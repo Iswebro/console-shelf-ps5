@@ -116,6 +116,32 @@ def public_guides(guide, room):
             "PPSA99541/START-HERE.md": guide.replace("](ROOM.md)", "](../ROOM.md)").encode("utf-8")}
 
 
+def public_source_documents(kit_data, version):
+    """Return publication-only documentation changes; leave frozen build inputs alone."""
+    instructions = kit_data["SOURCE-KIT.txt"].decode("utf-8")
+    old = ("This is a private preparation artifact. Publication still requires the full\n"
+           "hardware and launch acceptance in docs/PROTOTYPE-PLAN.md.")
+    require(old in instructions, "Source kit publication notice was not found")
+    instructions = instructions.replace(old,
+        "Published prototype " + version + ". The matching executable has the owner\n"
+        "hardware checks listed in the release's HARDWARE-CHECKS.json. Other routes\n"
+        "remain experimental. Rebuilding or changing the program needs new tests.")
+    instructions = instructions.replace("Console Shelf source and relink kit (development build)",
+                                        "Console Shelf " + version + " source and relink kit")
+    instructions += ("\nProject documents retain the compiled-source snapshot, with a release note\n"
+                     "and the stale no-video sentence corrected in README.md. Publication-only\n"
+                     "document changes and hashes are recorded in SOURCE-KIT-MANIFEST.json.\n"
+                     "The release hardware checks record later owner acceptance of the exact program.\n")
+    readme = kit_data["README.md"].decode("utf-8")
+    readme = readme.replace("This prototype uses an artwork fallback and does not play video.",
+        "The prototype includes original Shelf stills and silent intro animations, with personal overrides.")
+    note = ("> Source snapshot for Console Shelf " + version + ". The program code, build inputs and\n"
+            "> bundled media are unchanged from the compiled revision. Current release hardware\n"
+            "> checks are recorded in SOURCE-KIT-MANIFEST.json. The project status below is\n"
+            "> historical; publication-only documentation changes are recorded in that manifest.\n\n")
+    return {"SOURCE-KIT.txt": instructions.encode("utf-8"), "README.md": (note + readme).encode("utf-8")}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--acceptance", type=Path, help="Reviewed owner hardware-check JSON")
@@ -221,25 +247,17 @@ def main():
                 "limitations": ["Opening can show black before the grid", "Standalone emulators open their shelves",
                                 "Other dedicated-emulator and native-title routes remain experimental",
                                 "Discovery requires the existing console-local FTP service"]}
-    # Preserve code, objects, libraries and upstream archives byte-for-byte. Only the
-    # source kit's publication instructions and metadata change from the cold-tested baseline.
-    instructions = kit_data["SOURCE-KIT.txt"].decode("utf-8")
-    old = ("This is a private preparation artifact. Publication still requires the full\n"
-           "hardware and launch acceptance in docs/PROTOTYPE-PLAN.md.")
-    require(old in instructions, "Source kit publication notice was not found")
-    instructions = instructions.replace(old,
-        "Published prototype " + args.version + ". The matching executable has the owner\n"
-        "hardware checks listed in the release's HARDWARE-CHECKS.json. Other routes\n"
-        "remain experimental. Rebuilding or changing the program needs new tests.")
-    instructions = instructions.replace("Console Shelf source and relink kit (development build)",
-                                        "Console Shelf " + args.version + " source and relink kit")
-    instructions += ("\nTracked project documents retain the original compiled-source snapshot.\n"
-                     "The release hardware checks record later owner acceptance of that exact program.\n")
-    kit_data["SOURCE-KIT.txt"] = instructions.encode("utf-8")
+    # Preserve code, objects, libraries, media and upstream archives byte-for-byte.
+    # Only publication documents and their manifest change from the cold-tested baseline.
+    document_updates = public_source_documents(kit_data, args.version)
+    document_changes = [{"path": name, "baseline": digest(kit_data[name]), "published": digest(raw)}
+                        for name, raw in document_updates.items()]
+    kit_data.update(document_updates)
     kit_manifest.update({"privatePreparation": False, "releaseVersion": args.version,
-                         "hardwareAcceptance": evidence, "coldRelinkBaselineArchiveSHA256": kit["archiveSHA256"]})
+                         "hardwareAcceptance": evidence, "coldRelinkBaselineArchiveSHA256": kit["archiveSHA256"],
+                         "publicationDocumentChanges": document_changes})
     for entry in kit_manifest["files"]:
-        if entry["path"] == "SOURCE-KIT.txt":
+        if entry["path"] in document_updates:
             entry.update(digest(kit_data[entry["path"]]))
     kit_data["SOURCE-KIT-MANIFEST.json"] = (json.dumps(kit_manifest, indent=2) + "\n").encode()
 

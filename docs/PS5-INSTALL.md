@@ -37,6 +37,8 @@ Appearance → Missing emulator artwork defaults to **Black & white** for system
 
 Open a console to choose a preferred detected emulator or show its game library. Standalone emulators can open their own shelves; a selected RetroArch game uses a separate direct-game route. Use the release's verified-route list to distinguish accepted behavior from experimental plans. Opening can still show black before the grid; the home-screen selection artwork is confirmed.
 
+Highlight **Preferred emulator** and use Left/Right (or Cross) to cycle the detected choices. This selection saves in Shelf. For example, PlayStation 1 can offer PSXS5's own shelf and a RetroArch/SwanStation game route when both apps are detected. Both emulators can use the existing PS1 files: PSXS5 opens its own shelf, while the RetroArch game route receives the selected file. An emulator's own playlist is separate from Shelf's discovered library; switching the preference does not move games or convert saved data.
+
 ## Upgrading and recovery
 
 Close Shelf and other apps before replacing files. Keep a PC backup of its program folder and `/data/console-shelf`, where its preferences live. When reading or backing up `eboot.bin` through `ftpsrv`, send the custom `SELF` command and confirm the reply explicitly says conversion is **disabled**; otherwise the server can transform the file during transfer and its hash will differ. This setting is per FTP connection.

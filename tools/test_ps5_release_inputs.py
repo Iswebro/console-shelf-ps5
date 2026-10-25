@@ -4,7 +4,7 @@ import copy
 import posixpath
 import re
 import unittest
-from prepare_ps5_release import (digest, public_guides, verify_asset_sources,
+from prepare_ps5_release import (digest, public_guides, public_source_documents, verify_asset_sources,
                                  verify_console_manifest, verify_source_members)
 
 
@@ -80,6 +80,28 @@ class ReleaseInputTests(unittest.TestCase):
             resolved = posixpath.normpath(posixpath.join(posixpath.dirname(name), target))
             self.assertIn(resolved, members)
             self.assertEqual(members[resolved], b"fixture room guide")
+
+    def test_source_publication_corrects_docs_without_changing_program_inputs(self):
+        private_notice = (b"Console Shelf source and relink kit (development build)\n"
+                          b"This is a private preparation artifact. Publication still requires the full\n"
+                          b"hardware and launch acceptance in docs/PROTOTYPE-PLAN.md.")
+        original = {"SOURCE-KIT.txt": private_notice,
+                    "README.md": b"# Shelf\nThis prototype uses an artwork fallback and does not play video.\n",
+                    "source.cpp": b"frozen application source\x00\xff", "objects/main.o": b"frozen object",
+                    "libraries/libSDL2.a": b"frozen library", "assets/room/intros/ps2.mpg": b"frozen media"}
+        before = original.copy()
+        documents = public_source_documents(original, "v0.1.0-alpha.1")
+        self.assertEqual(original, before)
+        self.assertEqual(set(documents), {"README.md", "SOURCE-KIT.txt"})
+        self.assertNotIn(b"does not play video", documents["README.md"])
+        self.assertIn(b"historical", documents["README.md"])
+        published = {**original, **documents}
+        for name in original.keys() - documents.keys():
+            self.assertEqual(published[name], before[name])
+        manifest = {"files": [{"path": name, **digest(raw)} for name, raw in published.items()]}
+        verify_source_members({**published, "SOURCE-KIT-MANIFEST.json": b"fixture metadata"}, manifest)
+        with self.assertRaisesRegex(ValueError, "publication notice"):
+            public_source_documents({**original, "SOURCE-KIT.txt": b"already published or unexpected"}, "v0.1.0-alpha.1")
 
 
 if __name__ == "__main__":
