@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "purpose": "PS5-managed static selection and launch/loading artwork; animation remains in Shelf",
+  "image": {
+    "width": 3840,
+    "height": 2160,
+    "format": "DX10 DDS BC7_UNORM",
+    "dxgiFormat": 98,
+    "mipLevels": 1,
+    "arraySize": 1
+  },
+  "encoder": {
+    "publisher": "Microsoft",
+    "release": "microsoft/DirectXTex may2026",
+    "url": "https://github.com/microsoft/DirectXTex/releases/download/may2026/texconv.exe",
+    "bytes": 966480,
+    "sha256": "dcfdec10244e02cf5037fba089c55fb7e1326b1c8181742d77d15fa5cb5eef06",
+    "digestEvidence": "GitHub official release-asset SHA-256 matched",
+    "authenticode": "Valid; Microsoft 3rd Party Application Component",
+    "bundled": false
+  },
+  "files": [
+    {
+      "path": "assets/launch-background-source.png",
+      "bytes": 113045,
+      "sha256": "7b433d131f25aec94b58deb5b5c47a49e5cadcb3f6e53563ad7082e38e97fe33"
+    },
+    {
+      "path": "native/ps5/sce_sys/pic0.dds",
+      "bytes": 8294548,
+      "sha256": "382b846eface2975c4437a1958f6275ecd808dc88bb0e9805d3da820ef6d6726"
+    },
+    {
+      "path": "native/ps5/sce_sys/pic1.dds",
+      "bytes": 8294548,
+      "sha256": "382b846eface2975c4437a1958f6275ecd808dc88bb0e9805d3da820ef6d6726"
+    }
+  ],
+  "hardwareTest": "not run"
+}

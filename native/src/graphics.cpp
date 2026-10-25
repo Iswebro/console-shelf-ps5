@@ -725,6 +725,13 @@ bool graphics_init(SDL_Renderer* target, const char* asset_root) {
     return background && halo && font(24, false) && font(27, true);
 }
 void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
+    if (state.presentation.artwork) {
+        SDL_SetRenderDrawColor(renderer, 11, 13, 28, 255);
+        SDL_RenderClear(renderer);
+        splash(1, 0, false);
+        SDL_RenderPresent(renderer);
+        return;
+    }
     const bool show_orbit = (!state.presentation.loading || state.presentation.preparing) && state.page == Page::home &&
                             state.settings.preferences.layout == Layout::swipe;
     if (show_orbit) {

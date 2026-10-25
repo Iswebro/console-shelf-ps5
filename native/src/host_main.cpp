@@ -232,7 +232,8 @@ bool script_event(const char* token) {
         SDL_Delay(static_cast<Uint32>(delay));
         return true;
     }
-    if (std::strcmp(token, "loading") == 0 || std::strcmp(token, "reveal") == 0 || std::strcmp(token, "prepare") == 0)
+    if (std::strcmp(token, "loading") == 0 || std::strcmp(token, "reveal") == 0 || std::strcmp(token, "prepare") == 0 ||
+        std::strcmp(token, "launch-art") == 0)
         return true;
     if (std::strcmp(token, "circle-down") == 0 || std::strcmp(token, "circle-up") == 0) {
         SDL_Event event{};
@@ -572,6 +573,8 @@ int main(int argc, char** argv) {
                 script_time += static_cast<unsigned>(std::strtoul(token + 6, nullptr, 10));
             if (std::strcmp(token, "loading") == 0)
                 state.presentation.loading = true;
+            if (std::strcmp(token, "launch-art") == 0)
+                state.presentation.artwork = true;
             if (std::strcmp(token, "reveal") == 0) {
                 state.presentation.loading = false;
                 state.presentation.reveal = 0;

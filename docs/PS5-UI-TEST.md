@@ -37,3 +37,11 @@ After exposing the new tile through the already established ShadowMount procedur
 5. Report any black screen, crash, missing input or incorrect library count. Avoid repeated attempts after a console hang.
 
 No binary release should be labelled compatible with firmware 12.20 until these results and the later supported launch routes are recorded. Remove only Shelf's owned app folder to roll back the program, retaining its preferences if wanted.
+
+## PS5-managed launch picture
+
+The native template supports static selection and launch backgrounds as `sce_sys/pic0.dds` and `pic1.dds`: 3840x2160 BC7_UNORM DX10 DDS, one 2D image and one mip level. Shelf now supplies its own matching artwork, generated from the native renderer's `launch-art` scene, with the original PNG and conversion provenance retained. `python tools/verify_ps5_presentation.py` checks complete payload sizes, image headers, PNG CRCs and SHA-256 pins; the package assembler includes both backgrounds. The Microsoft encoder is not bundled.
+
+This is a PS5-managed static picture before the app draws. The moving transition remains app code. The owner requested this route after the UI-9 console pictures proved the logo and reveal were drawn but the TV still showed black before the shelf.
+
+An existing title without these assets needs its own registration refreshed before the PS5 adopts them. First verify that ShadowMountPlus reports this exact title as an owned, managed folder at `/data/homebrew/PPSA99541`, not a package or image. With apps closed, retain a full raw program backup and the owned preferences, add/verify both artwork files, and use the existing ShadowMountPlus title-only uninstall/scan API to register that same folder again. Never use its source-deletion operation. Recheck every program/artwork hash and the preference bytes afterward. Keep firmware 12.20 and leave other titles, PSN, global shell settings and payload order untouched. The console check must still establish whether the managed launch picture is visible.

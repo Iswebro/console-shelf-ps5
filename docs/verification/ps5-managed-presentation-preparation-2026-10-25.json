@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-10-25",
+  "scope": "PS5-managed static selection and launch picture preparation",
+  "titleId": "PPSA99541",
+  "originalSourcePNG": {
+    "bytes": 113045,
+    "sha256": "7b433d131f25aec94b58deb5b5c47a49e5cadcb3f6e53563ad7082e38e97fe33"
+  },
+  "eachDDS": {
+    "bytes": 8294548,
+    "sha256": "382b846eface2975c4437a1958f6275ecd808dc88bb0e9805d3da820ef6d6726",
+    "format": "3840x2160 BC7_UNORM (98), DX10 2D, one mip, array size one"
+  },
+  "checks": [
+    "Microsoft DirectXTex may2026 official release SHA-256 matched; Authenticode signature verified",
+    "Full DDS decode inspected visually",
+    "Exact asset sizes, hashes, complete DDS geometry and source PNG CRCs passed",
+    "Seven malformed/truncated DDS variants and a damaged PNG were rejected",
+    "Native renderer passed 25 simulated captures including the dedicated launch-art scene"
+  ],
+  "consolePreflight": {
+    "shadowMountVersion": "1.7beta7",
+    "relevantCapabilities": ["list_games", "uninstall_game", "rescan"],
+    "sourcePath": "/data/homebrew/PPSA99541",
+    "sourceType": "folder",
+    "managed": true,
+    "installedPackage": false,
+    "currentRegisteredBackgrounds": "absent",
+    "ownDownloadDirectory": "absent"
+  },
+  "consoleTest": "not run",
+  "animatedSystemTransition": "not provided by these static DDS assets; animation remains in Shelf",
+  "publicBinaryRelease": false
+}

@@ -5,7 +5,7 @@
 namespace shelf {
 inline constexpr std::uint32_t close_hold_ms = 3000;
 struct Presentation {
-    bool loading = false, preparing = false;
+    bool loading = false, preparing = false, artwork = false;
     float reveal = 1, appear = 1, hold = 0, close = 0;
 };
 class OpeningGate {

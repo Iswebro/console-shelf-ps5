@@ -11,6 +11,7 @@ import zipfile
 
 from ps5_common import CACHE, ROOT, run, sha256
 from verify_ps5_build import require, source_fingerprint, verify_recorded_hashes
+from verify_ps5_presentation import verify as verify_presentation
 
 
 def main():
@@ -36,6 +37,9 @@ def main():
     copy(build / "libc-a.prx", "sce_module/libc.prx")
     require(sha256(app / "sce_module/libc.prx") == "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036", "Wrong clean-room runtime")
     copy(ROOT / "native/ps5/param.json", "sce_sys/param.json")
+    verify_presentation()
+    for name in ("pic0.dds", "pic1.dds"):
+        copy(ROOT / "native/ps5/sce_sys" / name, "sce_sys/" + name)
     metadata = json.loads((app / "sce_sys/param.json").read_text())
     require(metadata["titleId"] == "PPSA99541" and metadata["requiredSystemSoftwareVersion"] == "0x0000000000000000", "Wrong test identity or firmware requirement")
     images = sorted((ROOT / "assets/3d-icons").glob("*.png"))

@@ -16,6 +16,8 @@ assets/*.png
 !assets/shelf-icon-v1.png
 !assets/shelf-icon-premium-v2.png
 !assets/shelf-icon-gaming-v3.png
+# Shelf-rendered startup artwork; no external source photograph.
+!assets/launch-background-source.png
 
 # Keep a few current screenshots; others are local review artifacts.
 previews/*
