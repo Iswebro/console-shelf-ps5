@@ -1,0 +1,39 @@
+{
+  "revision": "UI-19",
+  "programSourceCommit": "afe360a279d5f773413911e4c77bb4389a5e0eb0",
+  "contentVersion": "00.100.018",
+  "self": {
+    "bytes": 2697473,
+    "sha256": "91f83d28992718bcaa65e59fa6cfef3e35165234d5ee1211f170aa03bf52dc3b"
+  },
+  "rawTransferMode": "226 SELF transfer mode disabled",
+  "fullReadbackFiles": 80,
+  "preferencesUnchanged": true,
+  "previousProgramAndPreferencesBackedUp": true,
+  "retiredArtwork": [
+    "assets/backgrounds/display-shelf-v1.png",
+    "assets/backgrounds/gallery-room-v1.png"
+  ],
+  "retiredArtworkBackedUp": true,
+  "stageRemoved": true,
+  "helperExecuted": false,
+  "helperIdenticalToOwnerTestedUI15": true,
+  "firmwareNetworkAndOtherAppsModified": false,
+  "deviation": {
+    "initialAttempt": "Python FTP.delete rejected the server response 226 File deleted",
+    "reconciliation": "Confirmed the earlier deletion by bounded listing; retained the original failure; verified another complete raw readback and both artwork backups; completed the second deletion and rechecked directory membership and preferences"
+  },
+  "sourceKit": {
+    "commit": "afe360a279d5f773413911e4c77bb4389a5e0eb0",
+    "files": 296,
+    "archiveBytes": 124520919,
+    "archiveSHA256": "ba0570680d7f6e174d2a4ba79228c7be42d45854364e3dadeabb7475058d2bda",
+    "coldRelink": "passed; exact ELF and SELF",
+    "freshCompilerPrefix": true,
+    "converterRebuilt": true,
+    "applicationRecompiled": false,
+    "consoleContactedDuringColdRelink": false
+  },
+  "physicalAcceptance": "pending owner checks",
+  "publicPrototypeDownload": "not published"
+}
