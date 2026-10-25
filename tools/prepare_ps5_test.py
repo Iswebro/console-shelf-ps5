@@ -3,6 +3,7 @@
 import datetime
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import struct
@@ -109,7 +110,8 @@ def main():
     arguments = [ROOT / presentation.get("icon", {}).get("source", "assets/shelf-icon.png"), app / "sce_sys/icon0.png"]
     if executable.with_suffix(".exe").exists():
         executable = executable.with_suffix(".exe")
-        arguments = [subprocess.check_output(["wslpath", "-w", str(path)], text=True).strip() for path in arguments]
+        if os.name != "nt":
+            arguments = [subprocess.check_output(["wslpath", "-w", str(path)], text=True).strip() for path in arguments]
     require(executable.is_file(), "Build tools/build-package-art.js first")
     original = sha256(ROOT / "assets/shelf-icon.png")
     run([executable, *arguments])
