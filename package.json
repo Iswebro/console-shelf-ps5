@@ -15,6 +15,7 @@
     "prepare:ps5-sources": "node tools/build-ps5.js prepare_corresponding_source.py",
     "relink:ps5": "node tools/build-ps5.js relink_ps5.py",
     "prepare:ps5-source-kit": "node tools/build-ps5.js prepare_ps5_source_kit.py",
+    "prepare:ps5-release": "node tools/build-ps5.js prepare_ps5_release.py",
     "start:native-host": "node tools/run-native-host.js",
     "build:ps5": "node tools/build-ps5.js",
     "build:ps5-launch-helper": "node tools/build-ps5.js build_launch_helper.py",
