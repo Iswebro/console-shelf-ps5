@@ -4,6 +4,8 @@ The local test folder is a separate step from the first public release. It is fo
 
 The first private build failed its startup test. The console stayed responsive; the app returned from startup, then its C runtime exit hit SIGSYS. The corrected build waits for asynchronous shell closure and writes a small stage log under its owned data folder to identify the original startup failure. Hardware acceptance remains pending. No public download is available.
 
+That journal identified the early failure: `sceSystemServiceLoadExec` remained null as a weak-only import. The next build makes this required lifecycle import strong, matching the reference native app, and its ELF verifier rejects a weak, missing or misbound shell import. This is a link-time correction; physical acceptance still requires another owner test.
+
 The unofficial test title identity is `PPSA99541`, shown as **Console Shelf (UI test)**. It is not a globally reserved ID. The owner's console was checked for a collision; every installation must repeat that check and refuse to overwrite any existing title. The target app folder is `/data/homebrew/PPSA99541`; preferences are written only to `/data/console-shelf/settings.ini` and its recovery files. Existing game libraries are read in place.
 
 ## Assemble locally

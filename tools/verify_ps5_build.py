@@ -2,12 +2,22 @@
 """Independent structural checks; a PASS here is not a PS5 hardware test."""
 import json
 import struct
+import base64
+import hashlib
 from ps5_common import CACHE, ROOT, sha256
 
 
 def require(condition, message):
     if not condition:
         raise ValueError(message)
+
+
+def public_nid(name):
+    # Public SDK ABI symbol identifier, also documented by the pinned native
+    # converter. This is a name hash, not a signing or decryption key.
+    suffix = bytes.fromhex("518d64a635ded8c1e6b039b1c3e55230")
+    digest = hashlib.sha1(name.encode("ascii") + suffix).digest()[:8][::-1]
+    return base64.b64encode(digest).decode("ascii").rstrip("=").replace("/", "-")
 
 
 def source_fingerprint():
@@ -58,6 +68,43 @@ def verify(elf_path, self_path):
     table = dict(tags)
     start = virtual(table[5], table[10])
     strings = raw[start:start + table[10]]
+    def string_at(offset):
+        require(offset < len(strings), "String offset is outside metadata")
+        end = strings.find(b"\0", offset)
+        require(end >= offset, "Unterminated metadata string")
+        return strings[offset:end].decode("ascii")
+
+    # The first device test exposed a required weak-only import returning null.
+    # Check the final converted ELF rather than trusting library names alone.
+    symbol_bytes = table.get(0x6100003f, 0)
+    require(table.get(11) == 24 and 0 < symbol_bytes <= 65536 and symbol_bytes % 24 == 0,
+            "Invalid native symbol table extent")
+    symbol_start = virtual(table[6], symbol_bytes)
+    modules, libraries = {}, {}
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-"
+    for tag, value in tags:
+        if tag in (0x61000045, 0x61000049):
+            module_id = value >> 48
+            require(module_id < 64, "Unexpected native module identity")
+            destination = modules if tag == 0x61000045 else libraries
+            require(alphabet[module_id] not in destination, "Duplicate native module/library identity")
+            destination[alphabet[module_id]] = string_at(value & 0xffffffff)
+    required = "sceSystemServiceLoadExec"
+    prefix = public_nid(required) + "#"
+    matches = []
+    for offset in range(0, symbol_bytes, 24):
+        name, info, other, section, value, size = struct.unpack_from("<IBBHQQ", raw, symbol_start + offset)
+        label = string_at(name)
+        if label.startswith(prefix):
+            matches.append((label, info, section))
+    require(len(matches) == 1, "Required shell lifecycle import is missing or duplicated")
+    label, info, section = matches[0]
+    require(info >> 4 == 1 and info & 15 == 2 and section == 0,
+            "Required shell lifecycle import must be a strong undefined function")
+    parts = label.split("#")
+    require(len(parts) == 3 and modules.get(parts[2]) == "libSceSystemService" and
+            libraries.get(parts[1]) == "libSceSystemService",
+            "Shell lifecycle import is bound to the wrong system module")
     needed = []
     for tag, offset in tags:
         if tag == 1:
@@ -73,7 +120,9 @@ def verify(elf_path, self_path):
     require(b"\x7fELF\x02\x01\x01\x09\x02" in signed[:4096], "SELF lacks its native ELF header")
     return {"structuralCheck": "passed", "hardwareTest": "not run", "firmware12_20": "unverified",
             "elf": {"bytes": len(raw), "sha256": sha256(elf_path), "programHeaders": phcount,
-                    "loadSegments": len(loads), "neededModules": needed},
+                    "loadSegments": len(loads), "neededModules": needed,
+                    "requiredShellImport": {"name": required, "binding": "global", "provider": modules[parts[2]],
+                                            "library": libraries[parts[1]]}},
             "self": {"bytes": len(signed), "sha256": sha256(self_path)}}
 
 

@@ -11,7 +11,9 @@ int gs_missing_imports(char* output, size_t capacity);
 void gs_notify(const char* text);
 int gs_request_close(void);
 void gs_wait_for_close(void) __attribute__((noreturn));
-int sceSystemServiceLoadExec(const char* path, const char* const* argv) __attribute__((weak));
+// Required native lifecycle import. A weak-only reference remains null in the
+// tested retail app loader even though the system module is present.
+int sceSystemServiceLoadExec(const char* path, const char* const* argv);
 #ifdef __cplusplus
 }
 #endif

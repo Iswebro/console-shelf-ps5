@@ -1,0 +1,49 @@
+{
+  "structuralCheck": "passed",
+  "hardwareTest": "corrected build not yet tested",
+  "firmware12_20": "unverified",
+  "elf": {
+    "bytes": 2655220,
+    "sha256": "5530b58377e2d0d5fd72e9b41ef2f04811ff03a0f9f5323d76363b35e2045cfd",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2537969,
+    "sha256": "7a555153d51c350dd9100ee343f6dce3aae9ab848f89146808ae96d28dbf17fa"
+  },
+  "verifiedOn": "2026-10-25",
+  "scope": "Strong shell import correction; console UI acceptance still pending",
+  "diagnosticEvidence": {
+    "previousBuildSHA256": "435019c99d1582b75f7837aeb0a721ee8949874c8ea60fa96c13a11f0dbd53b4",
+    "journal": [
+      "main entered",
+      "missing imports: sceSystemServiceLoadExec",
+      "shell close requested: 0xffffffff"
+    ],
+    "finding": "required lifecycle API was weak-only; guard stopped startup"
+  },
+  "sourceFingerprintSHA256": "837ba6e80b06f74df8dad477c067077b80d7cb9097ab4f6eac843088bb344e55",
+  "checks": {
+    "knownFailingWeakImportBuild": "rejected by the strengthened verifier",
+    "damagedOrMisboundFixtures": 12,
+    "nativeRendererCaptures": 11,
+    "asyncShellExitRegression": "passed"
+  },
+  "publicRelease": "not published"
+}

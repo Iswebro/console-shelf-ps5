@@ -6,7 +6,7 @@
 #include <stdint.h>
 int sceKernelUsleep(uint32_t microseconds);
 int gs_request_close(void) {
-    return sceSystemServiceLoadExec ? sceSystemServiceLoadExec("exit", 0) : -1;
+    return sceSystemServiceLoadExec("exit", 0);
 }
 void gs_wait_for_close(void) {
     for (;;)

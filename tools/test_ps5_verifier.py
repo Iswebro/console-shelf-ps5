@@ -35,6 +35,24 @@ reject("writable-executable", lambda b: struct.pack_into("<I", b, phoff + 4, 7))
 reject("load-exceeds-file", lambda b: struct.pack_into("<Q", b, phoff + 32, len(original) * 2))
 module = original.index(b"libScePad.prx")
 reject("foreign-module", lambda b: b.__setitem__(slice(module, module + 13), b"libBadPad.prx"))
+headers = [struct.unpack_from("<IIQQQQQQ", original, phoff + i * 56)
+           for i in range(struct.unpack_from("<H", original, 56)[0])]
+dynamic = next(p for p in headers if p[0] == 2)
+tags = dict(struct.unpack_from("<qQ", original, dynamic[2] + offset)
+            for offset in range(0, dynamic[5], 16))
+def file_offset(address):
+    p = next(p for p in headers if p[0] == 1 and p[3] <= address < p[3] + p[5])
+    return p[2] + address - p[3]
+strings = file_offset(tags[5])
+shell_name = original.index(b"JoBqSQt1yyA#", strings, strings + tags[10])
+symbols = file_offset(tags[6])
+shell_symbol = next(symbols + offset for offset in range(0, tags[0x6100003f], 24)
+                    if struct.unpack_from("<I", original, symbols + offset)[0] == shell_name - strings)
+reject("required-shell-import-weak", lambda b: b.__setitem__(shell_symbol + 4, 0x22))
+reject("required-shell-import-missing", lambda b: b.__setitem__(shell_name, ord("X")))
+shell_end = original.index(b"\0", shell_name)
+reject("required-shell-import-wrong-provider", lambda b: b.__setitem__(shell_end - 1, ord("H")))
+reject("required-shell-import-wrong-library", lambda b: b.__setitem__(shell_end - 3, ord("G")))
 bad_self = folder / "bad-wrapper.bin"
 bad_self.write_bytes(b"BAD!" + self_file.read_bytes()[4:])
 try:
@@ -57,4 +75,4 @@ except ValueError:
     pass
 else:
     raise RuntimeError("Verifier accepted a SELF changed after container validation")
-print("PASS: PS5 verifier rejects eight damaged/foreign build fixtures without modifying the original executable.")
+print("PASS: PS5 verifier rejects twelve damaged/foreign fixtures, including weak/missing/misbound required shell imports, without modifying the original executable.")
