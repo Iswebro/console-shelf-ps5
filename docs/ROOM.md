@@ -51,6 +51,8 @@ Examples are `intros/ps2.png`, `intros/ps3.png`, `intros/n64.png`, `intros/genes
 
 The PS5 uses silent **MPEG-1 video in an MPEG program stream** (`.mpg`), up to 640 × 368 pixels, 30 fps, 60 seconds and 32 MB. Renaming an MP4 to `.mpg` does not convert it. A missing, corrupt or unsupported personal clip falls back to that console's bundled Shelf animation. No PC streaming host is needed.
 
+Manufacturer startup sequences are for **personal overrides from local source files**. They are not part of the public isShelf download. The startup compilation links shared during development are references for identifying the desired sequence and trim points; this conversion tool requires a local video file supplied by the user. Shelf currently plays intro video without audio.
+
 Prepare a copy with Python and a portable [FFmpeg build](https://ffmpeg.org/download.html), keeping your original untouched:
 
 ```powershell
