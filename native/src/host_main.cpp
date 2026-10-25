@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Host executable of the native renderer. This file does not deploy or launch PS5 apps.
+// Shared native event loop. The host build never deploys or launches PS5 apps.
 #define SDL_MAIN_HANDLED
 #include "shelf/graphics.hpp"
 #include <SDL.h>
@@ -9,12 +9,25 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#ifdef SHELF_PS5
+#include "platform/platform.h"
+#include "shelf/memory.hpp"
+#endif
 #ifdef _WIN32
 #include <direct.h>
 #else
 #include <sys/stat.h>
 #endif
 namespace {
+#ifdef SHELF_PS5
+struct PlatformExit {
+    ~PlatformExit() {
+        gs_vout_shutdown();
+        if (sceSystemServiceLoadExec)
+            sceSystemServiceLoadExec("exit", nullptr);
+    }
+};
+#endif
 bool directory(const char* path) {
 #ifdef _WIN32
     return _mkdir(path) == 0 || errno == EEXIST;
@@ -153,11 +166,30 @@ bool script_event(const char* token) {
 } // namespace
 
 int main(int argc, char** argv) {
+#ifdef SHELF_PS5
+    PlatformExit platform_exit;
+    char missing[1024];
+    if (gs_missing_imports(missing, sizeof(missing)) != 0) {
+        char message[1200];
+        std::snprintf(message, sizeof(message), "Shelf cannot start: missing console functions: %s", missing);
+        std::fprintf(stderr, "%s\n", message);
+        gs_notify(message);
+        return 1;
+    }
+    if (SDL_SetMemoryFunctions(gs_malloc, gs_calloc, gs_realloc, gs_free) != 0) {
+        gs_notify("Shelf could not initialise its memory allocator.");
+        return 1;
+    }
+    const char* assets = "/app0";
+    const char* data = "/data/console-shelf";
+#else
     const char* assets = nullptr;
     const char* data = nullptr;
+#endif
     const char* captures = nullptr;
     const char* script_arg = nullptr;
     bool headless = false;
+#ifndef SHELF_PS5
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--asset-root") == 0 && i + 1 < argc)
             assets = argv[++i];
@@ -174,6 +206,11 @@ int main(int argc, char** argv) {
             return 1;
         }
     }
+#else
+    // Console storage paths are owned constants, never supplied by launch arguments.
+    (void)argc;
+    (void)argv;
+#endif
     if (!assets || !data || std::strlen(assets) > 2000 || std::strlen(data) > 2000 ||
         (script_arg && std::strlen(script_arg) > 8191)) {
         std::fprintf(stderr, "Use --asset-root and --data-dir; optional --headless --script and --capture-dir.\n");
@@ -181,6 +218,9 @@ int main(int argc, char** argv) {
     }
     if (!directory(data)) {
         std::fprintf(stderr, "Cannot create the requested owned data directory.\n");
+#ifdef SHELF_PS5
+        gs_notify("Shelf cannot access its own settings folder: /data/console-shelf.");
+#endif
         return 1;
     }
     if (!captures)
@@ -199,15 +239,30 @@ int main(int argc, char** argv) {
         std::snprintf(state.notice, sizeof(state.notice),
                       "Settings could not be read. Defaults are in use; the original file is kept.");
     SDL_SetMainReady();
+#ifdef SHELF_PS5
+    SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, "0");
+    const char* video_error = gs_vout_init();
+    if (video_error) {
+        gs_notify(video_error);
+        return 1;
+    }
+#else
     if (headless)
         SDL_setenv("SDL_VIDEODRIVER", "dummy", 1);
+#endif
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS) < 0) {
+    if (SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS
+#ifndef SHELF_PS5
+                 | SDL_INIT_VIDEO
+#endif
+                 ) < 0) {
         std::fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
         return 1;
     }
-    SDL_Window* window =
-        headless ? nullptr
+    SDL_Window* window = nullptr;
+#ifndef SHELF_PS5
+    window = headless
+                 ? nullptr
                  : SDL_CreateWindow("Console Shelf - native host build", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                     1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!headless && !window) {
@@ -215,6 +270,7 @@ int main(int argc, char** argv) {
         SDL_Quit();
         return 1;
     }
+#endif
     SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, 1920, 1080, 32, SDL_PIXELFORMAT_ABGR8888);
     SDL_Renderer* renderer = surface ? SDL_CreateSoftwareRenderer(surface) : nullptr;
     if (!renderer || !shelf::graphics_init(renderer, assets)) {
@@ -402,6 +458,9 @@ int main(int argc, char** argv) {
                     SDL_UpdateWindowSurface(window);
                 }
             }
+#ifdef SHELF_PS5
+            gs_vout_present(surface->pixels, surface->pitch);
+#endif
             redraw = false;
         }
         if (token && (std::strncmp(token, "shot:", 5) == 0 || std::strncmp(token, "report:", 7) == 0)) {

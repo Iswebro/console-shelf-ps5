@@ -38,4 +38,8 @@ Run `npm run test:native` for the model, persistence and navigation tests. On Wi
 
 The model tests also cover availability evidence, individual visibility, sorting, navigation, backup recovery, damaged settings and failed saves. All owned C++ sources compile with warnings treated as errors. The raster renderer keeps a bounded artwork cache and uses smaller font atlases for small text; it redraws when input or window state changes.
 
-PS5 cross-compilation, VideoOut/direct-memory integration, physical controller testing, real discovery, launch adapters and packaging remain in the [prototype milestone](../docs/PROTOTYPE-PLAN.md). No PS5 download has been released yet. The runtime dependencies and font licenses are in [third-party notices](../THIRD_PARTY.md).
+## PS5 cross-build
+
+`npm run build:ps5` now builds the native executable using a pinned compiler prefix and verified public SDK/SDL archives inside ignored `.cache/ps5/`. Windows uses an existing WSL Ubuntu instance; the build does not install packages globally or connect to a console. `npm run test:ps5-platform` runs host mocks against the actual allocator/VideoOut failure and cleanup paths. `npm run verify:ps5` checks the executable's structure independently of its packager. See the [PS5 build instructions and limits](../docs/PS5-BUILD.md).
+
+VideoOut/direct-memory integration is implemented and cross-compiled, but physical controller/display testing, real discovery, launch adapters, package identity and console validation remain in the [prototype milestone](../docs/PROTOTYPE-PLAN.md). No PS5 download has been released yet. The runtime dependencies and font licenses are in [third-party notices](../THIRD_PARTY.md).

@@ -1,0 +1,104 @@
+{
+  "repository": "https://github.com/SkaRift/JewelCase",
+  "revision": "765297d2decd1be6c8076261f484e36724250bd7",
+  "origin": "BlackBearReloaded/ps5-native-app-boilerplate as retained by JewelCase",
+  "license": "GPL-3.0-or-later; used under GPL-3.0",
+  "files": [
+    {
+      "path": "tooling/native/app-symbols.map",
+      "bytes": 475,
+      "sha256": "f3e1e4694ad55538a0833555213eb6eeee8eb08a1085650bb9ea16c3c49f8d1e",
+      "gitBlob": "368b612c70afd420a0fcc6d33b4795656fcc310e"
+    },
+    {
+      "path": "tooling/native/app_cpp_runtime.cpp",
+      "bytes": 3466,
+      "sha256": "7379cd8df8f41af0e1a178c9300992f2235f3a3f8b910171caf91608568dac67",
+      "gitBlob": "f7f80a4e69f2dd992de4dac53ed33d6ed1fd48f4"
+    },
+    {
+      "path": "tooling/native/app_crt.cpp",
+      "bytes": 2343,
+      "sha256": "a99fe406e36d8ce82e68e0245898ba064e28a56a9853f746e9cf13d23cc17a00",
+      "gitBlob": "b53c9deaf25109d0af585c11aa98d8be6aecd620"
+    },
+    {
+      "path": "tooling/native/elf_object.cpp",
+      "bytes": 12125,
+      "sha256": "2fc0f25fb67e1dd1b1a7c91e78e7ae191a1d08f95b9ac4047c6a252606077ae9",
+      "gitBlob": "964a0ce5b0e00a0fc724e9d33bc7f7f04d0e0981"
+    },
+    {
+      "path": "tooling/native/elf_object.hpp",
+      "bytes": 3748,
+      "sha256": "fc12dd8f98cfb282cad5b0a541338e49b8ccbb87006a89cc5fff05ea4fe3aacb",
+      "gitBlob": "91928f7dbb7cebc6b05cf9e7778d298503ee2de7"
+    },
+    {
+      "path": "tooling/native/hash.hpp",
+      "bytes": 6220,
+      "sha256": "f76621a0d649f0920debbe813cc562498aa478d5c503de73b66e7cf4db9d4e5d",
+      "gitBlob": "df287efde1fc73a3fd491b9f3a35aeff478dcddc"
+    },
+    {
+      "path": "tooling/native/libc_builder.cpp",
+      "bytes": 41450,
+      "sha256": "fb9e4eb66ef6c1d9e9bcfd059a3a3aaf86156fe065838303a0c3fbd789786a1a",
+      "gitBlob": "f67de88495155a15b8a235d0290c52c07052299f"
+    },
+    {
+      "path": "tooling/native/native_app_builder.cpp",
+      "bytes": 11600,
+      "sha256": "b975e8ad177f0f1e039f70ef4e055bf71040cb26a6469307af392be1693acb18",
+      "gitBlob": "8c3b055768c7fe7ae3bcf93eb2ce2140fd07c682"
+    },
+    {
+      "path": "tooling/native/ps5-pie.ld",
+      "bytes": 2388,
+      "sha256": "fbc52518761b58b703a2225c847c5f44a81523cd0e751755adf890ae0f0dd74c",
+      "gitBlob": "91fd169b4de5b54ffb55915992bd14cb41f53461"
+    },
+    {
+      "path": "tooling/native/sce_module_writer.cpp",
+      "bytes": 37544,
+      "sha256": "c919d29ef08dc4a93f57ce32d44b386c94f91d7d24533829a7f27295a0a75c8e",
+      "gitBlob": "cf194058effc2eed303c68e0a54cec0cd8c15338"
+    },
+    {
+      "path": "tooling/native/sce_module_writer.hpp",
+      "bytes": 869,
+      "sha256": "b80586c50b72b7ff4160c0944903390299f723ad7629b4ccb162275d1023761d",
+      "gitBlob": "7a7c4e53018b8b4d78bc5a2f1ee3bfc7ddaf90ea"
+    },
+    {
+      "path": "tooling/native/self_container.cpp",
+      "bytes": 22354,
+      "sha256": "3c028f6523b4c169e8b909cb2722187f13eea1487a5848c1d191693a854bb695",
+      "gitBlob": "2635323e7253e070436bcdc6ddb2efb402f5a364"
+    },
+    {
+      "path": "tooling/native/self_container.hpp",
+      "bytes": 2305,
+      "sha256": "c06a754fb6897b816154a598cdc7413dcbb2260baed54e00d8e854bbed9b7100",
+      "gitBlob": "a695d9415e9f44a8cddcf99f2bf586f2b877253d"
+    },
+    {
+      "path": "tooling/native/runtime/api-surface.txt",
+      "bytes": 53719,
+      "sha256": "d9a81aec01f077817c35f3225f8325126bd63fd077a57734454a1868f6b25052",
+      "gitBlob": "c8b285ad1e2daf070bc7d26e8b69cd074faedd67"
+    },
+    {
+      "path": "tooling/native/runtime/imports.txt",
+      "bytes": 3291,
+      "sha256": "ef8f04e17c355495ee8120ef28b1648f7d4380eb5b9baeb7ab50034ffacfe8ea",
+      "gitBlob": "3d02f56fc5c778c00347cdd15af6bf7908251a5a"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 35149,
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "gitBlob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "shelf/graphics.hpp"
+#include "shelf/memory.hpp"
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
 #include "stb/stb_truetype.h"
@@ -103,9 +104,9 @@ Font* font(int size, bool bold) {
     }
     const int atlas = size <= 35 ? 512 : 1024;
     const auto atlas_pixels = static_cast<std::size_t>(atlas) * static_cast<std::size_t>(atlas);
-    auto* bytes = static_cast<unsigned char*>(std::malloc(static_cast<std::size_t>(length)));
-    auto* bitmap = static_cast<unsigned char*>(std::calloc(atlas_pixels, 1));
-    auto* pixels = static_cast<Uint32*>(std::malloc(atlas_pixels * 4));
+    auto* bytes = static_cast<unsigned char*>(allocate(static_cast<std::size_t>(length)));
+    auto* bitmap = static_cast<unsigned char*>(allocate_zero(atlas_pixels, 1));
+    auto* pixels = static_cast<Uint32*>(allocate(atlas_pixels * 4));
     bool okay = bytes && bitmap && pixels;
     if (okay)
         okay = std::fread(bytes, 1, static_cast<std::size_t>(length), file) == static_cast<std::size_t>(length);
@@ -124,9 +125,9 @@ Font* font(int size, bool bold) {
             entry->bold = bold;
         }
     }
-    std::free(bytes);
-    std::free(bitmap);
-    std::free(pixels);
+    release(bytes);
+    release(bitmap);
+    release(pixels);
     if (!entry->texture)
         ++resource_errors;
     return entry->texture ? entry : nullptr;
@@ -376,7 +377,7 @@ void detail(const UiState& state) {
     text(count, 84, 415, 24, muted);
     if (state.page == Page::library) {
         text("Game library", 84, 522, 38, white, true);
-        text("Discovery adapters are not connected in this host build yet.", 84, 587, 26, muted);
+        text("Discovery adapters are not connected in this development build yet.", 84, 587, 26, muted);
         footer("Circle  Back to console    Options  Settings");
         return;
     }
@@ -501,7 +502,7 @@ bool graphics_init(SDL_Renderer* target, const char* asset_root) {
         return false;
     std::strcpy(root, asset_root);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    auto* pixels = static_cast<Uint32*>(std::malloc(static_cast<std::size_t>(width) * height * 4));
+    auto* pixels = static_cast<Uint32*>(allocate(static_cast<std::size_t>(width) * height * 4));
     if (!pixels)
         return false;
     for (int y = 0; y < height; ++y)
@@ -515,7 +516,7 @@ bool graphics_init(SDL_Renderer* target, const char* asset_root) {
     background = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, width, height);
     if (background)
         SDL_UpdateTexture(background, nullptr, pixels, width * 4);
-    std::free(pixels);
+    release(pixels);
     Uint32 halo_pixels[256 * 256];
     for (int y = 0; y < 256; ++y)
         for (int x = 0; x < 256; ++x) {
@@ -536,7 +537,11 @@ void graphics_render(const UiState& state) {
     SDL_RenderCopy(renderer, background, nullptr, nullptr);
     picture(icon_files[static_cast<std::size_t>(state.settings.preferences.icon)], 80, 30, 50, 50);
     text("Console Shelf", 147, 36, 29, white, true);
+#ifdef SHELF_PS5
+    text("PS5 / DEVELOPMENT BUILD", 1388, 42, 18, muted, true);
+#else
     text("NATIVE DEVELOPMENT BUILD / PC", 1388, 42, 18, muted, true);
+#endif
     box(1786, 27, 58, 58, state.tools && state.tool == 3);
     icon(3, 1815, 56);
     line(80, 99, 1840, 99, {43, 48, 69, 255});
@@ -564,12 +569,12 @@ void graphics_render(const UiState& state) {
     SDL_RenderPresent(renderer);
 }
 bool graphics_capture(const char* path) {
-    auto* pixels = static_cast<Uint32*>(std::malloc(static_cast<std::size_t>(width) * height * 4));
+    auto* pixels = static_cast<Uint32*>(allocate(static_cast<std::size_t>(width) * height * 4));
     if (!pixels)
         return false;
     const bool okay = SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_ABGR8888, pixels, width * 4) == 0 &&
                       stbi_write_png(path, width, height, 4, pixels, width * 4) != 0;
-    std::free(pixels);
+    release(pixels);
     return okay;
 }
 unsigned graphics_errors() {

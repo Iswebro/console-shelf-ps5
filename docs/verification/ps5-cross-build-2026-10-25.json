@@ -1,0 +1,45 @@
+{
+  "structuralCheck": "passed",
+  "hardwareTest": "not run",
+  "firmware12_20": "unverified",
+  "elf": {
+    "bytes": 2568268,
+    "sha256": "9345b417e75b29680689733915f81b279745c9c3c933c70c915c71d6dfed0d68",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ]
+  },
+  "self": {
+    "bytes": 2456705,
+    "sha256": "7b37ae06ae022da4999aa21a04329b760f0e396d518c794e5953a31a895e4c47"
+  },
+  "verifiedOn": "2026-10-25",
+  "scope": "Executable cross-build and host checks only; not an installable or console-validated prototype",
+  "target": "Native PS5 userland, firmware 12.20 remains the intended test target",
+  "sourceFingerprintSHA256": "4cd1190dbe5e615bbf7c11d3cb48bc318ff16b4cacf4501b25474f70072fb863",
+  "runtime": {
+    "rawSHA256": "8ee6e124993e1af26420cb455890fd002f5d6c7e78883c860ce45734e7d002bb",
+    "signedSHA256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "rebuiltCopies": 2
+  },
+  "checks": {
+    "browserInteractionAnd52Icons": "passed",
+    "nativeModelSettingsNavigation": "passed",
+    "nativeSDLRendererSimulatedController": "passed",
+    "nativePS5PlatformHostMocks": "passed",
+    "damagedExecutableRejectionFixtures": 8,
+    "stagedThirdPartyFilesMatchingPins": 24
+  },
+  "consoleDeployment": "not performed",
+  "prototypeRelease": "not published",
+  "discoveryAndLaunchAdapters": "not connected",
+  "sameExecutableHashAcrossRebuilds": true
+}

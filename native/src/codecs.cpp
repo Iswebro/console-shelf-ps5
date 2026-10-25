@@ -1,5 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Bundled, pinned stb sources retain their embedded MIT/Unlicense notices.
+#include "shelf/memory.hpp"
+#ifdef SHELF_PS5
+#define STBI_NO_THREAD_LOCALS
+#define STBI_MALLOC(size) gs_malloc(size)
+#define STBI_REALLOC(ptr, size) gs_realloc(ptr, size)
+#define STBI_FREE(ptr) gs_free(ptr)
+#define STBTT_malloc(size, user) ((void)(user), gs_malloc(size))
+#define STBTT_free(ptr, user) ((void)(user), gs_free(ptr))
+#define STBIW_MALLOC(size) gs_malloc(size)
+#define STBIW_REALLOC(ptr, size) gs_realloc(ptr, size)
+#define STBIW_FREE(ptr) gs_free(ptr)
+#endif
 #ifdef _MSC_VER
 #pragma warning(push, 0)
 #endif

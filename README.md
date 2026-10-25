@@ -19,7 +19,7 @@ See the [mobile Swipe view](previews/mobile-swipe.png) and [Switch 2 icon](previ
 
 The [demo system catalogue](docs/SYSTEMS.md) comes from a dated PS5 setup snapshot. Its 46 RetroArch core mappings and example game names are **not** a live scan of another user's console. A mapped core or listed emulator does not guarantee a game runs. In the demo, “Emulator or games” shows 51 of 52 cards; Switch 2 is the hardware-reference-only card and has no launch route. A future native build must replace the demo with each owner's actual emulator and game inventory.
 
-The next main milestone is a [native PS5 prototype and its first verified download](docs/PROTOTYPE-PLAN.md), targeting firmware 12.20. The [C++17 app](native/README.md) now renders the console shelf and settings, handles controller-style navigation and search, and saves preferences with recovery from a backup. Model, persistence and simulated SDL controller tests pass on PC. Real discovery, launch adapters, physical controller and firmware tests remain in development. No PS5 package is published here.
+The next main milestone is a [native PS5 prototype and its first verified download](docs/PROTOTYPE-PLAN.md), targeting firmware 12.20. The [C++17 app](native/README.md) renders the console shelf and settings, handles controller-style navigation and search, and saves preferences with recovery from a backup. Model, persistence and simulated SDL controller tests pass on PC. The [PS5 executable now cross-compiles](docs/PS5-BUILD.md), with native display/memory integration checked by host mocks and executable structure checks. Real discovery, launch adapters, physical controller and firmware tests remain in development. No PS5 package is published here.
 
 ![Searchable console visibility settings](previews/settings-consoles.png)
 
@@ -33,4 +33,4 @@ The preview itself needs no build step. With Node.js and npm, run `npm ci` and `
 
 ## Credits and license
 
-The application source in this repository is [GPL-3.0](LICENSE). The generated icons have separate [image credits and reuse terms](assets/CREDITS.md). [Third-party project credits](THIRD_PARTY.md) name the open-source launchers and emulators studied as references; their source code and binaries are not bundled. No games, ROMs, BIOS, keys, firmware files or user credentials are included. Console and game names are used for identification; this project is not affiliated with their manufacturers.
+The application source in this repository is [GPL-3.0](LICENSE). The generated icons have separate [image credits and reuse terms](assets/CREDITS.md). [Third-party project credits](THIRD_PARTY.md) distinguish incorporated GPL platform/build source, rendering dependencies and emulator references. No emulator binaries, games, ROMs, BIOS, keys, proprietary firmware/runtime files or user credentials are included. Console and game names are used for identification; this project is not affiliated with their manufacturers.

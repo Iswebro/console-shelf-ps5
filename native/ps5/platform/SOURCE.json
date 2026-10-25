@@ -1,0 +1,31 @@
+{
+  "repository": "https://github.com/SkaRift/JewelCase",
+  "revision": "765297d2decd1be6c8076261f484e36724250bd7",
+  "license": "GPL-3.0-or-later; used under GPL-3.0",
+  "files": [
+    {
+      "localPath": "alloc.c",
+      "upstreamPath": "src/gs/alloc.c",
+      "upstreamBytes": 4108,
+      "upstreamSha256": "f6f412d128e37d4e5118a39e05d99eec5127b21f9e31f48fe3eb74a027217e6f",
+      "modified": true,
+      "upstreamGitBlob": "eb0a02cd68e3bafd58bc47f7816a37527fc3466e"
+    },
+    {
+      "localPath": "vout.c",
+      "upstreamPath": "src/gs/vout.c",
+      "upstreamBytes": 7769,
+      "upstreamSha256": "058fadd0d12ddfd6a1e0e51d44981c52fdbc50f495d12e3751e61603ad56c124",
+      "modified": true,
+      "upstreamGitBlob": "db5cdb659144ddc9676ff0e7a2e1d518d5b2913c"
+    },
+    {
+      "localPath": "shims.c",
+      "upstreamPath": "src/gs/shims.c",
+      "upstreamBytes": 3550,
+      "upstreamSha256": "b7654c4a70ad51efe2ca5e5f8f74dfcd04161465b63db048d5e71a7eab5b9116",
+      "modified": true,
+      "upstreamGitBlob": "75c48f1eeec5a4a6a157a271e85c0c7b5bcaebf6"
+    }
+  ]
+}

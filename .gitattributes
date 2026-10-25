@@ -1,7 +1,12 @@
 * text=auto
+.gitattributes text eol=lf
+.gitignore text eol=lf
 *.js text eol=lf
 *.cpp text eol=lf
 *.hpp text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.py text eol=lf
 *.md text eol=lf
 *.json text eol=lf
 *.png -text
@@ -10,3 +15,5 @@
 native/third_party/stb/*.h -text -whitespace
 native/third_party/licenses/* -text -whitespace
 native/assets/fonts/* -text -whitespace
+native/third_party/ps5-runtime/** -text -whitespace
+native/third_party/ps5-runtime/SOURCE.json text eol=lf

@@ -9,10 +9,12 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Compact settings icons opening Appearance, Sort & filter and Consoles panels.
 - [x] Searchable individual console switches, whole-brand controls, Show/Hide results and saved visibility.
 - [x] Original C++17 hardware catalogue and browsing model, compiled and tested on Windows with warnings treated as errors.
-- [ ] Reproducible native PS5 SDK/SDL toolchain and package identity.
+- [x] Pinned project-local PS5 SDK/SDL/Clang toolchain and successful native executable cross-build.
+- [ ] Separate package identity, collision check and installable folder assembly.
 - [x] Native C++/SDL renderer, navigation model and settings persistence exercised on PC.
 - [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
-- [ ] PS5 VideoOut/direct-memory integration and physical controller validation.
+- [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
+- [ ] Physical PS5 display/controller validation on firmware 12.20.
 - [ ] Runtime emulator and game discovery in existing library locations.
 - [ ] Verified launch adapters and firmware 12.20 console tests.
 - [ ] Source-linked prototype ZIP, SHA-256, install/rollback instructions and first release.
@@ -21,7 +23,7 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 
 Use C/C++ with SDL2 for the installed app. The JavaScript/HTML preview remains the interaction and visual reference; a PS5 owner will not need Node.js or the PC preview to run the native Shelf. Artwork and catalogue metadata can be reused. Controller input, drawing, persistence and console integration require native implementation.
 
-[Jewel Case](https://github.com/SkaRift/JewelCase) is the primary reference for the native runtime and emulator launch architecture. [Estante](https://github.com/kauansilvalopes/estante) is the reference for native PS5/PS4 discovery. Reuse only reviewed components with their source and copyright notices; keep Shelf's own console-first UI and art. The current native model is original code and does not yet contain either project's implementation.
+[Jewel Case](https://github.com/SkaRift/JewelCase) is the primary reference for the native runtime and emulator launch architecture. Its reviewed display/memory/shim components and underlying BlackBearReloaded startup/build/runtime source are now incorporated with pinned provenance and original notices. [Estante](https://github.com/kauansilvalopes/estante) remains a reference for native PS5/PS4 discovery. Shelf keeps its original catalogue, console-first UI and artwork; see [credits](../THIRD_PARTY.md).
 
 The `native/` model uses only hardware metadata and suggested core names. Installed status and game counts start empty and must come from runtime discovery, rather than the PC demo. Visibility is independent of launch capability: a system may have game files while no compatible emulator is detected. Saved choices will use system IDs so catalogue reordering cannot change the owner's preferences.
 
@@ -38,4 +40,6 @@ The `native/` model uses only hardware metadata and suggested core names. Instal
 
 The native C++ renderer and settings flow now run on Windows with the existing Visual Studio compiler and a pinned, SHA-256-verified official SDL2 package in the project cache. Fonts and decoder sources are pinned and credited. The software-rendered host uses the same console artwork and controller-navigation model intended for the PS5. Its SDL event tests are simulated; physical controller and console compatibility are still unproven.
 
-Next, establish the pinned public PS5 SDK/SDL cross-compile environment and integrate the native VideoOut/direct-memory backend, followed by read-only discovery and launch helpers. The current Ubuntu/WSL instance lacks the compiler, make and SDL development packages; an isolated environment or an explicitly approved package setup is still needed. Keep local PS5 test evidence separate from public source. There is no prototype download until the acceptance steps above are met.
+The PS5 executable now cross-compiles using verified public SDK/PacBrew releases and a Clang 18 prefix extracted from pinned, signed-metadata-verified Ubuntu packages. Everything stays under the project cache; no apt, sudo or global configuration change is required. The clean-room runtime rebuilds twice to the reference hashes. Host mocks cover native display/memory failure paths, and the executable passes container integrity and independent ELF structure checks; see [build evidence scope](PS5-BUILD.md).
+
+Next, implement read-only discovery and verified launch helpers, choose/check the package identity, then assemble a source-complete test folder and validate it on the actual PS5. Keep local PS5 evidence separate from public source. There is no prototype download until the acceptance steps above are met.

@@ -245,7 +245,7 @@ void input(UiState& state, Action action) {
             else
                 std::snprintf(state.notice, sizeof(state.notice), "%s",
                               state.inventory[state.selected_system].emulator_count
-                                  ? "Launch adapter is not connected in this host development build."
+                                  ? "Launch adapter is not connected in this development build."
                                   : "No compatible emulator has been detected yet.");
         }
         return;

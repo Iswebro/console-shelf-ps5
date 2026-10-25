@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "suite": "Ubuntu 24.04 noble amd64",
+  "inReleaseUrl": "https://archive.ubuntu.com/ubuntu/dists/noble/InRelease",
+  "inReleaseSha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+  "signatureVerifiedWith": "/usr/share/keyrings/ubuntu-archive-keyring.gpg",
+  "indices": [
+    {
+      "path": "main/binary-amd64/Packages.xz",
+      "sha256": "2a6a199e1031a5c279cb346646d594993f35b1c03dd4a82aaa0323980dd92451",
+      "bytes": 1401160
+    },
+    {
+      "path": "universe/binary-amd64/Packages.xz",
+      "sha256": "ba9057fa1b91438cc8a1d26808d00c85389fe101d0c1496254df97236405599a",
+      "bytes": 15037908
+    }
+  ],
+  "hostRequirements": [
+    "Linux x86_64",
+    "glibc >= 2.38",
+    "libstdc++ with GLIBCXX_3.4.30",
+    "binutils",
+    "Python 3.10+"
+  ],
+  "packages": [
+    {
+      "name": "clang-18",
+      "version": "1:18.1.3-1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-toolchain-18/clang-18_18.1.3-1_amd64.deb",
+      "bytes": 80564,
+      "sha256": "3d028a3b4c0b3dc942e043db94e153baedf5c384283181d274a5e915da1b5135",
+      "depends": "libc6 (>= 2.34), libclang-cpp18 (>= 1:18.1.3), libllvm18 (= 1:18.1.3-1), libstdc++6 (>= 11), libstdc++-13-dev, libgcc-13-dev, libobjc-13-dev, libclang-common-18-dev (= 1:18.1.3-1), llvm-18-linker-tools (= 1:18.1.3-1), libclang1-18 (= 1:18.1.3-1), libc6-dev, binutils"
+    },
+    {
+      "name": "lld-18",
+      "version": "1:18.1.3-1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-toolchain-18/lld-18_18.1.3-1_amd64.deb",
+      "bytes": 1383244,
+      "sha256": "3a57f9d283186f0779020104ae81db8138657d0ea36809cf06d9cc2bcbce387d",
+      "depends": "libc6 (>= 2.34), libllvm18 (= 1:18.1.3-1), libstdc++6 (>= 12), libzstd1 (>= 1.5.5), zlib1g (>= 1:1.2.2)"
+    },
+    {
+      "name": "llvm-18-linker-tools",
+      "version": "1:18.1.3-1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-toolchain-18/llvm-18-linker-tools_18.1.3-1_amd64.deb",
+      "bytes": 1294898,
+      "sha256": "5724e42bd73a481386087b57dc9962c4d4d218c91175160668b6ceb297725093",
+      "depends": "libc6 (>= 2.38), libllvm18, libstdc++6 (>= 11)"
+    },
+    {
+      "name": "libclang-cpp18",
+      "version": "1:18.1.3-1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/l/llvm-toolchain-18/libclang-cpp18_18.1.3-1_amd64.deb",
+      "bytes": 13494854,
+      "sha256": "899e354d4719c31eb7829517a3ed8d6b64173590fb5c7fe7371ede469fbbe05d",
+      "depends": "libc6 (>= 2.38), libllvm18 (= 1:18.1.3-1), libstdc++6 (>= 12)"
+    },
+    {
+      "name": "libclang-common-18-dev",
+      "version": "1:18.1.3-1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-toolchain-18/libclang-common-18-dev_18.1.3-1_amd64.deb",
+      "bytes": 736304,
+      "sha256": "91df14d6e3829652b837e2b368e35b076124277f2962a3f3daaea296bf86e4b0",
+      "depends": ""
+    },
+    {
+      "name": "libclang1-18",
+      "version": "1:18.1.3-1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/l/llvm-toolchain-18/libclang1-18_18.1.3-1_amd64.deb",
+      "bytes": 7815262,
+      "sha256": "c7972cec7003be32e57fcfc3ec6ca3ee65ac5d648fb9c420db52022919562855",
+      "depends": "libc6 (>= 2.38), libllvm18, libstdc++6 (>= 11)"
+    },
+    {
+      "name": "libllvm18",
+      "version": "1:18.1.3-1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/l/llvm-toolchain-18/libllvm18_18.1.3-1_amd64.deb",
+      "bytes": 27545628,
+      "sha256": "826621c8e678dd27b4f5c3a9b26d10aae50d5de2d95575695a17c91014f5eaa5",
+      "depends": "libc6 (>= 2.38), libedit2 (>= 2.11-20080614-0), libffi8 (>= 3.4), libgcc-s1 (>= 3.3), libstdc++6 (>= 12), libtinfo6 (>= 6), libxml2 (>= 2.7.4), libzstd1 (>= 1.5.5), zlib1g (>= 1:1.2.0)"
+    },
+    {
+      "name": "libedit2",
+      "version": "3.1-20230828-1build1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/libe/libedit/libedit2_3.1-20230828-1build1_amd64.deb",
+      "bytes": 97586,
+      "sha256": "3afbc8ddf835049dd4d88275b9d13680e4c4cdd59e191cbd63424152cc08e00e",
+      "depends": "libbsd0 (>= 0.1.3), libc6 (>= 2.38), libtinfo6 (>= 6)"
+    },
+    {
+      "name": "libffi8",
+      "version": "3.4.6-1build1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi8_3.4.6-1build1_amd64.deb",
+      "bytes": 24718,
+      "sha256": "637e6a7744de08cd331a41f4efd0d24e6ea9064843dea9d1c6ca87bdb5f038a2",
+      "depends": "libc6 (>= 2.34)"
+    },
+    {
+      "name": "libxml2",
+      "version": "2.9.14+dfsg-1.3ubuntu3",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/libx/libxml2/libxml2_2.9.14+dfsg-1.3ubuntu3_amd64.deb",
+      "bytes": 762198,
+      "sha256": "8c4efd7abe155df3cf0f9b64d659f2d866215785f8e8c44234fbb341d58cc967",
+      "depends": "libc6 (>= 2.38), libicu74 (>= 74.1-1~), liblzma5 (>= 5.1.1alpha+20120614), zlib1g (>= 1:1.2.3.3)"
+    },
+    {
+      "name": "libicu74",
+      "version": "74.2-1ubuntu3",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/i/icu/libicu74_74.2-1ubuntu3_amd64.deb",
+      "bytes": 10860410,
+      "sha256": "d29c97a21a3e3254731cfac186e4d4e611e5e67d2c9a0430f6acfbd9acaefa2e",
+      "depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 13.1)"
+    },
+    {
+      "name": "libz3-4",
+      "version": "4.8.12-3.1build1",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/z/z3/libz3-4_4.8.12-3.1build1_amd64.deb",
+      "bytes": 5836188,
+      "sha256": "67ceb432593fe62afbaf3bd85c73d46c66fa19433a6b58326a3248162f139b19",
+      "depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.4), libstdc++6 (>= 13.1)"
+    },
+    {
+      "name": "libc6-dev",
+      "version": "2.39-0ubuntu8",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/g/glibc/libc6-dev_2.39-0ubuntu8_amd64.deb",
+      "bytes": 2123840,
+      "sha256": "1f03b79223d9cf1a6ed3a648f6942619dcb97b2884dba8fd12e262b6771e247a",
+      "depends": "libc6 (= 2.39-0ubuntu8), libc-dev-bin (= 2.39-0ubuntu8), linux-libc-dev, libcrypt-dev, rpcsvc-proto"
+    },
+    {
+      "name": "linux-libc-dev",
+      "version": "6.8.0-31.31",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/l/linux/linux-libc-dev_6.8.0-31.31_amd64.deb",
+      "bytes": 1597672,
+      "sha256": "21c631ba4da3d38d92a133e28a8a14278e1e00174ed135a20661d1e532e05ca5",
+      "depends": ""
+    },
+    {
+      "name": "libgcc-13-dev",
+      "version": "13.2.0-23ubuntu4",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/g/gcc-13/libgcc-13-dev_13.2.0-23ubuntu4_amd64.deb",
+      "bytes": 2687706,
+      "sha256": "d36c9acb969dd37fdc0496120715d8bba67a5cc43a0c2569717314e6ad80020c",
+      "depends": "gcc-13-base (= 13.2.0-23ubuntu4), libgcc-s1 (>= 13.2.0-23ubuntu4), libgomp1 (>= 13.2.0-23ubuntu4), libitm1 (>= 13.2.0-23ubuntu4), libatomic1 (>= 13.2.0-23ubuntu4), libasan8 (>= 13.2.0-23ubuntu4), liblsan0 (>= 13.2.0-23ubuntu4), libtsan2 (>= 13.2.0-23ubuntu4), libubsan1 (>= 13.2.0-23ubuntu4), libhwasan0 (>= 13.2.0-23ubuntu4), libquadmath0 (>= 13.2.0-23ubuntu4)"
+    },
+    {
+      "name": "libstdc++-13-dev",
+      "version": "13.2.0-23ubuntu4",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/g/gcc-13/libstdc++-13-dev_13.2.0-23ubuntu4_amd64.deb",
+      "bytes": 2399142,
+      "sha256": "0e34b7a6ad0d9db6c718301a0c30a077590decbb31099d0fd6ac957222d77a94",
+      "depends": "gcc-13-base (= 13.2.0-23ubuntu4), libgcc-13-dev (= 13.2.0-23ubuntu4), libstdc++6 (>= 13.2.0-23ubuntu4), libc6-dev (>= 2.13-0ubuntu6)"
+    },
+    {
+      "name": "gcc-13-base",
+      "version": "13.2.0-23ubuntu4",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/g/gcc-13/gcc-13-base_13.2.0-23ubuntu4_amd64.deb",
+      "bytes": 48958,
+      "sha256": "2613608b046eb9416878fa4e30aa8e34831775bb0cc7ae6efef6d230986dbb5a",
+      "depends": ""
+    },
+    {
+      "name": "make",
+      "version": "4.3-4.1build2",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/m/make-dfsg/make_4.3-4.1build2_amd64.deb",
+      "bytes": 179752,
+      "sha256": "1fe6a815b56c7b6e9ce4086a363f09444bbd0a0d30e230c453d0b78e44b57a99",
+      "depends": "libc6 (>= 2.38)"
+    },
+    {
+      "name": "zlib1g-dev",
+      "version": "1:1.3.dfsg-3.1ubuntu2",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/z/zlib/zlib1g-dev_1.3.dfsg-3.1ubuntu2_amd64.deb",
+      "bytes": 894096,
+      "sha256": "7360405fbf49e35dca2f7a4ebeac7d4fe5fe3b2db99adac70e11e104f53b2642",
+      "depends": "zlib1g (= 1:1.3.dfsg-3.1ubuntu2), libc6-dev | libc-dev"
+    }
+  ]
+}
