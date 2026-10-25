@@ -1,6 +1,6 @@
 # Project references and credits
 
-Console Shelf's current HTML, CSS and JavaScript preview does **not** include source code from the projects below. Their public documentation and source informed the proposed native PS5 integration. Their names and trademarks remain with their respective owners.
+Console Shelf's current HTML, CSS and JavaScript preview and initial C++ catalogue/browsing model do **not** include source code from the projects below. Their public documentation and source informed the proposed native PS5 integration. Their names and trademarks remain with their respective owners.
 
 | Project | Creator / publisher | How it informs Shelf | Source and license |
 | --- | --- | --- | --- |

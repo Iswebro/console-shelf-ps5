@@ -32,11 +32,16 @@ const settings = {
   availability: savedChoice('shelf-availability', ['all', 'tested', 'native', 'mapped', 'app', 'reference'], 'all'),
   icon: savedChoice('shelf-icon', Object.keys(appIcons), 'gaming')
 };
-let favorites;
-try {
-  const savedFavorites = JSON.parse(safeStorage.get('shelf-favorites') || '[]');
-  favorites = new Set(Array.isArray(savedFavorites) ? savedFavorites.filter(id => systems.some(system => system.id === id)) : []);
-} catch { favorites = new Set(); }
+function savedSystemSet(key) {
+  try {
+    const saved = JSON.parse(safeStorage.get(key) || '[]');
+    return new Set(Array.isArray(saved) ? saved.filter(id => systems.some(system => system.id === id)) : []);
+  } catch { return new Set(); }
+}
+const favorites = savedSystemSet('shelf-favorites');
+const hiddenSystems = savedSystemSet('shelf-hidden-systems');
+const settingsTabs = ['Appearance', 'Browse', 'Consoles'];
+let settingsOpener = null;
 let selected = null;
 let toastTimer;
 let drag = null;
@@ -72,6 +77,123 @@ function renderSettings() {
   $('lookImages').disabled = settings.layout === 'carousel';
   $('lookCards').disabled = settings.layout === 'carousel';
   $('systems').className = settings.layout === 'carousel' ? 'systems-carousel' : 'systems-grid';
+  const look = settings.layout === 'carousel' ? 'Swipe' : settings.look === 'images' ? '3D icons · Grid' : 'Classic cards · Grid';
+  const sort = $('sort').selectedOptions[0].textContent;
+  const view = settings.scope === 'all' ? 'All consoles' : 'Emulator or games';
+  $('shelfSummary').textContent = [look, sort, view, settings.family !== 'all' ? settings.family : '', settings.availability !== 'all' ? statusLabels[settings.availability] : ''].filter(Boolean).join(' · ');
+  const filterCount = Number(settings.family !== 'all') + Number(settings.availability !== 'all');
+  $('filterBadge').textContent = String(filterCount);
+  $('filterBadge').hidden = filterCount === 0;
+  $('openBrowse').setAttribute('aria-label', `Sort and filter consoles${filterCount ? `, ${filterCount} filters active` : ''}`);
+  const omitted = systems.filter(system => hiddenSystems.has(system.id) || !inScope(system)).length;
+  $('consoleBadge').textContent = String(omitted);
+  $('consoleBadge').hidden = omitted === 0;
+  $('openConsoles').setAttribute('aria-label', `Choose visible consoles${omitted ? `, ${omitted} hidden` : ''}`);
+  if (selected) {
+    const showImage = settings.layout === 'carousel' || settings.look === 'images';
+    $('heroImage').hidden = !showImage;
+    $('heroSymbol').hidden = showImage;
+  }
+}
+
+function inScope(system) {
+  return settings.scope === 'all' || system.status !== 'reference' || system.games.length > 0;
+}
+
+function pickerSystems() {
+  const query = $('consoleSearch').value.trim().toLocaleLowerCase();
+  return systems.filter(system => [system.name, system.family].some(value => value.toLocaleLowerCase().includes(query)));
+}
+
+function syncConsolePicker() {
+  const matches = pickerSystems();
+  $('visibleConsoleCount').textContent = `${systems.length - hiddenSystems.size} of ${systems.length} enabled`;
+  const searching = $('consoleSearch').value.trim().length > 0;
+  $('showAllConsoles').textContent = searching ? 'Show results' : 'Show all';
+  $('hideAllConsoles').textContent = searching ? 'Hide results' : 'Hide all';
+  $('showAllConsoles').disabled = !matches.some(system => hiddenSystems.has(system.id));
+  $('hideAllConsoles').disabled = !matches.some(system => !hiddenSystems.has(system.id));
+  $('consolePicker').querySelectorAll('input[data-console]').forEach(input => {
+    input.checked = !hiddenSystems.has(input.dataset.console);
+  });
+  $('consolePicker').querySelectorAll('input[data-family]').forEach(input => {
+    const members = matches.filter(system => system.family === input.dataset.family);
+    const enabled = members.filter(system => !hiddenSystems.has(system.id)).length;
+    input.checked = enabled === members.length;
+    input.indeterminate = enabled > 0 && enabled < members.length;
+    input.parentElement.querySelector('small').textContent = `${enabled} / ${members.length}`;
+  });
+}
+
+function renderConsolePicker() {
+  const matches = pickerSystems();
+  const groups = [...new Set(matches.map(system => system.family))];
+  const fragment = document.createDocumentFragment();
+  for (const family of groups) {
+    const group = document.createElement('div');
+    group.className = 'console-picker-group';
+    const heading = document.createElement('label');
+    heading.className = 'console-group-heading';
+    const groupToggle = document.createElement('input');
+    groupToggle.type = 'checkbox';
+    groupToggle.dataset.family = family;
+    groupToggle.setAttribute('aria-label', `Show all ${family} consoles${$('consoleSearch').value.trim() ? ' in search results' : ''}`);
+    const groupCount = document.createElement('small');
+    heading.append(groupToggle, document.createTextNode(family), groupCount);
+    group.append(heading);
+    for (const system of matches.filter(system => system.family === family)) {
+      const row = document.createElement('label');
+      row.className = 'console-toggle';
+      const image = document.createElement('img');
+      image.src = system.image;
+      image.alt = '';
+      image.loading = 'lazy';
+      const copy = document.createElement('span');
+      const name = document.createElement('strong');
+      name.textContent = system.name;
+      const route = document.createElement('small');
+      route.textContent = system.status === 'reference' ? 'Hardware reference only' : [system.emulators[0], system.games.length ? `${system.games.length} example games` : ''].filter(Boolean).join(' · ');
+      copy.append(name, route);
+      const toggle = document.createElement('input');
+      toggle.type = 'checkbox';
+      toggle.setAttribute('role', 'switch');
+      toggle.setAttribute('aria-label', `Show ${system.name}`);
+      toggle.dataset.console = system.id;
+      row.append(image, copy, toggle);
+      group.append(row);
+    }
+    fragment.append(group);
+  }
+  $('consolePicker').replaceChildren(fragment);
+  $('emptyPicker').hidden = matches.length > 0;
+  syncConsolePicker();
+}
+
+function saveConsoleVisibility() {
+  safeStorage.set('shelf-hidden-systems', JSON.stringify(systems.filter(system => hiddenSystems.has(system.id)).map(system => system.id)));
+  syncConsolePicker();
+  renderSettings();
+  renderSystems();
+}
+
+function setSettingsTab(name, focusTab = false) {
+  for (const tab of settingsTabs) {
+    const active = tab === name;
+    $('tab' + tab).setAttribute('aria-selected', String(active));
+    $('tab' + tab).tabIndex = active ? 0 : -1;
+    $('panel' + tab).hidden = !active;
+  }
+  if (name === 'Consoles') renderConsolePicker();
+  if (focusTab) $('tab' + name).focus();
+  $('settingsDialog').querySelector('.settings-body').scrollTop = 0;
+}
+
+function openSettings(tab, focusId) {
+  settingsOpener = document.activeElement;
+  setSettingsTab(tab);
+  $('settingsDialog').showModal();
+  document.body.classList.add('settings-open');
+  $(focusId || 'tab' + tab).focus();
 }
 
 function renderIcon() {
@@ -85,7 +207,7 @@ function renderIcon() {
 function sortedSystems() {
   const query = $('search').value.trim().toLocaleLowerCase();
   const shown = systems.filter(system =>
-    (settings.scope === 'all' || system.status !== 'reference' || system.games.length > 0) &&
+    !hiddenSystems.has(system.id) && inScope(system) &&
     (settings.family === 'all' || system.family === settings.family) &&
     (settings.availability === 'all' || system.status === settings.availability) &&
     [system.name, system.family, system.core || '', ...system.emulators].some(value => value.toLocaleLowerCase().includes(query))
@@ -172,6 +294,7 @@ function renderSystems() {
   const shown = sortedSystems();
   $('systemCount').textContent = `${shown.length} of ${systems.length} systems`;
   $('emptySearch').hidden = shown.length !== 0;
+  $('emptyMessage').textContent = hiddenSystems.size === systems.length ? 'Your shelf is empty. Switch on a few consoles to make it yours.' : 'No systems match this view. Try another search or review your settings.';
   $('systems').replaceChildren(...shown.map(makeCard));
   $('systems').scrollLeft = 0;
   updateCarouselPosition();
@@ -224,10 +347,10 @@ function openSystem(id) {
   const image = $('heroImage');
   image.src = selected.image;
   image.alt = selected.name + ' console';
-  image.hidden = settings.look !== 'images';
+  image.hidden = settings.layout !== 'carousel' && settings.look !== 'images';
   image.onerror = () => { image.hidden = true; $('heroSymbol').hidden = false; };
   $('heroSymbol').textContent = selected.symbol;
-  $('heroSymbol').hidden = settings.look === 'images';
+  $('heroSymbol').hidden = settings.layout === 'carousel' || settings.look === 'images';
   const menu = $('emulator');
   menu.replaceChildren(...selected.emulators.map(emulator => new Option(emulator, emulator)));
   const saved = safeStorage.get('shelf-emulator-' + id);
@@ -273,6 +396,47 @@ $('scopeAvailable').onclick = () => setChoice('scope', 'available');
 $('sort').onchange = event => setChoice('sort', event.target.value);
 $('family').onchange = event => setChoice('family', event.target.value);
 $('availability').onchange = event => setChoice('availability', event.target.value);
+$('clearFilters').onclick = () => {
+  settings.family = 'all';
+  settings.availability = 'all';
+  safeStorage.set('shelf-family', 'all');
+  safeStorage.set('shelf-availability', 'all');
+  renderSettings();
+  renderSystems();
+};
+$('openAppearance').onclick = () => openSettings('Appearance');
+$('openBrowse').onclick = () => openSettings('Browse', 'sort');
+$('openConsoles').onclick = () => openSettings('Consoles', 'consoleSearch');
+$('reviewSettings').onclick = () => openSettings(hiddenSystems.size ? 'Consoles' : 'Browse');
+for (const tab of settingsTabs) $('tab' + tab).onclick = () => setSettingsTab(tab);
+$('settingsDialog').querySelector('.settings-tabs').onkeydown = event => {
+  const index = settingsTabs.findIndex(tab => 'tab' + tab === event.target.id);
+  if (index < 0 || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  const next = event.key === 'Home' ? 0 : event.key === 'End' ? settingsTabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + settingsTabs.length) % settingsTabs.length;
+  setSettingsTab(settingsTabs[next], true);
+};
+$('closeSettings').onclick = $('doneSettings').onclick = () => $('settingsDialog').close();
+$('settingsDialog').onclose = () => {
+  document.body.classList.remove('settings-open');
+  if (settingsOpener?.isConnected) settingsOpener.focus();
+};
+$('settingsDialog').onclick = event => {
+  if (event.target !== $('settingsDialog')) return;
+  const rect = $('settingsDialog').getBoundingClientRect();
+  if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) $('settingsDialog').close();
+};
+$('consoleSearch').oninput = renderConsolePicker;
+$('consolePicker').onchange = event => {
+  const { console: id, family } = event.target.dataset;
+  const matches = id ? systems.filter(system => system.id === id) : family ? pickerSystems().filter(system => system.family === family) : [];
+  for (const system of matches) {
+    if (event.target.checked) hiddenSystems.delete(system.id); else hiddenSystems.add(system.id);
+  }
+  if (matches.length) saveConsoleVisibility();
+};
+$('showAllConsoles').onclick = () => { for (const system of pickerSystems()) hiddenSystems.delete(system.id); saveConsoleVisibility(); };
+$('hideAllConsoles').onclick = () => { for (const system of pickerSystems()) hiddenSystems.add(system.id); saveConsoleVisibility(); };
 $('iconStyle').onchange = event => {
   settings.icon = event.target.value;
   safeStorage.set('shelf-icon', settings.icon);

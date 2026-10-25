@@ -14,8 +14,13 @@
 <body>
   <div class="app">
     <header class="site-header">
-      <div class="brand"><img id="brandIcon" class="mark" src="assets/shelf-icon.png" width="40" height="40" alt=""><span>Estante <span class="brand-divider">/</span> Console Shelf</span></div>
-      <span class="preview-badge">DESIGN PREVIEW · PC ONLY</span>
+      <div class="brand"><img id="brandIcon" class="mark" src="assets/shelf-icon.png" width="40" height="40" alt=""><span>Console Shelf</span></div>
+      <div class="header-actions">
+        <span class="preview-badge">DESIGN PREVIEW · PC ONLY</span>
+        <button type="button" id="openAppearance" class="icon-button" aria-label="Open shelf settings" title="Shelf settings" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.7 3-.6 2.2-1.8 1-2.2-.6-2.2 3.8 1.6 1.6v2l-1.6 1.6 2.2 3.8 2.2-.6 1.8 1 .6 2.2h4.6l.6-2.2 1.8-1 2.2.6 2.2-3.8-1.6-1.6v-2l1.6-1.6-2.2-3.8-2.2.6-1.8-1-.6-2.2Z"/><circle cx="12" cy="12" r="3.1"/></svg>
+        </button>
+      </div>
     </header>
 
     <main>
@@ -23,90 +28,27 @@
         <div class="welcome">
           <p class="eyebrow">ONE HOME FOR YOUR SYSTEMS</p>
           <h1>What do you want<br><em>to play today?</em></h1>
-          <p class="intro">Explore console and computer systems mapped in your PS5 setup. Choose a look, browse by brand or status, and see which games have actually been tried.</p>
+          <p class="intro">Your consoles, your way. Find a system, pick your emulator, and make room for the games you love.</p>
         </div>
 
         <div class="browse-panel">
           <div class="search-row">
             <label class="search-wrap"><span class="sr-only">Find a system</span><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find a system, brand or core…" autocomplete="off"></label>
-            <span class="count" id="systemCount" aria-live="polite"></span>
+            <div class="browse-actions">
+              <button type="button" id="openBrowse" class="icon-button" aria-label="Sort and filter consoles" title="Sort and filter" aria-haspopup="dialog">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg>
+                <span id="filterBadge" class="button-badge" hidden aria-hidden="true"></span>
+              </button>
+              <button type="button" id="openConsoles" class="icon-button" aria-label="Choose visible consoles" title="Choose consoles" aria-haspopup="dialog">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="m14 17 2.5 2.5L21 14.5"/></svg>
+                <span id="consoleBadge" class="button-badge" hidden aria-hidden="true"></span>
+              </button>
+            </div>
           </div>
-          <div class="options-row">
-            <div class="option-block">
-              <span class="option-label">SHOW · DEMO INVENTORY</span>
-              <div class="segmented" role="group" aria-label="Which consoles to show">
-                <button type="button" id="scopeAll" aria-pressed="true">All consoles</button>
-                <button type="button" id="scopeAvailable" aria-pressed="false">Emulator or games</button>
-              </div>
-            </div>
-            <div class="option-block">
-              <span class="option-label">GRID LOOK</span>
-              <div class="segmented" role="group" aria-label="Console look">
-                <button type="button" id="lookImages" aria-pressed="true">3D system icons</button>
-                <button type="button" id="lookCards" aria-pressed="false">Classic cards</button>
-              </div>
-            </div>
-            <div class="option-block">
-              <span class="option-label">LAYOUT</span>
-              <div class="segmented" role="group" aria-label="Shelf layout">
-                <button type="button" id="layoutGrid" aria-pressed="true">Grid</button>
-                <button type="button" id="layoutCarousel" aria-pressed="false">Swipe</button>
-              </div>
-            </div>
-            <label class="option-block select-block" for="sort">
-              <span class="option-label">SORT BY</span>
-              <select id="sort">
-                <option value="featured">Featured order</option>
-                <option value="az">Name · A to Z</option>
-                <option value="za">Name · Z to A</option>
-                <option value="newest">Newest hardware first</option>
-                <option value="oldest">Oldest hardware first</option>
-                <option value="brand">Brand, then name</option>
-                <option value="games">Example games · most first</option>
-                <option value="favorites">Favorites first</option>
-              </select>
-            </label>
-            <label class="option-block select-block brand-filter" for="family">
-              <span class="option-label">BRAND</span>
-              <select id="family">
-                <option value="all">All brands</option>
-                <option value="PlayStation">PlayStation</option>
-                <option value="Nintendo">Nintendo</option>
-                <option value="Sega">Sega</option>
-                <option value="Sammy">Sammy</option>
-                <option value="Atari">Atari</option>
-                <option value="NEC">NEC</option>
-                <option value="SNK">SNK</option>
-                <option value="Bandai">Bandai</option>
-                <option value="3DO">3DO</option>
-                <option value="Arcade">Arcade</option>
-                <option value="Commodore">Commodore</option>
-                <option value="Computer">Computer</option>
-              </select>
-            </label>
-            <label class="option-block select-block" for="availability">
-              <span class="option-label">PS5 STATUS</span>
-              <select id="availability">
-                <option value="all">All statuses</option>
-                <option value="tested">Game tested here</option>
-                <option value="native">Native on PS5</option>
-                <option value="mapped">RetroArch core listed</option>
-                <option value="app">Emulator app listed</option>
-                <option value="reference">Hardware reference only</option>
-              </select>
-            </label>
-            <label class="option-block select-block icon-style" for="iconStyle">
-              <span class="option-label">APP ICON</span>
-              <select id="iconStyle">
-                <option value="gaming">Gaming · default</option>
-                <option value="classic">Classic mint</option>
-                <option value="jade">Jade</option>
-              </select>
-            </label>
-          </div>
+          <div class="browse-summary"><span id="shelfSummary"></span><span class="count" id="systemCount" aria-live="polite"></span></div>
         </div>
 
-        <p class="inventory-note">The demo inventory is based on one PS5 snapshot from 24 October 2026: <strong>46 RetroArch system mappings</strong> plus native and dedicated apps. “Emulator or games” uses that snapshot, including built-in PS5/PS4 routes; this PC preview does not scan your console. A listed core is a route to try, not a guarantee that games will run. Switch 2 is a visual reference only. <a href="docs/SYSTEMS.md">See the demo system list</a>.</p>
+        <p class="inventory-note">Demo catalogue · 52 systems. Availability and game lists use the bundled snapshot; Switch 2 is a hardware reference. <a href="docs/SYSTEMS.md">About this preview</a>.</p>
 
         <div class="shelf-heading">
           <div><p class="eyebrow">YOUR SYSTEM COLLECTION</p><h2>Choose a system</h2></div>
@@ -118,7 +60,7 @@
         </div>
         <p id="swipeHint" class="swipe-hint" hidden>Floating console icons. Swipe sideways, drag with a mouse, or use the arrows to explore.</p>
         <div id="systems" class="systems-grid" role="list" aria-label="Systems"></div>
-        <p id="emptySearch" class="empty-search" hidden>No systems match those filters. Try another name, brand or status.</p>
+        <div id="emptySearch" class="empty-search" hidden><p id="emptyMessage">No systems match this view.</p><button type="button" id="reviewSettings" class="secondary">Review shelf settings</button></div>
       </section>
 
       <section id="detail" hidden>
@@ -147,6 +89,48 @@
 
     <footer>Stylized system icons and <a href="assets/CREDITS.md">reference credits</a>. The Switch 2 image follows Nintendo's official hardware photo. No official PS6 design was verified, so no PS6 card was made. This preview does not connect to your PS5.</footer>
   </div>
+  <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsTitle" aria-describedby="settingsHint">
+    <div class="settings-shell">
+      <header class="settings-heading">
+        <div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settingsTitle">Shelf settings</h2><p id="settingsHint">Changes save automatically.</p></div>
+        <button type="button" id="closeSettings" class="icon-button" aria-label="Close settings" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
+      </header>
+      <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+        <button type="button" id="tabAppearance" role="tab" aria-controls="panelAppearance" aria-selected="true" tabindex="0">Appearance</button>
+        <button type="button" id="tabBrowse" role="tab" aria-controls="panelBrowse" aria-selected="false" tabindex="-1">Sort &amp; filter</button>
+        <button type="button" id="tabConsoles" role="tab" aria-controls="panelConsoles" aria-selected="false" tabindex="-1">Consoles</button>
+      </div>
+      <div class="settings-body">
+        <section id="panelAppearance" role="tabpanel" aria-labelledby="tabAppearance">
+          <h3>Your shelf, your style</h3><p class="settings-description">Choose how you want to browse your consoles.</p>
+          <fieldset class="settings-field"><legend>Layout</legend><div class="layout-choices" role="group" aria-label="Shelf layout">
+            <button type="button" id="layoutGrid" class="layout-choice" aria-pressed="true"><svg viewBox="0 0 32 24" aria-hidden="true"><rect x="2" y="2" width="11" height="8" rx="2"/><rect x="19" y="2" width="11" height="8" rx="2"/><rect x="2" y="14" width="11" height="8" rx="2"/><rect x="19" y="14" width="11" height="8" rx="2"/></svg><strong>Grid</strong><span>Everything at a glance</span></button>
+            <button type="button" id="layoutCarousel" class="layout-choice" aria-pressed="false"><svg viewBox="0 0 32 24" aria-hidden="true"><rect x="9" y="2" width="14" height="20" rx="3"/><path d="M4 6H1v12h3M28 6h3v12h-3"/></svg><strong>Swipe</strong><span>Floating icons, one row</span></button>
+          </div></fieldset>
+          <fieldset class="settings-field"><legend>Grid look</legend><div class="segmented" role="group" aria-label="Console look"><button type="button" id="lookImages" aria-pressed="true">3D system icons</button><button type="button" id="lookCards" aria-pressed="false">Classic cards</button></div><p class="field-help">Swipe always uses floating console icons.</p></fieldset>
+          <label class="settings-field select-block" for="iconStyle"><span>App icon</span><select id="iconStyle"><option value="gaming">Gaming · default</option><option value="classic">Classic mint</option><option value="jade">Jade</option></select></label>
+        </section>
+        <section id="panelBrowse" role="tabpanel" aria-labelledby="tabBrowse" hidden>
+          <h3>Find your next favourite</h3><p class="settings-description">Set the order and narrow down your shelf.</p>
+          <label class="settings-field select-block" for="sort"><span>Sort by</span><select id="sort"><option value="featured">Featured order</option><option value="az">Name · A to Z</option><option value="za">Name · Z to A</option><option value="newest">Newest hardware first</option><option value="oldest">Oldest hardware first</option><option value="brand">Brand, then name</option><option value="games">Example games · most first</option><option value="favorites">Favorites first</option></select></label>
+          <div class="settings-columns">
+            <label class="settings-field select-block" for="family"><span>Brand</span><select id="family"><option value="all">All brands</option><option value="PlayStation">PlayStation</option><option value="Nintendo">Nintendo</option><option value="Sega">Sega</option><option value="Sammy">Sammy</option><option value="Atari">Atari</option><option value="NEC">NEC</option><option value="SNK">SNK</option><option value="Bandai">Bandai</option><option value="3DO">3DO</option><option value="Arcade">Arcade</option><option value="Commodore">Commodore</option><option value="Computer">Computer</option></select></label>
+            <label class="settings-field select-block" for="availability"><span>PS5 status</span><select id="availability"><option value="all">All statuses</option><option value="tested">Game tested here</option><option value="native">Native on PS5</option><option value="mapped">RetroArch core listed</option><option value="app">Emulator app listed</option><option value="reference">Hardware reference only</option></select></label>
+          </div>
+          <button type="button" id="clearFilters" class="text-button">Clear brand and status filters</button>
+        </section>
+        <section id="panelConsoles" role="tabpanel" aria-labelledby="tabConsoles" hidden>
+          <h3>A shelf that feels like yours</h3><p class="settings-description">Choose a view, then switch individual consoles on or off. Your games stay where they are.</p>
+          <fieldset class="settings-field"><legend>Show on my shelf</legend><div class="segmented" role="group" aria-label="Which consoles to show"><button type="button" id="scopeAll" aria-pressed="true">All consoles</button><button type="button" id="scopeAvailable" aria-pressed="false">Emulator or games</button></div><p class="field-help">Availability uses the bundled demo inventory. Your individual choices apply to both views.</p></fieldset>
+          <label class="search-wrap picker-search"><span class="sr-only">Find consoles to show or hide</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="consoleSearch" type="search" placeholder="Find a console or brand…" autocomplete="off"></label>
+          <div class="picker-actions"><span id="visibleConsoleCount" class="count" aria-live="polite"></span><div><button type="button" id="showAllConsoles" class="text-button">Show all</button><button type="button" id="hideAllConsoles" class="text-button">Hide all</button></div></div>
+          <div id="consolePicker" class="console-picker"></div>
+          <p id="emptyPicker" class="field-help" hidden>No consoles match that search.</p>
+        </section>
+      </div>
+      <footer class="settings-footer"><span><span class="saved-dot" aria-hidden="true"></span>Saved on this device</span><button type="button" id="doneSettings" class="primary">Done</button></footer>
+    </div>
+  </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

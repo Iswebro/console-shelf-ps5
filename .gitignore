@@ -23,6 +23,9 @@ previews/*
 !previews/console-images-swipe.png
 !previews/mobile-swipe.png
 !previews/switch2-3d-card.png
+!previews/settings-consoles.png
+!previews/settings-appearance.png
+!previews/settings-mobile.png
 
 node_modules/
 .cache/
