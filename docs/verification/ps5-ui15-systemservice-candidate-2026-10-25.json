@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "scope": "Private owner test build; PS5SX2 menu foreground accepted; other launch routes pending; no public binary",
+  "sourceCommit": "18917ef0522873695fa71d10630eb8fed13ffbcc",
+  "titleId": "PPSA99541",
+  "contentVersion": "00.100.014",
+  "self": {
+    "bytes": 2674657,
+    "sha256": "74892b6d70634d507b54071f38fd2b2067bd2f161033056e875824e48ae6a12f"
+  },
+  "elf": {
+    "bytes": 2786948,
+    "sha256": "2201718cf5f56a215e4a2712c68db0f0ef25375a4838288308dc7f14a36d45f4"
+  },
+  "helper": {
+    "bytes": 108792,
+    "sha256": "6a848266e473351f0b3ccc2dcd23a3a022e392e2f0d81ddf7281e97a7605eaef",
+    "runtimeMode": "standard-sdk",
+    "permissionChanges": true,
+    "ownerApproval": "Existing explicit approval for Shelf standard-SDK runtime tests retained"
+  },
+  "privatePackage": {
+    "bytes": 75282659,
+    "sha256": "19a49c386174314bfe2245effc08857eb10806ee68f06c0d343f7ebfeae7c7e0",
+    "files": 77,
+    "zipIntegrity": "passed; full member size and SHA-256 comparison"
+  },
+  "checks": {
+    "nativeTests": "passed; one-launch policy, delayed/unknown/background focus, cancellation, expiry and app changes",
+    "transportTests": "nine loopback fixtures passed; no helper executed",
+    "executableStructure": "passed; exact embedded helper verified",
+    "retainedInputRelink": "passed; exact reference ELF and SELF from 18 application objects and three replaceable libraries",
+    "consoleTransfer": "all 77 full raw readbacks passed with SELF conversion disabled; prior program retained",
+    "transferPreflight": "Initial NLST preflight stopped before program writes because the FTP server does not implement that command. Bounded LIST parsing confirmed the added notice path absent before staging and again before rename.",
+    "preferences": "unchanged",
+    "helperExecutedByInstaller": false,
+    "physicalForegroundTest": "owner confirmed PS5SX2 appears directly on screen after Shelf closes",
+    "remainingHardwareTests": "PSXS5, PS5SX3 and RetroArch selected-game routes; final settings/restart checks"
+  },
+  "sourceKit": {
+    "sourceCommit": "18917ef0522873695fa71d10630eb8fed13ffbcc",
+    "bytes": 101286244,
+    "sha256": "c430c8a6b9272ebe5ab6690171f6d45268dfa106871b973d19325e8574efec80",
+    "members": 265,
+    "runtimeMode": "standard-sdk",
+    "coldRelinkTest": "passed; exact reference ELF and SELF from extracted kit, fresh compiler prefix and rebuilt converter",
+    "applicationRecompiled": false,
+    "consoleContactedByColdRelink": false
+  },
+  "policy": "One sceSystemServiceLaunchApp request after committed cooperative closure and monitored idle, with SkipSystemUpdate retained. Afterwards only read the same target instance and SceShellCoreUtilAppFocus; no second launch, focus setter, process kill or emulator-file writes.",
+  "focusInterpretation": "foreground-observed means the read-only shell flag equals the target app ID; TV output still needs owner acceptance",
+  "references": [
+    "https://github.com/ps5-payload-dev/websrv/blob/7748df9d2a43822a5ebfda149f43d4f2696d640b/src/ps5/sys.c",
+    "https://github.com/drakmor/ShadowMountPlus/blob/9ffcbe131575153266e951ab473bb6fd100d8c80/src/sm_shellcore_flags.c"
+  ]
+}
