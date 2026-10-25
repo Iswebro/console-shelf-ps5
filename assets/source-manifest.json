@@ -113,10 +113,10 @@
   },
   {
     "id": "genesis",
-    "bytes": 55841,
-    "sha256": "DC2A7E66489F8050D9E0038ABFF73E505815B999921191B4F1BADE9367352194",
-    "source": "https://commons.wikimedia.org/wiki/File:Sega-Mega-Drive-JP-Mk1-Console-Set.jpg",
-    "local": "assets/genesis.jpg"
+    "bytes": 2177832,
+    "sha256": "CFD5587388863951E6CB9AA7987CB529B937C8DAD3E59526D77F150BF7DF54CF",
+    "source": "https://commons.wikimedia.org/wiki/File:Sega-Mega-Drive-EU-Mk1-wController-FL.jpg",
+    "local": "assets/references/megadrive-pal-model1.jpg"
   },
   {
     "id": "dreamcast",

@@ -10,7 +10,9 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Searchable individual console switches, whole-brand controls, Show/Hide results and saved visibility.
 - [x] Original C++17 hardware catalogue and browsing model, compiled and tested on Windows with warnings treated as errors.
 - [ ] Reproducible native PS5 SDK/SDL toolchain and package identity.
-- [ ] Native renderer, controller navigation and settings persistence.
+- [x] Native C++/SDL renderer, navigation model and settings persistence exercised on PC.
+- [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
+- [ ] PS5 VideoOut/direct-memory integration and physical controller validation.
 - [ ] Runtime emulator and game discovery in existing library locations.
 - [ ] Verified launch adapters and firmware 12.20 console tests.
 - [ ] Source-linked prototype ZIP, SHA-256, install/rollback instructions and first release.
@@ -34,6 +36,6 @@ The `native/` model uses only hardware metadata and suggested core names. Instal
 
 ## Immediate engineering steps
 
-Establish a pinned build environment for the official public PS5 payload SDK and SDL2, then bring up a small native renderer using the compiled catalogue/model and existing transparent art. The Windows host model check already uses the installed Visual Studio compiler without changing system settings. The current Ubuntu/WSL instance lacks the native compiler, make and SDL development packages; an isolated build environment or an explicitly approved package setup is still needed for PS5 cross-compilation.
+The native C++ renderer and settings flow now run on Windows with the existing Visual Studio compiler and a pinned, SHA-256-verified official SDL2 package in the project cache. Fonts and decoder sources are pinned and credited. The software-rendered host uses the same console artwork and controller-navigation model intended for the PS5. Its SDL event tests are simulated; physical controller and console compatibility are still unproven.
 
-Next, port the settings and controller flow to that renderer before connecting read-only discovery and launch helpers. Keep local PS5 test evidence separate from the public source. There is no prototype download until the acceptance steps above are met.
+Next, establish the pinned public PS5 SDK/SDL cross-compile environment and integrate the native VideoOut/direct-memory backend, followed by read-only discovery and launch helpers. The current Ubuntu/WSL instance lacks the compiler, make and SDL development packages; an isolated environment or an explicitly approved package setup is still needed. Keep local PS5 test evidence separate from public source. There is no prototype download until the acceptance steps above are met.

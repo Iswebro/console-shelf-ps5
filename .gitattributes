@@ -1,0 +1,12 @@
+* text=auto
+*.js text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.png -text
+*.ttf -text
+# Preserve hash-pinned upstream bytes, including their original license whitespace.
+native/third_party/stb/*.h -text -whitespace
+native/third_party/licenses/* -text -whitespace
+native/assets/fonts/* -text -whitespace

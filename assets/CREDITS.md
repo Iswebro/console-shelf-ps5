@@ -22,8 +22,10 @@ The first 18 icons were generated with the photographs credited below as visual 
 | Super Nintendo | [Source](https://commons.wikimedia.org/wiki/File:SNES-Mod1-Console-Set.png) | Evan-Amos | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
 | Game Boy Advance | [Source](https://commons.wikimedia.org/wiki/File:Nintendo-Game-Boy-Advance-Purple-FL.png) | Evan-Amos | Public domain |
 | PSP | [Source](https://commons.wikimedia.org/wiki/File:PSP-1000.png) | Evan-Amos; derivative by Alphathon | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
-| Mega Drive | [Source](https://commons.wikimedia.org/wiki/File:Sega-Mega-Drive-JP-Mk1-Console-Set.jpg) | Evan-Amos | Public domain |
+| Mega Drive | [PAL Model 1 reference](https://commons.wikimedia.org/wiki/File:Sega-Mega-Drive-EU-Mk1-wController-FL.jpg) | Evan-Amos | Public domain |
 | Dreamcast | [Source](https://commons.wikimedia.org/wiki/File:Dreamcast-Console-Set.png) | Evan-Amos | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+
+The Mega Drive icon was revised on 25 October 2026 to depict the PAL Model 1 using Evan-Amos's reference above. It replaces the earlier Japanese-model illustration and uses the PAL hardware's neutral controls and three-button pad. The previous generated icon is kept only in the ignored local archive. The app icon variants were also generated for Console Shelf and are offered under CC BY 4.0 to the extent rights are held.
 
 The Switch 2 icon is a newly generated dock-and-grip illustration based on [Nintendo's official Switch 2 press image](https://nintendoes-newsroom.prgloo.com/resources/nintendo-switch-2). The press photo is not bundled or displayed. Nintendo owns the hardware design and press image. The card is a visual reference only; no Switch 2 PS5 emulator has been verified.
 

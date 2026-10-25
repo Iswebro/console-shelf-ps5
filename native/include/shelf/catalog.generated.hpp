@@ -64,4 +64,5 @@ inline constexpr std::array<SystemDefinition, 52> catalog = {{
     {"scummvm", "ScummVM adventures", "Computer", "assets/3d-icons/scummvm.png", "scummvm", 0}
 }};
 inline constexpr std::size_t system_count = catalog.size();
+inline constexpr std::array<std::string_view, 13> brands = {"", "PlayStation", "Nintendo", "Sega", "Sammy", "Atari", "NEC", "SNK", "Bandai", "3DO", "Arcade", "Commodore", "Computer"};
 } // namespace shelf

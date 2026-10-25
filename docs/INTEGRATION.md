@@ -2,7 +2,7 @@
 
 Console Shelf is presently an offline PC design preview. The console-first navigation, visual options, sort and filters work in a browser. They do not scan a PS5 or launch an emulator.
 
-The [first native prototype](PROTOTYPE-PLAN.md) is now the main goal. Its C++17 catalogue/browsing model is started and passes host checks; the renderer, console adapters and packaged PS5 build still need implementation and validation.
+The [first native prototype](PROTOTYPE-PLAN.md) is now the main goal. Its C++17 renderer, catalogue/browsing model, navigation and recoverable settings pass host checks. The PS5 display/memory backend, console adapters and packaged build still need implementation and validation.
 
 The proposed native app would build on [Jewel Case](https://github.com/SkaRift/JewelCase) for read-only game discovery and launch routing, with [Estante](https://github.com/kauansilvalopes/estante) as a reference for native PS5/PS4 titles. It would keep the console-first Grid and Swipe UI from this project. Both projects publish GPL source; see [credits](../THIRD_PARTY.md).
 

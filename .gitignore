@@ -26,6 +26,10 @@ previews/*
 !previews/settings-consoles.png
 !previews/settings-appearance.png
 !previews/settings-mobile.png
+!previews/native-home.png
+!previews/native-settings.png
+!previews/native-swipe.png
+!previews/native-megadrive.png
 
 node_modules/
 .cache/

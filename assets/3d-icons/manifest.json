@@ -202,9 +202,9 @@
   {
     "id": "genesis",
     "local": "assets/3d-icons/genesis.png",
-    "bytes": 1403434,
-    "sha256": "70FE2747E8EFF024149CDA2B0BF9788EAA8CB6789F75767121D6D1F174EFDA3A",
-    "reference": "https://commons.wikimedia.org/wiki/File:Sega-Mega-Drive-JP-Mk1-Console-Set.jpg",
+    "bytes": 1373943,
+    "sha256": "238C385A2C883B0A49CF3588D92AB091692739537E380A28D1079115570A55C8",
+    "reference": "https://commons.wikimedia.org/wiki/File:Sega-Mega-Drive-EU-Mk1-wController-FL.jpg",
     "referenceType": "credited hardware photo"
   },
   {

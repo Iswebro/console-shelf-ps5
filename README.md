@@ -1,6 +1,6 @@
 # Console Shelf
 
-A console-first library concept for PS5 homebrew. This repository currently contains an **offline PC design preview**, not an installable PS5 app. Open [index.html](index.html) in a browser to try it; it does not connect to a console, launch games, or change firmware and network settings.
+A console-first library project for PS5 homebrew. This repository contains a **browser design preview** and a **native C++/SDL development build for PC**. The PS5 package is still in development. Open [index.html](index.html) in a browser for the design preview, or follow the [native build instructions](native/README.md) to run the C++ app on PC. Both currently work offline with no console launch connection.
 
 ![Floating console icons in Swipe view](previews/console-images-swipe.png)
 
@@ -19,9 +19,13 @@ See the [mobile Swipe view](previews/mobile-swipe.png) and [Switch 2 icon](previ
 
 The [demo system catalogue](docs/SYSTEMS.md) comes from a dated PS5 setup snapshot. Its 46 RetroArch core mappings and example game names are **not** a live scan of another user's console. A mapped core or listed emulator does not guarantee a game runs. In the demo, “Emulator or games” shows 51 of 52 cards; Switch 2 is the hardware-reference-only card and has no launch route. A future native build must replace the demo with each owner's actual emulator and game inventory.
 
-The next main milestone is a [native PS5 prototype and its first verified download](docs/PROTOTYPE-PLAN.md), targeting firmware 12.20. An original C++17 catalogue and browsing model is started in [native/](native/README.md) and passes host tests. Direct game launch, PS5 controller integration, on-console scanning and firmware compatibility testing remain in development. No PS5 package is published here.
+The next main milestone is a [native PS5 prototype and its first verified download](docs/PROTOTYPE-PLAN.md), targeting firmware 12.20. The [C++17 app](native/README.md) now renders the console shelf and settings, handles controller-style navigation and search, and saves preferences with recovery from a backup. Model, persistence and simulated SDL controller tests pass on PC. Real discovery, launch adapters, physical controller and firmware tests remain in development. No PS5 package is published here.
 
 ![Searchable console visibility settings](previews/settings-consoles.png)
+
+The native C++ renderer running on PC:
+
+![Native development build](previews/native-home.png)
 
 ## Development check
 

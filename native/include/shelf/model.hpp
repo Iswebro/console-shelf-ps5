@@ -8,6 +8,8 @@ enum class GridLook { icons, cards };
 enum class Scope { all, available };
 enum class Sort { featured, name_asc, name_desc, newest, oldest, brand, games, favorites };
 enum class LaunchCapability { unavailable, emulator_menu, direct_game };
+enum class SystemFilter { all, emulators, games, built_in, no_route };
+enum class AppIcon { gaming, classic, jade };
 
 // Filled only by runtime adapters. A suggested core is never evidence of installation.
 struct Availability {
@@ -23,6 +25,9 @@ struct Preferences {
     GridLook grid_look = GridLook::icons;
     Scope scope = Scope::all;
     Sort sort = Sort::featured;
+    SystemFilter filter = SystemFilter::all;
+    AppIcon icon = AppIcon::gaming;
+    std::size_t brand = 0;
     // These arrays are in-memory state. Persistence must use stable system IDs.
     std::array<bool, system_count> hidden{};
     std::array<bool, system_count> favorite{};

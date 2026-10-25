@@ -7,6 +7,9 @@
   "scripts": {
     "test": "node tools/verify-preview.js",
     "test:native": "node tools/test-native.js",
+    "build:native-host": "node tools/build-native-host.js",
+    "test:native-renderer": "node tools/build-native-host.js && node tools/test-native-renderer.js",
+    "start:native-host": "node tools/run-native-host.js",
     "build:native-catalog": "node tools/build-native-catalog.js",
     "build:systems": "node tools/build-support-list.js",
     "build:icons": "node tools/build-icon-manifest.js"
