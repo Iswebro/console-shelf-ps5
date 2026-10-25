@@ -1,6 +1,9 @@
 # Local source research and console notes are not part of the public preview.
 native-estante/
 native-jewelcase/
+# Owner-provided startup compilations are personal media, never release assets.
+/All Game Consoles Startups (1977 - Presents)/
+/All Nintendo, Xbox, PlayStation, Sega & Atari Startups (Switch 2 + Unused Brand ID)/
 PS5-INTEGRATION.md
 JEWEL-CASE-INTEGRATION.md
 SYSTEM-SUPPORT.md

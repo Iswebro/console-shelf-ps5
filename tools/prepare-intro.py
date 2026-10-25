@@ -44,8 +44,8 @@ def main():
               '-vf', 'scale=640:360:force_original_aspect_ratio=decrease:force_divisible_by=2,pad=640:360:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=25',
               '-pix_fmt', 'yuv420p', '-threads', '2', '-map_metadata', '-1']
     records = []
-    for suffix, codec in [('mpg', ['-c:v', 'mpeg1video', '-q:v', '4', '-bf', '0', '-g', '12', '-f', 'mpeg']),
-                          ('mp4', ['-c:v', 'libx264', '-crf', '22', '-preset', 'medium', '-movflags', '+faststart'])]:
+    for suffix, codec in [('mpg', ['-c:v', 'mpeg1video', '-q:v', '3', '-bf', '0', '-g', '12', '-f', 'mpeg']),
+                          ('mp4', ['-c:v', 'libx264', '-crf', '20', '-preset', 'medium', '-movflags', '+faststart'])]:
         target = output / (args.console + '.' + suffix)
         subprocess.run(common + codec + [str(target)], check=True, timeout=240)
         metadata = json.loads(subprocess.check_output([str(ffprobe), '-v', 'error', '-protocol_whitelist', 'file,pipe',
