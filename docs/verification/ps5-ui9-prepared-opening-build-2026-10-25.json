@@ -25,7 +25,22 @@
     "readOnlyFtpAndBackgroundCancellation": "passed",
     "executableStructureAndContainer": "passed"
   },
-  "hardwareTest": "not yet run; UI-8 opening and perceived close duration remain unaccepted",
+  "hardwareTest": "UI-9 ran; owner still reports black followed by the shelf. Console-local images show the branded loading picture and a partial reveal, so drawing is verified but TV visibility remains unaccepted",
+  "deviceFollowUp": {
+    "configuredGames": 92,
+    "configuredRoutes": 55,
+    "discoveryFailures": 0,
+    "coveredSceneRenderMs": 215,
+    "coveredSceneReadyAfterGraphicsMs": 608,
+    "openingWallMs": 7292,
+    "openingForegroundClockMs": 2136,
+    "circleHoldCommittedAfterButtonMs": 3009,
+    "closingFadeCompleteAfterButtonMs": 3393,
+    "displayShutdownMs": 15,
+    "shellClose": "request recorded before the asynchronous call; time to the PS5 home screen is not measured",
+    "diagnosticPictures": "both privately inspected, full PC/PS5 readbacks matched, and console copies removed; not published",
+    "collectionQuirk": "ftpsrv replies 226 File deleted, which Python FTP.delete treats as exceptional. SIZE did not establish absence; LIST did. No deletion of the first image was repeated"
+  },
   "launches": "not connected; protocol and cooperative-policy host tests do not enable console launches",
   "sourceKit": "UI-6 cold relink evidence retained; refresh required for the final release candidate",
   "publicRelease": false

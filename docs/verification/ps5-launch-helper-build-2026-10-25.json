@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-10-25",
+  "scope": "Original cooperative launch helper; cross-build only",
+  "elf": {
+    "bytes": 112136,
+    "sha256": "84cb1083edf9401bd90f5fc8d756b8c137b4c9e3d83f3e382f00bd58c258988e"
+  },
+  "checks": [
+    "Host request/parser and cooperative policy tests passed",
+    "Pinned SDK v0.42 payload cross-compile/link passed with warnings treated as errors",
+    "ELF64 little-endian x86-64 dynamic payload, executable entry and load bounds/alignment checked",
+    "Normal payload System V ABI 0 matches the pinned SDK CRT; this is not a native app/SELF"
+  ],
+  "validationCorrection": "The initial local check incorrectly expected native-app ABI 9. Inspection proved the pinned SDK CRT, object and normal payload all use ABI 0; the payload check now requires that exact match. The payload was not executed",
+  "policy": "Fresh bounded request, cooperative Shelf closure, one launch attempt, unrelated/unknown foreground refusal, no process kill or emulator-file-write command",
+  "deployed": false,
+  "hardwareTest": "not run",
+  "transport": "not connected",
+  "uiIntegration": "not implemented",
+  "publicBinaryRelease": false,
+  "remaining": "Source/license assembly for the SDK-linked helper, console transport, final payload checks and end-to-end hardware launch tests"
+}
