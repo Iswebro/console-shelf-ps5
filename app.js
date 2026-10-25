@@ -827,6 +827,7 @@ $('iconStyle').onchange = event => {
   settings.icon = event.target.value;
   safeStorage.set('shelf-icon', settings.icon);
   renderIcon();
+  roomTv.render(true);
 };
 $('search').oninput = renderSystems;
 $('shelfPrev').onclick = () => moveShelfPage(-1);

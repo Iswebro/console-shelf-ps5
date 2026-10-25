@@ -61,10 +61,11 @@ Uint32* noise_pixels = nullptr;
 int noise_width = 0, noise_height = 0;
 std::size_t movie_selected = system_count;
 bool movie_demo = false;
+bool movie_bundled = false;
 void stop_movie() {
     tv_movie.close();
     if (movie_texture) SDL_DestroyTexture(movie_texture);
-    movie_texture = nullptr; movie_selected = system_count;
+    movie_texture = nullptr; movie_selected = system_count; movie_bundled = false;
 }
 float room_scale() {
     return std::max(static_cast<float>(width) / room_scene::width, static_cast<float>(height) / room_scene::height);
@@ -590,7 +591,19 @@ void tv_static(const SDL_Rect& target, bool still) {
     }
     SDL_RenderCopy(renderer, noise_texture, nullptr, &target);
 }
-bool tv_video(const SystemDefinition& system, std::size_t id, const SDL_Rect& target, bool still) {
+void tv_intro_logo(const SDL_Rect& frame, AppIcon icon, Uint8 alpha = 255) {
+    // The bundled 640x336 intros have a baked 28px logo at (584,30).
+    // An opaque inset badge covers it and draws the current choice without
+    // restarting playback or modifying the user's personal intro files.
+    const float sx = frame.w / 640.f, sy = frame.h / 336.f;
+    const int x = frame.x + static_cast<int>(574 * sx), y = frame.y + static_cast<int>(20 * sy);
+    const int w = std::max(1, static_cast<int>(48 * sx)), h = std::max(1, static_cast<int>(48 * sy));
+    const auto cover = static_cast<Uint8>(std::min(255, static_cast<int>(alpha) * 255 / 225));
+    rounded(x, y, w, h, std::max(1, std::min(w, h) / 7), {4, 12, 15, cover});
+    picture(icon_files[static_cast<std::size_t>(icon)], x + static_cast<int>(8 * sx), y + static_cast<int>(8 * sy),
+            std::max(1, static_cast<int>(32 * sx)), std::max(1, static_cast<int>(32 * sy)), alpha);
+}
+bool tv_video(const SystemDefinition& system, std::size_t id, const SDL_Rect& target, bool still, AppIcon icon) {
     bool changed = false;
     if (movie_selected != id) {
         stop_movie(); movie_selected = id; movie_demo = false;
@@ -599,7 +612,7 @@ bool tv_video(const SystemDefinition& system, std::size_t id, const SDL_Rect& ta
         bool loaded = room_data[0] && tv_movie.open(path, render_time);
         if (!loaded) {
             std::snprintf(path, sizeof(path), "%s/assets/room/intros/%.*s.mpg", root, static_cast<int>(system.id.size()), system.id.data());
-            loaded = tv_movie.open(path, render_time);
+            loaded = tv_movie.open(path, render_time); movie_bundled = loaded;
         }
         if (!loaded) {
             std::snprintf(path, sizeof(path), "%s/assets/room/shelf-intro.mpg", root);
@@ -618,6 +631,7 @@ bool tv_video(const SystemDefinition& system, std::size_t id, const SDL_Rect& ta
     const int w = static_cast<int>(tv_movie.width() * fit), h = static_cast<int>(tv_movie.height() * fit);
     SDL_Rect fitted{target.x + (target.w - w) / 2, target.y + (target.h - h) / 2, w, h};
     SDL_RenderCopy(renderer, movie_texture, nullptr, &fitted);
+    if (movie_bundled) tv_intro_logo(fitted, icon);
     tv_motion = !still && tv_movie.playing();
     if (movie_demo) {
         rect(target.x, target.y + target.h - 30, target.w, 30, {4, 12, 15, 220});
@@ -647,13 +661,14 @@ void room_tv(const UiState& state) {
     bool pictured = false;
     if (noise) { tv_static(clip, p.reduced_motion); tv_motion = !p.reduced_motion; pictured = true; }
     if (!noise && p.tv_mode == TvMode::video && eligible)
-        pictured = tv_video(system, id, clip, p.reduced_motion || state.presentation.loading);
+        pictured = tv_video(system, id, clip, p.reduced_motion || state.presentation.loading, p.icon);
     if (!noise && (p.tv_mode == TvMode::picture || p.tv_mode == TvMode::intro)) {
         char intro[96]; std::snprintf(intro, sizeof(intro), "@intro/%.*s", static_cast<int>(system.id.size()), system.id.data());
+        bool bundled = false;
         auto* custom = (p.tv_mode == TvMode::picture || eligible) ? image(p.tv_mode == TvMode::picture ? std::string_view("@room") : std::string_view(intro)) : nullptr;
         if (p.tv_mode == TvMode::intro && eligible && (!custom || !custom->texture)) {
             std::snprintf(intro, sizeof(intro), "assets/room/intros/%.*s.png", static_cast<int>(system.id.size()), system.id.data());
-            custom = image(intro);
+            custom = image(intro); bundled = custom && custom->texture;
         }
         if (custom && custom->texture) {
             SDL_Rect source{0, 0, custom->w, custom->h};
@@ -663,6 +678,8 @@ void room_tv(const UiState& state) {
             SDL_SetTextureColorMod(custom->texture, 255, 255, 255);
             SDL_SetTextureAlphaMod(custom->texture, alpha);
             SDL_RenderCopy(renderer, custom->texture, &source, &clip);
+            if (bundled) tv_intro_logo({x - static_cast<int>(source.x * fit), y - static_cast<int>(source.y * fit),
+                                       static_cast<int>(custom->w * fit), static_cast<int>(custom->h * fit)}, p.icon, alpha);
             pictured = true;
         }
         if (p.tv_mode == TvMode::intro && !eligible) {

@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "date": "2026-10-26",
+  "revision": "UI-23",
+  "sourceCommit": "ae4264913ab0627e9b0bad5069a00742bd0dd859",
+  "selfSHA256": "d5ff3af66e442e846d31c672ea984f2803b4a566e45cfbaa495f24ab341159fb",
+  "passed": [
+    "normal restart",
+    "three layouts",
+    "saved preferred emulator",
+    "RetroArch direct Mario Party 3",
+    "PSXS5 menu foreground",
+    "PS5SX2 menu foreground",
+    "PS5SX3 menu foreground",
+    "in-app logo choices change"
+  ],
+  "reportedVisualIssues": [
+    "PS5 cached home artwork and name remain old",
+    "built-in TV intro retains baked old logo"
+  ],
+  "publicRelease": "not published"
+}

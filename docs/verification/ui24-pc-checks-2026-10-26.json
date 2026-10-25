@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "date": "2026-10-26",
+  "revision": "UI-24",
+  "self": {
+    "bytes": 2773777,
+    "sha256": "9834451dc2ca0f59f6fe487900ebe3ab55f08b23f53fb9aabf16faaac2eda88e"
+  },
+  "elf": {
+    "bytes": 2890164,
+    "sha256": "26b84e0a60620df0dce26e1d81a6717da9c80407079ce01cba5823f34304c883",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "helperSHA256": "6a848266e473351f0b3ccc2dcd23a3a022e392e2f0d81ddf7281e97a7605eaef",
+  "sourceFingerprintSHA256": "74ae3475b190215f3cbb524ddaca475bfd0b5b457b3441c4c73437857bca90b7",
+  "browser": "passed",
+  "nativeRenderer": "passed; 80 captures, four selected TV logos, still/video distinction, personal-video pixels unchanged",
+  "verifier": "valid native executable; fourteen damaged fixtures rejected",
+  "console": "not yet installed; home registration refresh and visual confirmation pending"
+}

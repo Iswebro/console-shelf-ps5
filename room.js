@@ -136,7 +136,7 @@ window.ShelfRoom = class {
     const clip = this.videos.get('intro:' + system.id);
     const custom = mode === 'picture' ? this.images.get('picture') : mode === 'intro' && eligible ?
       this.images.get('intro:' + system.id) || `assets/room/intros/${system.id}.png` : null;
-    const signature = JSON.stringify([mode, system.id, message, custom, clip, staticOn, reduced, mode === 'clock' ? time : '', mode === 'favorites' ? favorite?.game : '', eligible]);
+    const signature = JSON.stringify([mode, system.id, message, custom, clip, staticOn, reduced, mode === 'clock' ? time : '', mode === 'favorites' ? favorite?.game : '', eligible, this.icon()]);
     if (signature === this.signature) return;
     this.currentVideo?.pause(); this.currentVideo = null; clearInterval(this.staticTimer); this.staticTimer = 0;
     this.signature = signature;
@@ -168,16 +168,22 @@ window.ShelfRoom = class {
       const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.preload = 'auto';
       video.src = clip || `assets/room/intros/${system.id}.mp4`; video.loop = false;
       content.append(video); this.currentVideo = video;
+      if (!clip) image(this.icon(), 'tv-brand-logo');
       let fallback = 0;
       video.onerror = () => {
         if (++fallback > 2) return;
         video.src = fallback === 1 ? `assets/room/intros/${system.id}.mp4` : 'assets/room/shelf-intro.mp4';
+        if (fallback === 1 && !content.querySelector('.tv-brand-logo')) image(this.icon(), 'tv-brand-logo');
+        if (fallback === 2) content.querySelector('.tv-brand-logo')?.remove();
         if (fallback === 2) text('isShelf demo · add your own console intro', 'small', 'tv-video-caption');
         if (!reduced) video.play().catch(() => {});
       };
       if (reduced) video.addEventListener('loadeddata', () => video.pause(), { once: true });
       else video.play().catch(() => { text('Video unavailable in this browser', 'small', 'tv-video-caption'); });
-    } else if (custom) image(custom, 'tv-personal-picture');
+    } else if (custom) {
+      image(custom, 'tv-personal-picture');
+      if (mode === 'intro' && !this.images.has('intro:' + system.id)) image(this.icon(), 'tv-brand-logo');
+    }
     else if (mode === 'clock') {
       image(this.icon(), 'tv-logo'); text(time, 'strong', 'tv-clock');
       text(date.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' }), 'span'); text(message, 'small');

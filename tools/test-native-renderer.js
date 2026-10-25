@@ -97,6 +97,28 @@ assert.ok(!region(path.join(captures,'original-intro.png'),...screen).equals(reg
 fs.writeFileSync(path.join(introPersonal,'intros/ps5.mpg'),'incomplete personal video');
 run('shot:bad-personal-intro-fallback.png',introPersonal,0,true);
 assert.ok(region(path.join(captures,'original-intro.png'),...screen).equals(region(path.join(captures,'bad-personal-intro-fallback.png'),...screen)),'a corrupt personal movie falls back to the matching original console intro');
+const logoImages = [];
+for (const icon of ['vector','gaming','classic','jade']) {
+  const data = path.join(directory,'tv-logo-' + icon); fs.mkdirSync(data);
+  const config = fs.readFileSync(path.join(introDefault,'settings.ini'),'utf8').replace(/^icon=.*$/m,'icon=' + icon);
+  fs.writeFileSync(path.join(data,'settings.ini'),config);
+  run('shot:tv-logo-' + icon + '.png',data,0,true);
+  logoImages.push(region(path.join(captures,'tv-logo-' + icon + '.png'),...screen));
+  fs.writeFileSync(path.join(data,'settings.ini'),config.replace(/^tv_mode=.*$/m,'tv_mode=intro'));
+  run('shot:tv-still-start-' + icon + '.png,frame:500,shot:tv-still-logo-' + icon + '.png',data,0,true);
+}
+for (let i=0;i<logoImages.length;i++) for (let j=i+1;j<logoImages.length;j++)
+  assert.ok(!logoImages[i].equals(logoImages[j]),'each chosen logo changes the TV inside a bundled intro');
+assert.ok(!region(path.join(captures,'tv-still-logo-vector.png'),...screen).equals(region(path.join(captures,'tv-still-logo-jade.png'),...screen)), 'bundled intro pictures also follow the chosen logo');
+const personalLogos = [];
+for (const icon of ['vector','jade']) {
+  const data = path.join(directory,'personal-logo-' + icon); fs.mkdirSync(data); fs.mkdirSync(path.join(data,'intros'));
+  fs.copyFileSync(path.join(root,'assets/room/shelf-intro.mpg'),path.join(data,'intros/ps5.mpg'));
+  fs.writeFileSync(path.join(data,'settings.ini'),fs.readFileSync(path.join(introDefault,'settings.ini'),'utf8').replace(/^icon=.*$/m,'icon=' + icon));
+  run('shot:personal-logo-' + icon + '.png',data,0,true);
+  personalLogos.push(region(path.join(captures,'personal-logo-' + icon + '.png'),...screen));
+}
+assert.ok(personalLogos[0].equals(personalLogos[1]), 'personal video pixels are preserved when the app logo changes');
 const menuPatch=region(path.join(captures,'display-shelf.png'),65,131,8,42);
 assert.ok([...menuPatch].every((value,index)=>index%4===3||value<50),'the room backboard quiets wall texture behind menu text');
 assert.notEqual(digest('orbit-start.png'),digest('orbit-middle.png'),'native motion must draw a new intermediate frame');
@@ -143,4 +165,4 @@ images.push('original-intro.png','original-intro-moving.png','personal-intro.png
 const output=[];
 for(const name of images){const filename=path.join(captures,name),bytes=fs.readFileSync(filename);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1080);assert.ok(bytes.length>(name.startsWith('loading')?1000:40000),name+' should contain its rendered frame');output.push({name,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
 fs.writeFileSync(path.join(root,'.cache/native-render-tests/latest.json'),JSON.stringify({directory,captures,processClosed:true,images:output},null,2)+'\n');
-console.log(`PASS: native renderer, room displays, stationary room pixels, console-only page swaps, three layouts, persistence, 52 icons and Circle hold/cancel/fade in ${images.length} captures. Full PS5 acceptance remains pending.`);
+console.log(`PASS: native renderer, selected TV logos, personal video preservation, stationary room pixels, console-only page swaps, three layouts, persistence, 52 icons and Circle hold/cancel/fade in ${fs.readdirSync(captures).filter(name => name.endsWith('.png')).length} captures. Full PS5 acceptance remains pending.`);

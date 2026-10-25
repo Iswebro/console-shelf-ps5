@@ -318,7 +318,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-23 isShelf branding and vector home artwork; UI-15 helper unchanged");
+    startup("main entered", "ui-24 selected TV logo and registered home artwork; UI-15 helper unchanged");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
