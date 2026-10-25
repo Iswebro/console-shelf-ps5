@@ -147,6 +147,7 @@ void text_input(UiState& state, const char* utf8) {
 
 void input(UiState& state, Action action) {
     state.notice[0] = 0;
+    state.close_hint_requested = false;
     if (state.page == Page::keyboard) {
         if (action == Action::back || action == Action::settings) {
             state.page = state.keyboard_return;
@@ -180,13 +181,6 @@ void input(UiState& state, Action action) {
                 text_input(state, text);
             }
         }
-        return;
-    }
-    if (state.page == Page::quit) {
-        if (action == Action::confirm)
-            state.exit_requested = true;
-        else if (action == Action::back)
-            state.page = Page::home;
         return;
     }
     if (action == Action::settings) {
@@ -346,7 +340,7 @@ void input(UiState& state, Action action) {
         return;
     }
     if (action == Action::back) {
-        state.page = Page::quit;
+        state.close_hint_requested = true;
         return;
     }
     if (action == Action::search) {

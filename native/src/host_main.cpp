@@ -311,7 +311,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-12 launcher title-query diagnostics; permissions preserved");
+    startup("main entered", "ui-13 timed Circle hint; explicit helper runtime selection");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -536,6 +536,7 @@ int main(int argc, char** argv) {
     int result = 0;
     shelf::NavigationInput navigation;
     shelf::CloseGesture close_gesture;
+    shelf::CloseHint close_hint;
     shelf::LaunchClient launcher;
     bool redraw = true;
     bool first_frame = true;
@@ -658,9 +659,12 @@ int main(int argc, char** argv) {
                     navigation.cancel();
                 if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
                     close_gesture.cancel();
+                if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+                    close_hint.dismiss();
                 redraw = true;
             } else if (event.type == SDL_CONTROLLERBUTTONDOWN) {
                 if (event.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
+                    close_hint.dismiss();
                     state.launch_requested = false;
                     if (state.launch_busy) {
                         launcher.cancel();
@@ -763,6 +767,8 @@ int main(int argc, char** argv) {
             }
             if (mapped && !state.presentation.loading && !close_gesture.closing() &&
                 (!state.launch_busy || action == shelf::Action::back)) {
+                if (action != shelf::Action::back)
+                    close_hint.dismiss();
                 if (action == shelf::Action::back) {
                     state.launch_requested = false;
                     if (state.launch_busy) {
@@ -827,6 +833,13 @@ int main(int argc, char** argv) {
             }
         }
 #endif
+        if (state.close_hint_requested) {
+            state.close_hint_requested = false;
+            if (!close_gesture.active())
+                close_hint.show(now);
+        }
+        if (close_hint.update(now, state.presentation))
+            redraw = true;
         close_gesture.update(now, state.presentation);
         if (close_gesture.closing()) {
             if (!circle_committed_logged) {

@@ -6,7 +6,7 @@
 #include "settings.hpp"
 
 namespace shelf {
-enum class Page { home, details, library, settings, keyboard, quit };
+enum class Page { home, details, library, settings, keyboard };
 enum class SettingsTab { appearance, browse, consoles };
 enum class Action {
     up,
@@ -46,6 +46,7 @@ struct UiState {
     int game_focus = 0;
     bool tools = false, keyboard_for_consoles = false, changed = false, exit_requested = false;
     bool launch_connected = false, launch_requested = false, launch_busy = false;
+    bool close_hint_requested = false;
     LaunchRequest pending_launch;
     char query[128]{}, console_query[128]{}, notice[192]{};
 };

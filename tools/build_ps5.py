@@ -21,16 +21,17 @@ def cached_run(args, inputs, output, env):
     stamp.write_text(json.dumps({"key": key, "sha256": sha256(output)}, indent=2) + "\n")
 
 
-def build():
+def build(standard_runtime=False):
     identity = source_fingerprint()
     prefix = prepare_compiler()
     env = environment(prefix)
     sdk, ports, zlib = prepare_dependencies()
     output = CACHE / "build"
     output.mkdir(parents=True, exist_ok=True)
-    build_launch_helper()
-    helper = CACHE / "launch-helper/shelf-launch.elf"
-    helper_record = json.loads((CACHE / "launch-helper/build.json").read_text())
+    build_launch_helper(standard_runtime)
+    helper_folder = CACHE / ("launch-helper-standard" if standard_runtime else "launch-helper")
+    helper = helper_folder / "shelf-launch.elf"
+    helper_record = json.loads((helper_folder / "build.json").read_text())
     require(helper_record["elf"] == {"bytes": helper.stat().st_size, "sha256": sha256(helper)}, "Helper build changed")
     payload = helper.read_bytes()
     literal = ",\n".join(",".join(f"0x{byte:02x}" for byte in payload[start:start + 24]) for start in range(0, len(payload), 24))
@@ -113,7 +114,9 @@ def build():
     run([tool, "self", "--inspect", "--file", signed], env=env)
     report = verify(elf, signed)
     require(elf.read_bytes().count(payload) == 1, "The verified helper is not embedded exactly once")
-    report["embeddedLaunchHelper"] = {**helper_record["elf"], "offset": elf.read_bytes().index(payload)}
+    report["embeddedLaunchHelper"] = {**helper_record["elf"], "offset": elf.read_bytes().index(payload),
+                                     "runtimeMode": helper_record["runtimeMode"],
+                                     "permissionChanges": helper_record["permissionChanges"]}
     require(identity == source_fingerprint(), "Build inputs changed during compilation; rebuild before verification")
     (output / "build-source.json").write_text(json.dumps(identity, indent=2) + "\n")
     (output / "structural-check.json").write_text(json.dumps(report, indent=2) + "\n")
@@ -121,4 +124,8 @@ def build():
 
 
 if __name__ == "__main__":
-    build()
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--standard-helper-runtime", action="store_true",
+                        help="Stage a build with the SDK's permission-changing startup; does not deploy or run it")
+    build(parser.parse_args().standard_helper_runtime)

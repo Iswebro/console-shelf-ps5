@@ -12,11 +12,11 @@ from verify_ps5_build import require
 from prepare_corresponding_source import prepare_sdk_source
 
 
-def main():
+def main(standard_runtime=False):
     prefix = prepare_compiler()
     sdk, _, _ = prepare_dependencies()
     env = environment(prefix)
-    output = CACHE / "launch-helper"
+    output = CACHE / ("launch-helper-standard" if standard_runtime else "launch-helper")
     output.mkdir(parents=True, exist_ok=True)
     source = ROOT / "native/ps5/helper/shelf_launch.cpp"
     protocol = ROOT / "native/include/shelf/launch_protocol.hpp"
@@ -62,7 +62,7 @@ def main():
     crt_objects.append(limits_object)
     sdk_links = {}
     with zipfile.ZipFile(CACHE / "downloads/ps5-payload-sdk-v0.42.zip") as original:
-        for name in ("libc.a", "libkernel_web.so", "libSceLibcInternal.so", "libSceNet.so",
+        for name in ("crt1.o", "libc.a", "libkernel_web.so", "libSceLibcInternal.so", "libSceNet.so",
                      "libSceSystemService.so", "libSceUserService.so"):
             data = original.read("ps5-payload-sdk/target/lib/" + name)
             require((sdk / "target/lib" / name).read_bytes() == data, "SDK link input differs from pinned release")
@@ -72,12 +72,14 @@ def main():
          "-isystem", sdk / "target/include/c++/v1", "-isystem", sdk / "target/include",
          "-fvisibility-nodllstorageclass=default", "-fno-stack-protector", "-fno-plt", "-femulated-tls",
          "-std=c++17", "-O2", "-fno-exceptions", "-fno-rtti", "-DNDEBUG", "-Wall", "-Wextra", "-Werror",
+         *(["-DSHELF_STANDARD_SDK_RUNTIME"] if standard_runtime else []),
          "-I", ROOT / "native/include", "-c", source, "-o", obj], env=env)
     # SDK v0.42's ordinary ELF-payload contract, distinct from the native app's
     # converter/container. Do not apply the app's SELF verifier to this payload.
     run([prefix / "usr/bin/ld.lld-18", "-m", "elf_x86_64", "-pie", "-T", sdk / "ldscripts/elf_x86_64.x",
          "--eh-frame-hdr", "-z", "max-page-size=0x4000", "-mllvm", "-emulated-tls", "--hash-style=gnu",
-         "--gc-sections", "-o", elf, obj, *crt_objects, "-L", sdk / "target/lib", "-lc", "-lkernel_web",
+         "--gc-sections", "-o", elf, obj, *([sdk / "target/lib/crt1.o"] if standard_runtime else crt_objects),
+         "-L", sdk / "target/lib", "-lc", "-lkernel_web",
          "-lSceLibcInternal", "-lSceNet", "-lSceSystemService", "-lSceUserService"], env=env)
     raw = elf.read_bytes()
     # The pinned SDK's normal payload CRT uses System V ABI 0. Native app
@@ -110,14 +112,14 @@ def main():
             name, info, _, owner, address, size = struct.unpack_from("<IBBHQQ", raw, section[4] + index)
             if owner and info & 15 == 2:
                 symbols[names[name:names.index(0, name)].decode()] = (info, address, size)
-    for hook in ("__patch_init", "__rtld_so_init", "__rtld_so_new"):
+    for hook in (() if standard_runtime else ("__patch_init", "__rtld_so_init", "__rtld_so_new")):
         require(hook in symbols, "Missing permission-preserving CRT hook")
         info, address, size = symbols[hook]
         segment = next(p for p in loads if p[1] & 1 and p[3] <= address and address + size <= p[3] + p[5])
         begin = segment[2] + address - segment[3]
         require(info == 0x12 and raw[begin:begin + size] == b"\x31\xc0\xc3", "CRT hook is not the expected return-zero body")
     forbidden = ("kernel_copyin", "kernel_proc_copyin", "mdbg_call", "patch_kernel_ucred", "patch_syscall_permissions")
-    require(not any(name.startswith(("kernel_set_", "mdbg_")) or name in forbidden for name in symbols),
+    require(standard_runtime or not any(name.startswith(("kernel_set_", "mdbg_")) or name in forbidden for name in symbols),
             "Unexpected kernel write or credential-changing routine remains in helper")
     require(inputs == {p.relative_to(ROOT).as_posix(): sha256(p) for p in (source, protocol, limits)}, "Build input drift")
     result = {"elf": {"bytes": len(raw), "sha256": sha256(elf)}, "inputs": inputs,
@@ -125,11 +127,19 @@ def main():
               "abi": "System V ABI 0, matching pinned SDK v0.42 crt1.o; not a native app/SELF",
               "sdkRuntimeSource": sdk_source,
               "sdkLinkInputs": sdk_links,
-              "permissionChanges": False, "crtPatchHook": "verified return 0; SDK patch.c excluded; kernel write routines absent",
-              "policy": "cooperative Shelf closure; one launch attempt; no process kill, permission patches or emulator-file writes"}
+              "runtimeMode": "standard-sdk" if standard_runtime else "restricted",
+              "permissionChanges": standard_runtime,
+              "crtPatchHook": ("Unmodified pinned SDK startup; targets helper process capabilities and syscall bounds"
+                               if standard_runtime else "verified return 0; SDK patch.c excluded; kernel write routines absent"),
+              "policy": "cooperative Shelf closure; one launch attempt; no process kill or emulator-file writes",
+              "approvalForStandardRuntime": "required before console use" if standard_runtime else "not applicable"}
     (output / "build.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--standard-helper-runtime", action="store_true",
+                        help="Build only: enable the SDK's process-permission startup; requires approval before console use")
+    main(parser.parse_args().standard_helper_runtime)

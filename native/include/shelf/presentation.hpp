@@ -7,7 +7,30 @@ inline constexpr std::uint32_t close_hold_ms = 3000;
 struct Presentation {
     bool loading = false, preparing = false, artwork = false;
     bool launching = false;
-    float reveal = 1, appear = 1, hold = 0, close = 0;
+    float reveal = 1, appear = 1, hold = 0, close = 0, close_hint = 0;
+};
+class CloseHint {
+    bool visible = false;
+    std::uint32_t began = 0;
+
+  public:
+    void show(std::uint32_t now) {
+        visible = true;
+        began = now;
+    }
+    void dismiss() {
+        visible = false;
+    }
+    bool update(std::uint32_t now, Presentation& view) {
+        const bool changed = visible || view.close_hint > 0;
+        const auto age = static_cast<std::uint32_t>(now - began);
+        if (age >= 3000)
+            visible = false;
+        const float enter = std::min(1.f, age / 180.f);
+        const float leave = std::min(1.f, (3000.f - std::min(3000.f, static_cast<float>(age))) / 350.f);
+        view.close_hint = visible ? std::min(enter, leave) : 0;
+        return changed;
+    }
 };
 class OpeningGate {
     bool unknown = false, foreground = false, fallback = false;

@@ -188,7 +188,12 @@ int main() {
     const int initialized = sceLncUtilInitialize();
     const int user_status = sceUserServiceGetForegroundUser(&context.user);
     if (context.journal) {
-        std::fprintf(context.journal, "ui-12 permission-preserving helper; init: 0x%08x; user query: 0x%08x\n",
+        std::fprintf(context.journal,
+#ifdef SHELF_STANDARD_SDK_RUNTIME
+                     "ui-13 standard SDK helper; init: 0x%08x; user query: 0x%08x\n",
+#else
+                     "ui-13 restricted helper; init: 0x%08x; user query: 0x%08x\n",
+#endif
                      static_cast<unsigned>(initialized), static_cast<unsigned>(user_status));
         std::fflush(context.journal);
     }

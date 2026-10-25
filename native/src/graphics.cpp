@@ -770,12 +770,6 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
             if (state.keyboard_for_consoles)
                 settings(state);
             keyboard(state);
-        } else {
-            home(state);
-            rect(0, 0, width, height, {4, 6, 16, 180});
-            box(570, 367, 780, 310, false);
-            centered("Close Console Shelf?", 960, 413, 40, white, true);
-            centered("Cross: close     Circle: keep browsing", 960, 524, 25, muted);
         }
         if (state.notice[0] && state.presentation.hold <= 0) {
             rounded(300, 931, 1320, 64, 16, {57, 46, 84, 255});
@@ -791,6 +785,12 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
         centered("Hold Circle to close Shelf", 960, 924, 24, white);
         rounded(707, 969, 506, 5, 2, {64, 62, 83, 255});
         rounded(707, 969, std::max(1, static_cast<int>(506 * state.presentation.hold)), 5, 2, purple);
+    } else if (state.presentation.close_hint > 0 && !state.presentation.loading && state.presentation.close == 0) {
+        const float opacity = state.presentation.close_hint;
+        rounded(660, 909, 600, 88, 18, {30, 30, 48, static_cast<Uint8>(245 * opacity)});
+        centered("Hold Circle to close Shelf", 960, 924, 24, {white.r, white.g, white.b, static_cast<Uint8>(255 * opacity)});
+        centered("Keep holding for 3 seconds", 960, 961, 18,
+                 {muted.r, muted.g, muted.b, static_cast<Uint8>(255 * opacity)});
     }
     if (state.presentation.close > 0) {
         const auto alpha = static_cast<Uint8>(state.presentation.close * 255);

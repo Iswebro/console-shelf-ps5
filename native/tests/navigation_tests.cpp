@@ -88,4 +88,19 @@ void test_navigation() {
     check(!released_close.release(4, 3010) && released_close.closing(),
           "releasing exactly at three seconds still commits closure without an intermediate update");
     std::puts("PASS: three-second Circle hold, cancellation, ordinary Back taps and timed closing fade.");
+    CloseHint hint;
+    view = {};
+    hint.show(100);
+    hint.update(350, view);
+    check(view.close_hint == 1 && view.close == 0, "a tap hint is visible without starting a close");
+    hint.update(2900, view);
+    check(view.close_hint > 0 && view.close_hint < 1, "the hint fades near its expiry");
+    hint.update(3100, view);
+    check(view.close_hint == 0, "the hint disappears after three seconds");
+    hint.show(0xffffff80u);
+    hint.update(0x80u, view);
+    check(view.close_hint == 1, "hint expiry handles timer wrap");
+    hint.dismiss();
+    hint.update(0x90u, view);
+    check(view.close_hint == 0, "another action can dismiss the hint immediately");
 }

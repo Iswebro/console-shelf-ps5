@@ -79,9 +79,11 @@ void test_ui() {
     input(state, Action::back);
     check(state.page == Page::home, "settings returns to the prior screen");
     input(state, Action::back);
-    check(state.page == Page::quit && !state.exit_requested, "leaving home requires a separate confirmation");
-    input(state, Action::back);
-    check(state.page == Page::home, "quit can be cancelled");
+    check(state.page == Page::home && state.close_hint_requested && !state.exit_requested,
+          "a home Circle tap requests a hint and keeps browsing");
+    input(state, Action::confirm);
+    check(!state.exit_requested && !state.close_hint_requested,
+          "Cross after the hint remains Select rather than confirming an exit");
     UiState detail_state;
     input(detail_state, Action::right);
     input(detail_state, Action::confirm);

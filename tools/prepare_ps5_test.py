@@ -16,7 +16,12 @@ from verify_ps5_presentation import verify as verify_presentation
 
 def main():
     build = CACHE / "build"
-    verify_recorded_hashes(build)
+    verified = verify_recorded_hashes(build)
+    launcher = verified.get("embeddedLaunchHelper", {})
+    permission_notice = ("Standard SDK helper runtime: changes process capabilities and syscall bounds in memory. "
+                         "Owner approval is required before using this private candidate."
+                         if launcher.get("permissionChanges") else
+                         "Restricted helper runtime: SDK credential/syscall patches and custom SO loading are disabled.")
     identity = json.loads((build / "build-source.json").read_text())
     require(identity == source_fingerprint(), "Rebuild the PS5 executable before assembling its test folder")
     status = subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True)
@@ -82,9 +87,8 @@ This private test displays Shelf's UI/settings and real library lists, and enabl
 The bundled original helper is embedded in eboot.bin and sent only to the console's existing
 loopback ELF loader when you select a launch action. It waits for Shelf's explicit commitment
 and cooperative closure; it never kills another app or writes emulator settings.
-Its source-built SDK runtime preserves the existing loader's permissions: the SDK's
-credential/syscall patches and custom shared-object loader are excluded. The helper
-waits through a monitored idle second after Shelf closes before its one launch call.
+{permission_notice}
+The helper waits through a monitored idle second after Shelf closes before its one launch call.
 It expects the console's existing ftpsrv on 127.0.0.1:2121; no PC DNS host is needed for discovery.
 The app writes only its own preferences, launch request/status and diagnostics under /data/console-shelf.
 
@@ -114,7 +118,8 @@ be assembled before any public binary release. This local package is for the own
     files = [{"path": p.relative_to(app).as_posix(), "bytes": p.stat().st_size, "sha256": sha256(p)}
              for p in sorted(app.rglob("*")) if p.is_file()]
     manifest = {"schema": 1, "purpose": "private native launch test; not a public release", "titleId": "PPSA99541", "sourceCommit": commit,
-                "hardwareTest": "not run", "sourceFingerprintSHA256": hashlib.sha256((build / "build-source.json").read_bytes()).hexdigest(), "files": files}
+                "hardwareTest": "not run", "launcherRuntime": launcher,
+                "sourceFingerprintSHA256": hashlib.sha256((build / "build-source.json").read_bytes()).hexdigest(), "files": files}
     (destination / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     archive = destination / "Console-Shelf-UI-test.zip"
     with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as output:
@@ -127,7 +132,7 @@ be assembled before any public binary release. This local package is for the own
             require(len(raw) == item["bytes"] and hashlib.sha256(raw).hexdigest() == item["sha256"], "ZIP member changed")
     receipt = {"directory": str(destination.relative_to(ROOT)), "archiveBytes": archive.stat().st_size, "archiveSHA256": sha256(archive),
                "files": len(files), "appBytes": sum(item["bytes"] for item in files), "titleId": "PPSA99541", "sourceCommit": commit,
-               "consoleInstall": "not performed", "publicRelease": "not published"}
+               "consoleInstall": "not performed", "publicRelease": "not published", "launcherRuntime": launcher}
     (CACHE / "test-packages/latest.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps(receipt, indent=2))
 
