@@ -17,8 +17,10 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
 - [ ] Physical PS5 display/controller validation on firmware 12.20.
 - [x] Read-only emulator/core and game discovery in configured existing library locations, checked from PC against the owner's console.
-- [ ] The same discovery inside the PS5 app sandbox, plus further library-layout adapters.
+- [x] The same configured discovery inside the PS5 app sandbox, with complete scan evidence.
+- [ ] Further dedicated-emulator and library-layout adapters.
 - [ ] Verified launch adapters and firmware 12.20 console tests.
+- [x] Complete linked-library sources and a private source/object kit, cold-relinked to the exact executable.
 - [ ] Source-linked prototype ZIP, SHA-256, install/rollback instructions and first release.
 
 ## Runtime decision
@@ -44,4 +46,4 @@ The native C++ renderer and settings flow now run on Windows with the existing V
 
 The PS5 executable now cross-compiles using verified public SDK/PacBrew releases and a Clang 18 prefix extracted from pinned, signed-metadata-verified Ubuntu packages. Everything stays under the project cache; no apt, sudo or global configuration change is required. The clean-room runtime rebuilds twice to the reference hashes. Host mocks cover native display/memory failure paths, and the executable passes container integrity and independent ELF structure checks; see [build evidence scope](PS5-BUILD.md).
 
-Read-only discovery now works from PC against existing console libraries, with bounded metadata parsing, core evidence, disc reference handling and real native game lists. A separate UI-only folder has been assembled and transferred to the owner's console; every file matched its full raw readback. The third build renders and accepts basic input, confirmed by the owner and a private console capture. Its console-local scan is failing, so discovery is not hardware-accepted. Next, resolve that connection, refine navigation, implement verified launch helpers, and finish corresponding source/relinking materials before releasing a binary. Keep local PS5 evidence separate from public source. There is no public prototype download until the acceptance steps above are met.
+Read-only discovery works from PC and inside the private PS5 app, with bounded metadata parsing, core evidence, disc reference handling and real native game lists. The sixth build displays its first loading frame before starting the background scan; its console journal records 92 games, 55 routes and no connection failures. This covers the configured roots, not every possible dedicated-emulator layout. Every updated program file matched its full raw readback. The owner confirmed basic display/input on an earlier build; refined controls and loading/closing transitions still need acceptance. A private source/object kit has reproduced the exact executable after extraction with a fresh compiler prefix and rebuilt converter. Further adapters, verified launches and complete hardware acceptance remain before publication. Keep private console evidence separate from public source.

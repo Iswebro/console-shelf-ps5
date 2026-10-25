@@ -1,0 +1,28 @@
+{
+  "verifiedOn": "2026-10-25",
+  "applicationSourceCommit": "21642b9398b55d37a667eef78ca036a7d27d8a68",
+  "applicationSelfSHA256": "466f6c14b6c26ef759a9be3fc9bb65237105a6220335cf66245a1415e4ba7556",
+  "ownerFirmwareTarget": "12.20",
+  "scope": "Console-local scan inside the private app; first frame before background discovery",
+  "evidence": [
+    "main entered: ui-6 loading transition and Circle hold",
+    "first frame submitted",
+    "library scan starting: background after first visible frame",
+    "library scan complete",
+    "library counts: 92 games; 55 routes; 107 roots read; 0 unavailable",
+    "library connection: 282 connections; 156 listings; 111 reads; first failure none (0)"
+  ],
+  "hardwareAcceptance": {
+    "configuredDiscovery": "complete",
+    "loadingFrameBeforeScan": "confirmed by owned journal",
+    "visualTransitionsAndCircleHold": "owner test pending",
+    "launches": "unimplemented"
+  },
+  "timing": {
+    "maxRenderMilliseconds": 210,
+    "maxHandoffMilliseconds": 1,
+    "scope": "15 frames after first; initialization work included; not displayed FPS"
+  },
+  "privacy": "only aggregate counts and owned stage names; no personal inventory, IP, images or account data",
+  "publishedBinary": false
+}

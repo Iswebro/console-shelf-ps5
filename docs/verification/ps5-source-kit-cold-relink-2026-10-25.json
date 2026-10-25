@@ -1,0 +1,32 @@
+{
+  "verifiedOn": "2026-10-25",
+  "sourceCommit": "21642b9398b55d37a667eef78ca036a7d27d8a68",
+  "sourceKitBytes": 97583213,
+  "sourceKitSHA256": "0c3d840291454609756531b436b7d14f33ff391403a5b6b49298bddbc8943108",
+  "files": 234,
+  "applicationSelf": {
+    "bytes": 2545233,
+    "sha256": "466f6c14b6c26ef759a9be3fc9bb65237105a6220335cf66245a1415e4ba7556"
+  },
+  "applicationElf": {
+    "bytes": 2655148,
+    "sha256": "41e2a3df59afd1726557fe693e0e448ef47110d983f8a5a4fa3f3d5079907bd7"
+  },
+  "coldRelink": {
+    "status": "passed",
+    "appRecompiled": false,
+    "retainedObjects": 17,
+    "defaultStaticLibraries": 3,
+    "compilerPrefix": "freshly extracted inside the unpacked kit",
+    "converter": "rebuilt from included source",
+    "dependencyDownloads": "21 immutable cached files, checked by committed hashes; no global installation",
+    "exactReferenceMatch": true
+  },
+  "fullLinkedSources": {
+    "SDL2": "1762 files; complete Git tree matched",
+    "libiconv": "complete 1.17 source; publisher recipe SHA-256 matched",
+    "libsamplerate": "complete 0.2.2 source; publisher recipe SHA-256 matched"
+  },
+  "publicRelease": false,
+  "hardwareAndLaunchAcceptance": "pending"
+}
