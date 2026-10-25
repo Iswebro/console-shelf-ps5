@@ -15,8 +15,8 @@ const directory=path.join(root,'.cache/native-render-tests',String(Date.now()));
 const data=path.join(directory,'data'),captures=path.join(directory,'captures');
 fs.mkdirSync(data,{recursive:true});fs.mkdirSync(captures,{recursive:true});
 const executable=path.join(root,'.cache/native-host',process.platform==='win32'?'shelf-host.exe':'shelf-host');
-function run(script,ownedData=data,expected=0,animate=false){
-  const result=spawnSync(executable,['--asset-root',root,'--data-dir',ownedData,'--capture-dir',captures,'--headless',...(animate?['--animate-script']:[]),'--script',script],{cwd:root,encoding:'utf8',windowsHide:true,timeout:60000});
+function run(script,ownedData=data,expected=0,animate=false,libraryRoot=null){
+  const result=spawnSync(executable,['--asset-root',root,'--data-dir',ownedData,'--capture-dir',captures,'--headless',...(animate?['--animate-script']:[]),...(libraryRoot?['--library-root',libraryRoot]:[]),'--script',script],{cwd:root,encoding:'utf8',windowsHide:true,timeout:60000});
   if(expected===0){if(result.stdout)process.stdout.write(result.stdout);if(result.stderr)process.stderr.write(result.stderr);}
   assert.equal(result.error,undefined,'native host process should finish');assert.equal(result.status,expected,'native host process exit status');
   return result;
@@ -120,6 +120,22 @@ assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'close-hint.json'))).
 assert.notEqual(digest('close-hint.png'),digest('close-hint-fade.png'),'the compact hint fades away');
 assert.equal(digest('close-hint-gone.png'),digest('reveal-reference.png'),'the timed hint leaves no modal or overlay');
 const images=['home.png','details.png','appearance.png','browse.png','consoles.png','swipe.png','megadrive.png','display-shelf.png','display-shelf-page2.png','display-shelf-reopened.png','orbit-start.png','orbit-middle.png','orbit-end.png','orbit-reference.png','loading.png','prepared-cover.png','loading-motion.png','reveal-start.png','reveal-middle.png','reveal-end.png','reveal-reference.png','hold-middle.png','hold-cancelled.png','close-start.png','close-middle.png','settings-focus.png','layout-focus.png','launch-art.png','close-hint.png','close-hint-fade.png','close-hint-gone.png'];
+const launchData=path.join(directory,'launch-label-data'),libraryRoot=path.join(directory,'library-fixture');fs.mkdirSync(launchData);
+function fixture(name,raw){const output=path.join(libraryRoot,name);fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,raw);}
+for(const [id,name] of [['PPSA97510','PSXS5'],['PPSA99169','RetroArch']]){
+  fixture(`user/app/${id}/eboot.bin`,'NONEXECUTABLE TEST FIXTURE');
+  fixture(`user/app/${id}/sce_sys/param.json`,JSON.stringify({titleId:id,titleName:name}));
+}
+fixture('data/homebrew/PPSA99169/cores/swanstation_libretro.so','NONEXECUTABLE CORE FIXTURE');
+fixture('data/PSXS5/games/Example PS1 Game.cue','FILE "Example PS1 Game.bin" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n');
+fixture('data/PSXS5/games/Example PS1 Game.bin',Buffer.alloc(2352));
+run('layout,layout,search,text:PlayStation 1,back,confirm,right,confirm,frame:1500,shot:library-menu.png,frame:1500,frame:1500,frame:1500,shot:library-menu-later.png,back,up,up,right,down,down,confirm,shot:library-direct.png,report:library-launch.json',launchData,0,true,libraryRoot);
+assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'library-launch.json'))).page,2,'route information is visible inside the game library before launching');
+assert.equal(digest('library-menu.png'),digest('library-menu-later.png'),'menu-only explanation stays visible instead of timing out');
+assert.notEqual(digest('library-menu.png'),digest('library-direct.png'),'choosing RetroArch changes the pre-launch information');
+run('search,text:PlayStation 1,back,confirm,right,confirm,shot:library-direct-reopened.png',launchData,0,false,libraryRoot);
+assert.equal(digest('library-direct.png'),digest('library-direct-reopened.png'),'the chosen RetroArch route and direct-play explanation survive a fresh app process');
+images.push('library-menu.png','library-menu-later.png','library-direct.png','library-direct-reopened.png');
 images.push('missing-monochrome.png','missing-setting.png','missing-full-colour.png');
 images.push('room-settings.png','room-intro.png','room-picture-fallback.png','room-clock.png','room-message.png','room-favourites.png','room-screen-off.png','shelf-swap-before.png','shelf-swap-start.png','shelf-swap-out.png','shelf-swap-in.png','shelf-swap-end.png','shelf-swap-reference.png');
 images.push('tv-main.png','tv-detail.png','tv-library.png','tv-video-start.png','tv-video-middle.png','tv-video-later.png','tv-static-a.png','tv-static-b.png','tv-static-reduced-a.png','tv-static-reduced-b.png');

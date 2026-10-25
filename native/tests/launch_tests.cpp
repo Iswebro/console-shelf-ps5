@@ -144,6 +144,11 @@ void test_launch() {
           "the selected installed RetroArch core produces the external direct-game plan");
     check(plan_game(*library, 0, standalone.id, planned) == LaunchPlan::menu && !planned.rom[0],
           "the chosen standalone emulator remains a menu route");
+    check(std::strcmp(launch_caption(plan_game(*library, 0, standalone.id, planned)).action, "Open emulator library") == 0 &&
+              std::strstr(launch_caption(LaunchPlan::menu).expectation, "Choose the game there"),
+          "the pre-launch menu caption states the real action before the user selects a game");
+    check(std::strcmp(launch_caption(plan_game(*library, 0, ra.id, planned)).action, "Play game") == 0,
+          "a direct RetroArch route has a different pre-launch action");
     check(plan_game(*library, 1, {}, planned) == LaunchPlan::menu && std::strcmp(planned.title, "PPSA99203") == 0,
           "a PS2 game honestly opens the emulator's own shelf");
     check(plan_game(*library, 2, {}, planned) == LaunchPlan::native_game && !planned.rom[0],

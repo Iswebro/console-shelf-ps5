@@ -162,7 +162,11 @@ The choice is independent of console visibility and survives closing/reopening S
 The selection background is confirmed; opening still shows black before the grid.
 Check Nintendo 64's library and the PS1/PS2/PS3 counts, then save a layout/visibility choice.
 Close and reopen Shelf to check persistence. Report any blank screen, crash or incorrect input.
-Test PS2 -> Test emulator launch first. Allow up to ten seconds after Shelf fades out.
+The game library shows a permanent launch panel before you select a game.
+Library only / Open emulator library means choosing the game inside that emulator.
+Direct play / Play game means the selected game is passed directly to RetroArch.
+Changing Preferred emulator updates the panel; RetroArch route choices save across reopen.
+Test PS2 -> Open emulator library first. Allow up to ten seconds after Shelf fades out.
 Check that PS5SX2 appears on the TV, rather than remaining behind the PS5 home screen.
 PS1/PS3 and other detected standalone emulators currently open their own libraries.
 For N64 using RetroArch, a selected game uses the external --rom/--core forwarder contract.

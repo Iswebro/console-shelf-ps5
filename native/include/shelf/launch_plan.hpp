@@ -7,6 +7,24 @@
 
 namespace shelf {
 enum class LaunchPlan { unavailable, menu, direct_game, native_game };
+struct LaunchCaption {
+    const char* action;
+    const char* badge;
+    const char* expectation;
+};
+inline LaunchCaption launch_caption(LaunchPlan plan) {
+    switch (plan) {
+    case LaunchPlan::menu:
+        return {"Open emulator library", "LIBRARY ONLY",
+                "Choose the game there. Circle returns to your emulator choices."};
+    case LaunchPlan::direct_game:
+        return {"Play game", "DIRECT PLAY", "The selected game opens directly in your chosen emulator."};
+    case LaunchPlan::native_game:
+        return {"Open game", "DIRECT PLAY", "The selected game opens directly on your PS5."};
+    default:
+        return {"No launch available", "UNAVAILABLE", "Choose a compatible installed emulator to play this game."};
+    }
+}
 inline bool launch_route_folder(const EmulatorRoute& route) {
     if (!launch_bounded(route.title_id) || !launch_bounded(route.folder) || !launch_menu_known(route.title_id))
         return false;

@@ -17,7 +17,7 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Native C++/SDL renderer, navigation model and settings persistence exercised on PC.
 - [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
 - [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
-- [ ] Complete the installed UI-21 checks on firmware 12.20. The owner confirmed distinct PS1/PS2/N64 intros, improved menu/static visuals, all three layout controls, settings access from page two, three-second closure, saved choices after app reopen and direct Mario Party 3 launch. Final standalone-emulator foreground confirmations, the new PS1/RetroArch game route and the normal-console-restart check remain pending. Persistent TV inside console libraries remains a separate room check.
+- [ ] Complete the final candidate checks on firmware 12.20. UI-21 has owner confirmation for room/intros, all three layouts, settings, closure, app-reopen persistence, all three standalone emulator foreground menus, and direct N64/PS1 games through RetroArch. UI-22 adds a persistent pre-launch explanation and fixes validation of saved `retroarch:<core>` preferences. Its model, browser, 66 native-renderer captures and PS5 structure checks pass; its installation and physical tests remain pending. The normal console restart remains deferred by the owner.
 - [x] Read-only emulator/core and game discovery in configured existing library locations, checked from PC against the owner's console.
 - [x] The same configured discovery inside the PS5 app sandbox, with complete scan evidence.
 - [ ] Further dedicated-emulator and library-layout adapters.

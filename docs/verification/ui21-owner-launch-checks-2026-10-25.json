@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "revision": "UI-21",
+  "programSourceCommit": "33b16ad7ddd6dfb705e2c991729dba333a9429a6",
+  "selfSHA256": "2031865828a6068aa413b219c98e0bd5efb94decdf03706cd29043d9aaddaddb",
+  "packageManifestSHA256": "21ce648b99f5080a47c997bff357628438f9d3cf68ae475f005dc0fa2093180f",
+  "basis": "Owner confirms the three standalone menus appeared on the TV; Final Fantasy Tactics starts directly through RetroArch from Shelf.",
+  "accepted": {
+    "psxs5_menu": true,
+    "ps5sx2_menu": true,
+    "ps5sx3_menu": true,
+    "retroarch_n64_game": true
+  },
+  "additionalAcceptedRoute": "RetroArch: selected PlayStation 1 game",
+  "limitation": "Standalone emulator routes open their own libraries, so UI-22 will disclose that before selection.",
+  "normalConsoleRestart": "pending",
+  "publicBinaryRelease": "not published"
+}

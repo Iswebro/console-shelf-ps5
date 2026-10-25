@@ -76,6 +76,17 @@ bool valid_route(const char* value) {
     const auto length = std::strlen(value);
     if (length >= 48)
         return false;
+    constexpr const char* retroarch = "retroarch:";
+    if (std::strncmp(value, retroarch, 10) == 0) {
+        if (length == 10)
+            return false;
+        for (std::size_t i = 10; i < length; ++i) {
+            const auto c = value[i];
+            if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_'))
+                return false;
+        }
+        return true;
+    }
     for (std::size_t i = 0; i < length; ++i) {
         const auto c = value[i];
         if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-' ||

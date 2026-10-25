@@ -41,6 +41,8 @@ void test_settings() {
     settings.preferences.sort = Sort::favorites;
     settings.preferences.brand = 2;
     std::strcpy(settings.preferred_emulator[find_system("ps2")].data(), "ps5sx2");
+    std::strcpy(settings.preferred_emulator[find_system("ps1")].data(), "retroarch:swanstation");
+    std::strcpy(settings.preferred_emulator[find_system("n64")].data(), "retroarch:mupen64plus_next");
     check(save_settings(path, settings), "initial atomic save");
     Settings read;
     check(load_settings(path, read) == SettingsLoad::loaded, "reload valid settings");
@@ -49,6 +51,14 @@ void test_settings() {
     check(read.preferences.sort == Sort::favorites && read.preferences.brand == 2, "sort and brand persist");
     check(std::strcmp(read.preferred_emulator[find_system("ps2")].data(), "ps5sx2") == 0,
           "preferred emulator persists");
+    check(std::strcmp(read.preferred_emulator[find_system("ps1")].data(), "retroarch:swanstation") == 0 &&
+              std::strcmp(read.preferred_emulator[find_system("n64")].data(), "retroarch:mupen64plus_next") == 0,
+          "real discovered RetroArch route IDs survive atomic save and reload");
+    for (const char* bad : {"retroarch:", "retroarch:../other", "other:core", "retroarch:core:other"}) {
+        Settings rejected = settings;
+        std::strcpy(rejected.preferred_emulator[find_system("ps1")].data(), bad);
+        check(!save_settings(path, rejected), "malformed namespaced route IDs cannot replace valid settings");
+    }
     settings.preferences.layout = Layout::swipe;
     check(save_settings(path, settings), "replacement preserves a valid backup");
     check(load_settings(path, read) == SettingsLoad::loaded && read.preferences.layout == Layout::swipe,

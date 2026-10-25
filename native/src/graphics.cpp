@@ -903,24 +903,38 @@ void detail(const UiState& state) {
     text(availability(state, id), 84, 366, 29, purple, true);
     char count[80];
     std::snprintf(count, sizeof(count), "%zu discovered games", state.inventory[id].game_count);
-    text(count, 84, 415, 24, muted);
+    if (state.page != Page::library)
+        text(count, 84, 415, 24, muted);
     if (state.page == Page::library) {
         const auto* route = state.library ? preferred_route(*state.library, id, state.settings.preferred_emulator[id].data()) : nullptr;
-        if (route && std::strcmp(route->title_id, "PPSA99169") != 0 && !state.inventory[id].built_in)
-            text("Opens the emulator library; choose your game there.", 84, 453, 20, muted);
+        const auto games = state.library ? games_for_system(*state.library, id) : GameList{};
+        LaunchRequest preview;
+        const auto plan = state.library && state.game_focus >= 0 && static_cast<std::size_t>(state.game_focus) < games.count
+                              ? plan_game(*state.library, games.indices[static_cast<std::size_t>(state.game_focus)],
+                                          state.settings.preferred_emulator[id].data(), preview)
+                              : LaunchPlan::unavailable;
+        const auto caption = launch_caption(plan);
+        const SDL_Color mode_color = plan == LaunchPlan::menu ? SDL_Color{239, 205, 151, 255}
+                                                              : SDL_Color{159, 220, 194, 255};
+        rounded(80, 400, 1000, 126, 18, {13, 23, 25, 248});
+        rect(80, 420, 4, 86, mode_color);
+        text(route ? route->name : state.inventory[id].built_in ? "PS5 system" : "Launch information",
+             104, 412, 19, {207, 218, 213, 255}, false, 690);
+        text(caption.badge, 842, 412, 17, mode_color, true, 220);
+        text(caption.action, 104, 440, 29, white, true, 940);
+        text(caption.expectation, 104, 482, 20, {215, 222, 219, 255}, false, 940);
         if (!state.library) {
-            text("Your library", 84, 522, 38, white, true);
-            text("Connect a library to see your games here.", 84, 587, 26, muted);
+            text("Your library", 84, 554, 38, white, true);
+            text("Connect a library to see your games here.", 84, 615, 26, muted);
         } else {
-            const auto games = games_for_system(*state.library, id);
             if (!games.count)
-                text("No games found for this console yet.", 84, 540, 26, muted);
+                text("No games found for this console yet.", 84, 558, 26, muted);
             const int start = state.game_focus / 8 * 8;
             for (int row = 0; row < 8 && static_cast<std::size_t>(start + row) < games.count; ++row) {
                 const auto& game = state.library->games[games.indices[static_cast<std::size_t>(start + row)]];
-                const int y = 478 + row * 60;
-                box(80, y, 1000, 53, !state.tools && state.game_focus == start + row);
-                text(game.name, 100, y + 10, 23, white, !state.tools && state.game_focus == start + row, 895);
+                const int y = 546 + row * 52;
+                box(80, y, 1000, 46, !state.tools && state.game_focus == start + row);
+                text(game.name, 100, y + 7, 23, white, !state.tools && state.game_focus == start + row, 895);
                 const auto key = game_favorite_key(game);
                 if (std::find(state.settings.game_favorites.begin(), state.settings.game_favorites.end(), key) != state.settings.game_favorites.end())
                     text("*", 1026, y + 9, 27, purple, true);
@@ -931,7 +945,9 @@ void detail(const UiState& state) {
                 text(position, 84, 973, 19, muted);
             }
         }
-        footer("D-pad  Browse games    Left / Right  Page    Triangle  Favourite    Circle  Back    Options  Settings");
+        char actions[240];
+        std::snprintf(actions, sizeof(actions), "Cross  %s    D-pad  Browse    Left / Right  Page    Triangle  Favourite    Circle  Back", caption.action);
+        footer(actions);
         return;
     }
     const auto& route = state.settings.preferred_emulator[id];
@@ -942,11 +958,11 @@ void detail(const UiState& state) {
                                        : std::string_view("No emulator detected"),
           !state.tools && state.detail_focus == 0, 920);
     box(80, 631, 443, 82, !state.tools && state.detail_focus == 1);
-    text(state.launch_connected ? "Test emulator launch" : "Open emulator", 107, 652, 27,
+    text("Open emulator library", 107, 652, 27,
          state.inventory[id].emulator_count ? white : muted, true);
     box(547, 631, 453, 82, !state.tools && state.detail_focus == 2);
     text("Show game library", 575, 652, 29, white, true);
-    text("An emulator-menu route opens the emulator's own shelf.", 84, 765, 23, muted);
+    text("Choose Show game library to see how each game will open.", 84, 765, 23, muted);
     footer("D-pad  Choose action    Cross  Select    Triangle  Favourite    Circle  Back    Options  Settings");
 }
 void settings(const UiState& state) {

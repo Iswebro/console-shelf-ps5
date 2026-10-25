@@ -37,7 +37,8 @@ After exposing the new tile through the already established ShadowMount procedur
 3. Select Nintendo 64 and its game library; check Mario Party and the other existing titles. Check PS1, PS2 and PS3 as well.
 4. Change a layout/visibility choice, close Shelf, then reopen it to check persistence.
 5. Report any black screen, crash, missing input or incorrect library count. Avoid repeated attempts after a console hang.
-6. Choose PlayStation 2 → Test emulator launch once, then wait up to ten seconds without pressing PS. Check that PS5SX2 appears on the TV, rather than remaining behind the home screen. Only after acceptance, test PS1/PS3 menu routes and a selected Nintendo 64 game through RetroArch. The helper passes game arguments once and stops observing focus if the target changes; it never retries the launch.
+6. Open a game library and read its persistent launch panel before pressing Cross. **Library only / Open emulator library** means choosing the game inside the emulator; **Direct play / Play game** passes the selected game to RetroArch. The panel and footer must change when Preferred emulator changes, and remain visible while browsing. Close and reopen Shelf to check a saved RetroArch preference.
+7. Choose PlayStation 2 → Open emulator library once, then wait up to ten seconds without pressing PS. Check that PS5SX2 appears on the TV, rather than remaining behind the home screen. Then test PS1/PS3 menu routes and selected Nintendo 64 and PS1 games through RetroArch. The helper passes game arguments once and stops observing focus if the target changes; it never retries the launch.
 
 No binary release should be labelled compatible with firmware 12.20 until these results and the later supported launch routes are recorded. Remove only Shelf's owned app folder to roll back the program, retaining its preferences if wanted.
 

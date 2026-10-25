@@ -701,11 +701,24 @@ function openSystem(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function renderGameLaunchHint() {
+  const emulator = $('emulator').value;
+  const direct = emulator.startsWith('RetroArch');
+  const native = selected.status === 'native';
+  $('libraryLaunchHint').dataset.mode = direct || native ? 'direct' : 'menu';
+  $('libraryLaunchAction').textContent = direct ? 'Play game' : native ? 'Open game' : 'Open emulator library';
+  $('libraryLaunchDescription').textContent = direct
+    ? `The native prototype passes the selected game to ${emulator}. This browser remains a preview.`
+    : native ? 'The native prototype opens the selected installed title. This browser remains a preview.'
+    : `${emulator} opens its own library. Choose the game there, or change Preferred emulator for another route.`;
+}
+
 function renderGames() {
   if (!selected) return;
   $('libraryPanel').hidden = false;
   $('libraryTitle').textContent = `${selected.name} games`;
   $('libraryCount').textContent = `${selected.games.length} example ${selected.games.length === 1 ? 'game' : 'games'}`;
+  renderGameLaunchHint();
   const list = $('games');
   list.replaceChildren();
   if (!selected.games.length) {
@@ -959,6 +972,7 @@ $('back').onclick = () => {
 };
 $('emulator').onchange = () => {
   safeStorage.set('shelf-emulator-' + selected.id, $('emulator').value);
+  if (!$('libraryPanel').hidden) renderGameLaunchHint();
   toast(`${$('emulator').value} saved as the preferred emulator for ${selected.name} in this preview.`);
 };
 $('openEmulator').onclick = () => toast(`Preview only: the finished PS5 app would open ${$('emulator').value}.`);
