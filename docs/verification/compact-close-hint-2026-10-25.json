@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "scope": "UI-13 compact close hint and restricted helper candidate",
+  "nativeModelAndGestureChecks": "passed",
+  "simulatedRendererCaptures": 28,
+  "tapHint": "stays on home; three-second expiry; Cross remains Select; hold retains closing fade",
+  "renderer": "passed and close-hint capture visually inspected",
+  "elf": {
+    "bytes": 2770516,
+    "sha256": "1837aae077ba9309ba38a737b95f108764c373010481bc111bdc73676a4698db",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2656993,
+    "sha256": "127ed0fc7f3e17a798506e71d82c894c028c05b26d6c813d328d457b4dc0aeba"
+  },
+  "embeddedLaunchHelper": {
+    "bytes": 91304,
+    "sha256": "58d3286a9849e75a90c617b99ac2aed3ab40ce9bc68875e6db852cee4ee7b837",
+    "offset": 1599888,
+    "runtimeMode": "restricted",
+    "permissionChanges": false
+  },
+  "newConsoleUIAcceptance": "pending",
+  "launcherDiagnosticFromUI12": {
+    "serviceInitialisation": "0x00000000",
+    "foregroundUserQuery": "0x00000000",
+    "runningAppQuery": "0x8094000f",
+    "stoppedBeforeCommit": true
+  },
+  "standardRuntimeApproval": "pending; no console deployment authorised",
+  "publicBinaryReleased": false
+}

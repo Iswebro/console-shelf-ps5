@@ -2,7 +2,7 @@
 
 The native target is C/C++ with SDL2. The HTML/JavaScript preview remains a design reference and a fast way to test interactions. It is not the runtime shipped to the PS5. The emulator still runs as its own app, so the preview's choice of language does not change emulator performance.
 
-The C++17 development app now renders the console grid, floating-icon Swipe view, console details, settings sections, console visibility picker and a controller-operated search keyboard at 1920Ã—1080. SDL controller events and the left stick drive the interface. Settings use stable console IDs, a verified temporary file, atomic replacement and a backup of the previous valid file. Loading damaged settings never rewrites that source file.
+The C++17 development app now renders the console grid, floating-icon Swipe view, console details, settings sections, console visibility picker and a controller-operated search keyboard at 1920×1080. SDL controller events and the left stick drive the interface. Settings use stable console IDs, a verified temporary file, atomic replacement and a backup of the previous valid file. Loading damaged settings never rewrites that source file.
 
 Hardware names, icon paths, brands and suggested cores are generated with `node tools/build-native-catalog.js`; demo games and installed-status labels are omitted. The PC build starts with an empty inventory unless an explicit read-only library source is supplied. Its [discovery adapter](../docs/DISCOVERY.md) identifies real installed cores and supported library folders, with paginated game lists and saved preferred-emulator choices. The configured scan also completes inside the private PS5 app. No launch capability is inferred from discovery. The owner has confirmed the grid and basic PS5 input; refined controls, transitions and complete hardware acceptance still need testing.
 
@@ -25,16 +25,16 @@ The build fetches the official SDL2 2.32.10 Windows development ZIP into ignored
 | Options | F1 | Settings / finish search |
 | Square | F2 | Switch Grid/Swipe on the home screen; delete while using the search keyboard |
 | L1 / R1 | Shift+Tab / Tab | Settings sections |
-| Triangle | â€” | Favourite; clear while using the search keyboard |
-| â€” | F3 / F4 | Console picker / main search |
+| Triangle | — | Favourite; clear while using the search keyboard |
+| — | F3 / F4 | Console picker / main search |
 
-The host app also accepts typed text while its search keyboard is open. A short Circle tap on the home screen shows a compact three-second hint. Hold Circle for three seconds to close with the usual fade.
+The host app also accepts typed text while its search keyboard is open. A short Circle tap on the home screen shows a compact hint that fades away after three seconds. Hold Circle for three seconds to close with the usual fade.
 
 Swipe is a curved carousel with a larger centre console, progressively smaller neighbours, subtle yaw and a quiet floor glow. Left/right loop at either end, while Up reaches the toolbar. Its 420 ms ease-out retargets from the current frame without queuing moves; drawing stops once it settles. Grid navigation stays bounded. Display sizing uses the visible illustration's bounds, keeping tall hardware intact and wide hardware readable without changing the PNG files.
 
 ## Verification
 
-`npm run test:native-renderer` builds the app and drives it through its SDL event loop without opening a visible window. It captures twenty-five 1080p screens, changes visibility through an independent picker search, uses controller buttons to type on the search keyboard, reopens the executable to verify persistence, and walks all 52 system images. Timed carousel and startup transitions must finish pixel-identically to a settled reference pose; heavy scene preparation must remain covered by the branded loading picture. Spatial toolbar tests cover Up to settings and Down back to layout. Three-second Circle hold/cancel/fade tests retain ordinary Back taps. The FTP integration test also commits background inventory and cancels a deliberately stalled greeting before its network timeout. The test checks the vendored file hashes first. Captures and machine-readable reports remain under ignored `.cache/native-render-tests/`. These are **simulated SDL controller events**, not full physical DualSense or PS5 acceptance.
+`npm run test:native-renderer` builds the app and drives it through its SDL event loop without opening a visible window. It captures twenty-eight 1080p screens, changes visibility through an independent picker search, uses controller buttons to type on the search keyboard, reopens the executable to verify persistence, and walks all 52 system images. Timed carousel and startup transitions must finish pixel-identically to a settled reference pose; heavy scene preparation must remain covered by the branded loading picture. Spatial toolbar tests cover Up to settings and Down back to layout. Three-second Circle hold/cancel/fade tests retain ordinary Back taps. The FTP integration test also commits background inventory and cancels a deliberately stalled greeting before its network timeout. The test checks the vendored file hashes first. Captures and machine-readable reports remain under ignored `.cache/native-render-tests/`. These are **simulated SDL controller events**, not full physical DualSense or PS5 acceptance.
 
 Run `npm run test:native` for the model, persistence, discovery and navigation tests. On Windows it uses an existing Visual Studio C++ installation, configures that compiler only in its child process and writes to ignored `.cache/native-tests/`. On Linux it uses an existing `c++` compiler with C++17 support. It installs no packages. After building the host, `npm run test:library-ftp` checks the read-only protocol against a loopback-only fake server without contacting a console.
 
