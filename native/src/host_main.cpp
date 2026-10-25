@@ -5,6 +5,7 @@
 #include "shelf/ftp.hpp"
 #include "shelf/graphics.hpp"
 #include "shelf/memory.hpp"
+#include "shelf/navigation.hpp"
 #include <SDL.h>
 #include <algorithm>
 #include <cerrno>
@@ -196,7 +197,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-3 strong shell import");
+    startup("main entered", "ui-4 navigation and connection diagnostics");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -324,6 +325,21 @@ int main(int argc, char** argv) {
                                 *library.value);
         state.library = library.value;
         startup(library.value->scan.complete ? "library scan complete" : "library scan partial");
+        char scan_info[160];
+        std::snprintf(scan_info, sizeof(scan_info), "%zu games; %zu routes; %zu roots read; %zu unavailable",
+                      library.value->game_count, library.value->route_count, library.value->scan.roots_read,
+                      library.value->scan.roots_denied);
+        startup("library counts", scan_info);
+        if (library_host) {
+            char connection_info[180];
+            const auto& diag = ftp.diagnostics;
+            std::snprintf(connection_info, sizeof(connection_info),
+                          "%zu connections; %zu listings; %zu reads; first failure %s (%d)", diag.connections,
+                          diag.listings, diag.reads, diag.first_failure, diag.error);
+            startup("library connection", connection_info);
+            if (scan_only)
+                std::printf("FTP diagnostics: %s\n", connection_info);
+        }
         state.inventory = library.value->inventory;
         std::printf("Read-only library: %zu games, %zu emulator/core routes; scan %s.\n", library.value->game_count,
                     library.value->route_count, library.value->scan.complete ? "complete" : "partial");
@@ -415,14 +431,10 @@ int main(int argc, char** argv) {
     char* next = script[0] ? script : nullptr;
     bool scripting = next != nullptr;
     int result = 0;
-    Uint32 repeat_at = 0;
-    shelf::Action held = shelf::Action::up;
-    bool repeating = false;
-    int held_kind = 0;
-    Uint8 held_button = 0;
+    shelf::NavigationInput navigation;
     bool redraw = true;
     bool first_frame = true;
-    int axis_x = 0, axis_y = 0;
+    unsigned measured_frames = 0, max_render_ms = 0, max_present_ms = 0;
     unsigned script_time = 0;
     while (!state.exit_requested) {
         char* token = nullptr;
@@ -454,21 +466,17 @@ int main(int argc, char** argv) {
             else if (event.type == SDL_TEXTINPUT) {
                 shelf::text_input(state, event.text.text);
                 redraw = true;
-            } else if (event.type == SDL_WINDOWEVENT)
+            } else if (event.type == SDL_WINDOWEVENT) {
+                if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+                    navigation.cancel();
                 redraw = true;
-            else if (event.type == SDL_CONTROLLERBUTTONDOWN) {
+            } else if (event.type == SDL_CONTROLLERBUTTONDOWN) {
                 mapped = mapped_button(event.cbutton.button, state, action);
-                if (mapped && event.cbutton.button >= SDL_CONTROLLER_BUTTON_DPAD_UP &&
-                    event.cbutton.button <= SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
-                    held = action;
-                    repeating = true;
-                    held_kind = 1;
-                    held_button = event.cbutton.button;
-                    repeat_at = SDL_GetTicks() + 350;
-                }
+                if (mapped && shelf::NavigationInput::directional(action))
+                    mapped = navigation.button(action, true, event.cbutton.which, SDL_GetTicks(), action);
             } else if (event.type == SDL_CONTROLLERBUTTONUP) {
-                if (held_kind == 1 && event.cbutton.button == held_button)
-                    repeating = false;
+                if (mapped_button(event.cbutton.button, state, action) && shelf::NavigationInput::directional(action))
+                    navigation.button(action, false, event.cbutton.which, SDL_GetTicks(), action);
             } else if (event.type == SDL_CONTROLLERDEVICEADDED && !headless) {
                 for (auto& controller : controllers)
                     if (!controller && SDL_IsGameController(event.cdevice.which)) {
@@ -476,7 +484,7 @@ int main(int argc, char** argv) {
                         break;
                     }
             } else if (event.type == SDL_CONTROLLERDEVICEREMOVED) {
-                repeating = false;
+                navigation.disconnected(event.cdevice.which);
                 for (auto& controller : controllers)
                     if (controller &&
                         SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller)) == event.cdevice.which) {
@@ -486,23 +494,8 @@ int main(int argc, char** argv) {
             } else if (event.type == SDL_CONTROLLERAXISMOTION) {
                 if (event.caxis.axis != SDL_CONTROLLER_AXIS_LEFTX && event.caxis.axis != SDL_CONTROLLER_AXIS_LEFTY)
                     continue;
-                if (event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX)
-                    axis_x = event.caxis.value;
-                if (event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY)
-                    axis_y = event.caxis.value;
-                if (std::abs(axis_x) > 16000 || std::abs(axis_y) > 16000) {
-                    action = std::abs(axis_x) > std::abs(axis_y)
-                                 ? (axis_x > 0 ? shelf::Action::right : shelf::Action::left)
-                                 : (axis_y > 0 ? shelf::Action::down : shelf::Action::up);
-                    if (!repeating || held != action || held_kind != 2) {
-                        mapped = true;
-                        held = action;
-                        repeating = true;
-                        held_kind = 2;
-                        repeat_at = SDL_GetTicks() + 350;
-                    }
-                } else if (held_kind == 2)
-                    repeating = false;
+                mapped = navigation.axis(event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX, event.caxis.value,
+                                         event.caxis.which, SDL_GetTicks(), action);
             } else if (event.type == SDL_KEYDOWN) {
                 mapped = true;
                 switch (event.key.keysym.sym) {
@@ -548,13 +541,15 @@ int main(int argc, char** argv) {
                 }
             }
             if (mapped) {
+                if (!shelf::NavigationInput::directional(action))
+                    navigation.cancel();
                 shelf::input(state, action);
                 redraw = true;
             }
         }
-        if (repeating && !scripting && SDL_TICKS_PASSED(SDL_GetTicks(), repeat_at)) {
-            shelf::input(state, held);
-            repeat_at = SDL_GetTicks() + 110;
+        shelf::Action repeated{};
+        if (!scripting && navigation.tick(SDL_GetTicks(), repeated)) {
+            shelf::input(state, repeated);
             redraw = true;
         }
         if (state.changed) {
@@ -566,8 +561,10 @@ int main(int argc, char** argv) {
             state.changed = false;
         }
         if (redraw || shelf::graphics_animating()) {
+            const auto frame_start = SDL_GetTicks();
             shelf::graphics_render(state, animate_script ? script_time : SDL_GetTicks(),
                                    animate_script || (!scripting && !headless));
+            const auto render_end = SDL_GetTicks();
             if (shelf::graphics_errors()) {
                 startup("render resource failed");
                 std::fprintf(stderr, "A packaged image/font or rendering resource failed to load.\n");
@@ -584,6 +581,19 @@ int main(int argc, char** argv) {
 #ifdef SHELF_PS5
             gs_vout_present(surface->pixels, surface->pitch);
 #endif
+            // Bounded timing evidence, not a claim about displayed frame rate.
+            if (measured_frames < 16) {
+                if (measured_frames) {
+                    max_render_ms = std::max(max_render_ms, render_end - frame_start);
+                    max_present_ms = std::max(max_present_ms, SDL_GetTicks() - render_end);
+                }
+                if (++measured_frames == 16) {
+                    char timing[100];
+                    std::snprintf(timing, sizeof(timing), "max render %u ms; frame handoff %u ms (15 samples)",
+                                  max_render_ms, max_present_ms);
+                    startup("frame costs", timing);
+                }
+            }
             if (first_frame) {
                 startup("first frame submitted");
                 first_frame = false;

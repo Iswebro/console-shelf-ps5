@@ -21,6 +21,7 @@ bool has(const shelf::BrowseResult& result, std::size_t id) {
 void test_settings();
 void test_ui();
 void test_library();
+void test_navigation();
 int main() {
     using namespace shelf;
     Preferences preferences;
@@ -80,6 +81,7 @@ int main() {
               "launch-capability separation.");
     test_settings();
     test_ui();
+    test_navigation();
     test_library();
     return 0;
 }

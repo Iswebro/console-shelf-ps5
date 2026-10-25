@@ -84,6 +84,8 @@ async function scenario(pasv, malformed = false) {
     assert.match(result.stdout, /2 games, 1 emulator\/core routes/);
     assert.match(result.stdout, /n64: 1 games, 1 routes/);
     assert.match(result.stdout, /ps5: 1 games, 0 routes/);
+    assert.match(result.stdout, malformed ? /first failure listing data \(226\)/ : /first failure none \(0\)/,
+      'the bounded diagnostic distinguishes a malformed transfer from successful discovery');
     assert.ok(commands.some(c => c.verb === 'RETR'));
     if (pasv) assert.ok(commands.some(c => c.verb === 'PASV'), 'PASV fallback should use original peer, not advertised external IP');
   } finally {

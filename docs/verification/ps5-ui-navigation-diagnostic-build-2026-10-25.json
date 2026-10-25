@@ -1,0 +1,53 @@
+{
+  "structuralCheck": "passed",
+  "hardwareTest": "new build not tested on console",
+  "firmware12_20": "full acceptance pending",
+  "elf": {
+    "bytes": 2655220,
+    "sha256": "659b65f165ca6c5f5554766527fed3382ed3bff642a461ae9780b839995fc75e",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2540001,
+    "sha256": "47af9ef1fd86199477322a619507392d696e69b7f82d7252561b3c7fbe87009e"
+  },
+  "verifiedOn": "2026-10-25",
+  "scope": "Private UI test 4: physical gesture navigation and bounded FTP diagnostics",
+  "previousBuildOutcome": {
+    "selfSHA256": "7a555153d51c350dd9100ee343f6dce3aae9ab848f89146808ae96d28dbf17fa",
+    "display": "owner confirmed; private PS5 Create capture inspected",
+    "input": "basic controls work; owner requested more efficient and fluid navigation",
+    "library": "partial scan; installed emulator cards incorrectly empty",
+    "launches": "disabled"
+  },
+  "changes": [
+    "Stick engage/release hysteresis and dominant-axis locking",
+    "Immediate D-pad response, controlled hold acceleration, no repeat backlog",
+    "Cancel held navigation on page actions, focus loss and controller disconnect",
+    "Owned journal records fixed operation/error codes and scan counts without server replies or paths",
+    "Bounded render/handoff timings for 15 frames after the first"
+  ],
+  "sourceFingerprintSHA256": "db232699b7b35cf522050d515851674dd83a8d53a947aa9ca67b04a6ab73ba1f",
+  "checks": {
+    "nativeModelSettingsUiAndGestureTests": "passed",
+    "nativeRendererAndFtpFixtures": "passed: 11 captures; EPSV/PASV, malformed listing diagnostic and no hostname lookup",
+    "independentExecutableVerification": "passed"
+  },
+  "publicRelease": "not published"
+}

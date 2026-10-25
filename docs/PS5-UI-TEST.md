@@ -1,6 +1,6 @@
 # Private first UI test
 
-The local test folder is a separate step from the first public release. It is for validating the shared native renderer, DualSense input, persistence and console-local read-only library scanning. **It does not launch emulators or games.** No launch payload is included, and the console app has not yet been hardware-validated.
+The local test folder is a separate step from the first public release. It is for validating the shared native renderer, DualSense input, persistence and console-local read-only library scanning. **It does not launch emulators or games.** No launch payload is included. The owner has confirmed that the third test build displays the grid and responds to basic controls on firmware 12.20; navigation is not yet accepted and the console-local scan is incomplete.
 
 The first private build failed its startup test. The console stayed responsive; the app returned from startup, then its C runtime exit hit SIGSYS. The corrected build waits for asynchronous shell closure and writes a small stage log under its owned data folder to identify the original startup failure. Hardware acceptance remains pending. No public download is available.
 
