@@ -81,14 +81,17 @@ class ReleaseInputTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "lacks corresponding"):
             verify_asset_sources({"unknown.dat": b"fixture"}, {"unknown.dat": b"fixture"})
 
-    def test_room_link_resolves_from_both_guides(self):
-        members = public_guides("See [room setup](ROOM.md).", b"fixture room guide")
+    def test_room_links_work_in_full_release_and_app_only_zip(self):
+        version = "v0.1.0-beta.1"
+        members = public_guides("See [room setup](ROOM.md).", b"fixture room guide", version)
         self.assertEqual(set(members), {"README.md", "ROOM.md", "PPSA99541/START-HERE.md"})
-        for name in ("README.md", "PPSA99541/START-HERE.md"):
-            target = re.search(r"\]\(([^)]+)\)", members[name].decode()).group(1)
-            resolved = posixpath.normpath(posixpath.join(posixpath.dirname(name), target))
-            self.assertIn(resolved, members)
-            self.assertEqual(members[resolved], b"fixture room guide")
+        target = re.search(r"\]\(([^)]+)\)", members["README.md"].decode()).group(1)
+        resolved = posixpath.normpath(target)
+        self.assertIn(resolved, members)
+        self.assertEqual(members[resolved], b"fixture room guide")
+        app_target = re.search(r"\]\(([^)]+)\)", members["PPSA99541/START-HERE.md"].decode()).group(1)
+        self.assertEqual(app_target, "https://github.com/Iswebro/console-shelf-ps5/blob/" + version + "/docs/ROOM.md")
+        self.assertNotIn("../", app_target)
 
     def test_source_publication_corrects_docs_without_changing_program_inputs(self):
         private_notice = (b"Console Shelf source and relink kit (development build)\n"

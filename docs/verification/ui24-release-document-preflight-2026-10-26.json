@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "revision": "UI-24",
+  "compiledSourceCommit": "5c34e67aba3e51ca209d56215f97b586ff58c1e5",
+  "selfSHA256": "9834451dc2ca0f59f6fe487900ebe3ab55f08b23f53fb9aabf16faaac2eda88e",
+  "releaseInputFixtures": 12,
+  "storeArchiveFixtures": 3,
+  "fixtureResult": "passed",
+  "guideContract": "The full release uses its bundled ROOM.md; the app-only store archive uses the versioned GitHub guide link",
+  "integrationCorrection": "Updated the guide fixture for the added version argument and app-only archive link; the initial obsolete two-argument test failure is retained in the work log",
+  "mergedReleaseInputAudit": "passed; same installed program and source archive",
+  "programOrHelperChanged": false,
+  "consoleContacted": false,
+  "releaseAssetsCreated": false,
+  "hardwareAcceptance": "partial; TV-logo switching remains reported unresolved and final restart/launch checks are deferred",
+  "publicBinaryRelease": "not published"
+}
