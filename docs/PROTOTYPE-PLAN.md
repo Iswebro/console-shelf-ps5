@@ -9,7 +9,7 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Curved carousel with centre emphasis, progressive depth, short wrap motion and timed native renderer checks.
 - [x] One settings entry with Appearance, Sort & filter, Consoles and Play room tabs; a separate direct layout toggle.
 - [x] Deep counters, L1/R1 pages, an eight-console curated display, favourites-only browsing and optional reduced motion; native host and browser checks pass.
-- [x] Personal TV modes and intro-picture fallback. UI-19's clock display, three-second Circle closure and saved clock choice after app reopen are owner-confirmed on PS5.
+- [x] Personal TV modes, intro-picture fallback and local silent intro-video playback. UI-20 also keeps the TV in console libraries, offers optional static and uses smaller handhelds on the room shelves. These additions pass PC checks; UI-19's clock, three-second Circle closure and saved clock after app reopen remain the physical baseline.
 - [x] Searchable individual console switches, whole-brand controls, Show/Hide results and saved visibility.
 - [x] Original C++17 hardware catalogue and browsing model, compiled and tested on Windows with warnings treated as errors.
 - [x] Pinned project-local PS5 SDK/SDL/Clang toolchain and successful native executable cross-build.
@@ -17,14 +17,14 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Native C++/SDL renderer, navigation model and settings persistence exercised on PC.
 - [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
 - [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
-- [ ] Finish UI-19's normal console restart and Grid/Swipe/Shelf controller check on firmware 12.20; Shelf paging and the clock/settings flow have passed.
+- [ ] Verify the installed UI-20 build on firmware 12.20: page-local navigation, handheld proportions, persistent TV, intro-video/static options and Grid/Swipe/Shelf controls. The normal console restart check remains deferred by the owner.
 - [x] Read-only emulator/core and game discovery in configured existing library locations, checked from PC against the owner's console.
 - [x] The same configured discovery inside the PS5 app sandbox, with complete scan evidence.
 - [ ] Further dedicated-emulator and library-layout adapters.
 - [x] Four initial firmware 12.20 launch tests on UI-15: PSXS5/PS5SX2/PS5SX3 menus foreground; Mario Party 3 through RetroArch starts directly.
 - [x] Complete linked-library sources and a private source/object kit, cold-relinked to the earlier UI-only executable.
-- [x] Matching UI-19 complete source/relink kit: fresh compiler prefix and rebuilt converter reproduce its exact ELF and SELF. The application objects were retained, not recompiled during that cold relink.
-- [x] Release-input audit binds all 80 files to the console ledger, checks all 296 source-kit members, reproduces the tile icon, and compares 75 source assets/notices. LICENSE differs only in CRLF/LF; both original hashes are retained.
+- [x] Matching UI-20 complete source/relink kit: a fresh compiler prefix and rebuilt converter reproduce its exact ELF and SELF. The 19 application objects were retained during that cold relink. A separate clean build then recompiled every application/helper source inside the extracted archive and reproduced the exact installed ELF, SELF and source fingerprint without reusing application objects.
+- [x] UI-20 release-input audit binds all 84 installed files to a fresh full console ledger, checks all 312 source-kit members, reproduces the tile icon, and compares 79 source assets/notices. LICENSE differs only in CRLF/LF; both original hashes are retained.
 - [ ] Source-linked prototype ZIP, SHA-256, install/rollback instructions and first release.
 
 ## Runtime decision
@@ -50,6 +50,8 @@ The native C++ renderer and settings flow run on Windows with the existing Visua
 
 The PS5 executable now cross-compiles using verified public SDK/PacBrew releases and a Clang 18 prefix extracted from pinned, signed-metadata-verified Ubuntu packages. Everything stays under the project cache; no apt, sudo or global configuration change is required. The clean-room runtime rebuilds twice to the reference hashes. Host mocks cover native display/memory failure paths, and the executable passes container integrity and independent ELF structure checks; see [build evidence scope](PS5-BUILD.md).
 
-Read-only discovery works from PC and inside the private PS5 app, with bounded metadata parsing, core evidence, disc references and real native game lists. The latest PC scan of configured console roots found 91 games and 55 routes; an earlier in-app journal recorded 92 and 55. This covers configured roots, not every dedicated-emulator layout. UI-19 has 80 complete raw file readbacks with preferences preserved, 47 native host captures, room/rotation tests and an exact cold relink. The owner confirmed its room, L1/R1 paging, clock display, Circle closure and saved clock after reopening. UI-15 retains four owner-accepted launch baselines with the same helper bytes. Recheck those routes and normal console restart on UI-19 before publishing. Keep private console evidence separate from public source.
+Read-only discovery works from PC and inside the private PS5 app, with bounded metadata parsing, core evidence, disc references and real native game lists. The latest PC scan of configured console roots found 91 games and 55 routes; an earlier in-app journal recorded 92 and 55. This covers configured roots, not every dedicated-emulator layout. UI-20 has 84 complete raw file readbacks with preferences preserved during installation, 57 native host captures, browser room/video checks, bounded MPEG decoder tests, an exact cold relink and an exact clean rebuild from its source archive. The [installation](verification/ui20-console-install-2026-10-25.json), [source kit](verification/ui20-source-kit-relink-2026-10-25.json), [clean source build](verification/ui20-clean-source-build-2026-10-25.json) and [release-input](verification/ui20-release-input-audit-2026-10-25.json) records distinguish these checks from hardware acceptance.
+
+The owner confirmed UI-19's room, L1/R1 paging, clock display, Circle closure and saved clock after reopening. UI-15 retains four owner-accepted launch baselines with the same helper bytes. UI-20's pending checks are kept in their own acceptance ledger; the earlier results are not relabelled as current-build tests. PSXS5 currently opens its own game shelf, so a selected PS1 game is labelled as a menu route. Recheck the final candidate's launch routes and normal console restart before publishing. Keep private console evidence separate from public source.
 
 `npm run verify:ps5-release-inputs` checks the existing app and source archives without preparing a release or evaluating hardware acceptance. `npm run test:ps5-release-inputs` covers malformed or incomplete ledgers, changed assets/notices, source membership and standalone guide links. The real release still requires the owner-check file bound to the full tested package manifest. Its ZIP includes the room guide, with links that resolve from both the root README and app's START-HERE.
