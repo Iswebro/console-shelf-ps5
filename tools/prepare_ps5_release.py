@@ -120,9 +120,11 @@ def verify_generated_icon(app_data, kit_data):
     return directory
 
 
-def public_guides(guide, room):
+def public_guides(guide, room, version):
+    room_url = ("https://github.com/Iswebro/console-shelf-ps5/blob/" +
+                version + "/docs/ROOM.md")
     return {"README.md": guide.encode("utf-8"), "ROOM.md": room,
-            "PPSA99541/START-HERE.md": guide.replace("](ROOM.md)", "](../ROOM.md)").encode("utf-8")}
+            "PPSA99541/START-HERE.md": guide.replace("](ROOM.md)", "](" + room_url + ")").encode("utf-8")}
 
 
 def public_source_documents(kit_data, version):
@@ -293,7 +295,7 @@ def main():
     guide += ("\n\nProgram source: https://github.com/Iswebro/console-shelf-ps5/tree/" + package["sourceCommit"] +
               "\n\nThe matching complete source/object/relink kit is supplied beside this download. "
               "Licenses and credits are included. HARDWARE-CHECKS.json records this build's checked scope.\n")
-    guides = public_guides(guide, (ROOT / "docs/ROOM.md").read_bytes())
+    guides = public_guides(guide, (ROOT / "docs/ROOM.md").read_bytes(), args.version)
     app_data["START-HERE.md"] = guides.pop("PPSA99541/START-HERE.md")
     public_files = [{"path": name, **digest(raw)} for name, raw in sorted(app_data.items())]
     public_manifest = {"schema": 1, "version": args.version, "titleId": "PPSA99541",
