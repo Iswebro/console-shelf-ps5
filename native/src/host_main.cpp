@@ -311,7 +311,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-16 display Shelf and gallery backdrop; UI-15 SystemService helper unchanged");
+    startup("main entered", "ui-17 deeper display Shelf and solid artwork contact; UI-15 SystemService helper unchanged");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);

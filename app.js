@@ -354,9 +354,10 @@ function placeShelfIcons() {
     image.style.width = `${bounds.canvas[0] * fit}px`;
     image.style.height = `${bounds.canvas[1] * fit}px`;
     image.style.left = `${(surface.clientWidth - w * fit) / 2 - x * fit}px`;
-    image.style.top = `${surface.clientHeight - h * fit - y * fit}px`;
+    const supportY = bounds.supportY ?? y + h;
+    image.style.top = `${surface.clientHeight - supportY * fit}px`;
     surface.style.setProperty('--art-foot-x', `${(x + w / 2) * fit}px`);
-    surface.style.setProperty('--art-foot-y', `${(y + h) * fit}px`);
+    surface.style.setProperty('--art-foot-y', `${supportY * fit}px`);
   });
 }
 

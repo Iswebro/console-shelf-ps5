@@ -150,8 +150,8 @@ h2 { margin: 5px 0 0; font-size: 28px; letter-spacing: -.035em; }
 .systems-shelf .console-art { position: absolute; inset: 0 0 auto; display: block; height: 222px; width: 100%; margin: 0; overflow: visible; border-radius: 0; background: none; }
 .systems-shelf .console-art::before { content: ""; position: absolute; left: 7%; right: 7%; bottom: -2px; height: 180px; background: radial-gradient(ellipse at 50% 70%, #7fdac832, transparent 68%); opacity: 0; transition: opacity .25s ease; }
 .systems-shelf .console-art::after { z-index: -1; left: 18%; width: 64%; height: 14px; bottom: -5px; background: #010408b5; filter: blur(5px); }
-.systems-shelf .console-art img { inset: auto; max-width: none; object-fit: fill; filter: none; transform: none; transform-origin: var(--art-foot-x, 50%) var(--art-foot-y, 100%); transition: transform .24s cubic-bezier(.2,.65,.3,1), filter .24s ease; }
-.systems-shelf .card:is(:hover, :focus-within) .console-art img { transform: scale(1.045); filter: brightness(1.08); }
+.systems-shelf .console-art img { inset: auto; max-width: none; object-fit: fill; filter: drop-shadow(0 4px 2px #0009); transform: none; transform-origin: var(--art-foot-x, 50%) var(--art-foot-y, 100%); transition: transform .24s cubic-bezier(.2,.65,.3,1), filter .24s ease; }
+.systems-shelf .card:is(:hover, :focus-within) .console-art img { transform: scale(1.045); filter: drop-shadow(0 4px 2px #0009) brightness(1.08); }
 .systems-shelf .card:is(:hover, :focus-within) .console-art::before { opacity: 1; }
 .systems-shelf .card-copy { position: absolute; top: 237px; left: 8px; right: 8px; padding: 0; }
 .systems-shelf .card-topline, .systems-shelf .card-meta { display: none; }

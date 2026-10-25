@@ -34,6 +34,7 @@ struct Art {
     SDL_Texture* texture = nullptr;
     char name[256]{};
     int w = 0, h = 0;
+    int support_y = 0;
     SDL_Rect bounds{};
     unsigned age = 0;
 };
@@ -274,14 +275,25 @@ Art* image(std::string_view name) {
     unsigned char* data = stbi_load(filename, &slot->w, &slot->h, &channels, 4);
     if (data && slot->w > 0 && slot->h > 0 && slot->w <= 4096 && slot->h <= 4096) {
         int left = slot->w, top = slot->h, right = -1, bottom = -1;
-        for (int y = 0; y < slot->h; ++y)
-            for (int x = 0; x < slot->w; ++x)
-                if (data[(static_cast<std::size_t>(y) * slot->w + x) * 4 + 3] > 8) {
+        slot->support_y = 0;
+        for (int y = 0; y < slot->h; ++y) {
+            int solid = 0;
+            for (int x = 0; x < slot->w; ++x) {
+                const auto alpha = data[(static_cast<std::size_t>(y) * slot->w + x) * 4 + 3];
+                if (alpha > 8) {
                     left = std::min(left, x);
                     top = std::min(top, y);
                     right = std::max(right, x);
                     bottom = std::max(bottom, y);
                 }
+                if (alpha >= 192)
+                    ++solid;
+            }
+            if (solid >= 3)
+                slot->support_y = y + 1;
+        }
+        if (!slot->support_y)
+            slot->support_y = bottom >= 0 ? bottom + 1 : slot->h;
         if (right >= 0) {
             left = std::max(0, left - 12);
             top = std::max(0, top - 12);
@@ -316,7 +328,7 @@ void picture(std::string_view name, int x, int y, int w, int h, Uint8 alpha = 25
     SDL_SetTextureAlphaMod(entry->texture, alpha);
     SDL_RenderCopy(renderer, entry->texture, nullptr, &dest);
 }
-void shelf_picture(std::string_view name, int cx, int base, int w, int h, bool selected) {
+void shelf_picture(std::string_view name, int cx, int base, int w, int h, bool selected, int floor_top, int floor_end) {
     auto* entry = image(name);
     if (!entry || !entry->texture)
         return;
@@ -324,8 +336,26 @@ void shelf_picture(std::string_view name, int cx, int base, int w, int h, bool s
     const float fit = std::min(static_cast<float>(w) / bounds.w, static_cast<float>(h) / bounds.h) *
                       (selected ? 1.045f : 1.f);
     const int dw = static_cast<int>(bounds.w * fit), dh = static_cast<int>(bounds.h * fit);
-    SDL_Rect dest{cx - dw / 2, base - dh, dw, dh};
-    SDL_SetTextureAlphaMod(entry->texture, selected ? 255 : 235);
+    const int feet = static_cast<int>((entry->support_y - bounds.y) * fit);
+    SDL_Rect dest{cx - dw / 2, base - feet, dw, dh};
+    // Use the illustration's silhouette so both the rear console and its lower
+    // controller cast a contact shadow, each at its own height on the wood.
+    // Clipping to the horizontal surface keeps shadows off the wall/fascia.
+    SDL_Rect floor{80, floor_top, 1760, floor_end - floor_top};
+    SDL_RenderSetClipRect(renderer, &floor);
+    SDL_SetTextureColorMod(entry->texture, 0, 0, 0);
+    SDL_Rect shadow = dest;
+    shadow.y += 7;
+    SDL_SetTextureAlphaMod(entry->texture, 45);
+    SDL_RenderCopy(renderer, entry->texture, &bounds, &shadow);
+    shadow.y -= 4;
+    SDL_SetTextureAlphaMod(entry->texture, 105);
+    SDL_RenderCopy(renderer, entry->texture, &bounds, &shadow);
+    SDL_RenderSetClipRect(renderer, nullptr);
+    SDL_SetTextureColorMod(entry->texture, 255, 255, 255);
+    // Solid hardware stays opaque; selection uses scale/light rather than
+    // allowing the shelf's back edge to show through the console body.
+    SDL_SetTextureAlphaMod(entry->texture, 255);
     SDL_RenderCopy(renderer, entry->texture, &bounds, &dest);
 }
 void orbit_picture(std::string_view name, double cx, double cy, double w, double h, double yaw, Uint8 alpha) {
@@ -527,7 +557,7 @@ void home(const UiState& state) {
                 if (active)
                     glow(cx - 165, y + 38, 330, 188, {125, 223, 211, 255}, 85);
                 glow(cx - 111, contact - 11, 222, 22, {0, 0, 0, 255}, 225);
-                shelf_picture(system.image, cx, contact, 302, 181, active);
+                shelf_picture(system.image, cx, contact, 302, 181, active, y + 120, y + 211);
                 if (active)
                     rounded(cx - 31, contact + 8, 62, 3, 1, {150, 235, 219, 255});
                 centered(system.name, cx, y + 220, 23, active ? white : SDL_Color{219, 225, 238, 255}, true);

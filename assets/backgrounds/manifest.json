@@ -5,13 +5,20 @@
       "id": "display-shelf-v1",
       "role": "display shelf row",
       "local": "assets/backgrounds/display-shelf-v1.png",
-      "bytes": 2183137,
-      "sha256": "65ca9f106f5842438dfea99cc5f8c783eb457dda6a34b9362e15e7a5065d04c1",
+      "bytes": 1973421,
+      "sha256": "48f4c9de7a98e4ce6ae67b3e744aac995ae1d0c7adab64ef0228497e69db9694",
       "width": 2172,
       "height": 724,
       "tool": "OpenAI built-in image_gen",
       "prompt": "display-shelf-v1.prompt.txt",
-      "shelfContactY": 0.74
+      "shelfContactY": 0.74,
+      "revision": 2,
+      "woodPlaneY": [
+        0.43,
+        0.755
+      ],
+      "editPrompt": "display-shelf-v1-depth-edit.prompt.txt",
+      "originalSHA256": "65ca9f106f5842438dfea99cc5f8c783eb457dda6a34b9362e15e7a5065d04c1"
     },
     {
       "id": "gallery-room-v1",

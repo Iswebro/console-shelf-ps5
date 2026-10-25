@@ -54,7 +54,7 @@ const manifest = require('../assets/3d-icons/manifest.json');
       const art = shelfArtLayout[card.dataset.system], image = card.querySelector('img').getBoundingClientRect();
       const tier = card.parentElement.getBoundingClientRect(), slot = card.getBoundingClientRect();
       const [x, y, w, h] = art.bounds;
-      return { base: image.top + (y + h) * image.height / art.canvas[1], contact: tier.top + tier.height * .74,
+      return { base: image.top + (art.supportY ?? y + h) * image.height / art.canvas[1], contact: tier.top + tier.height * .74,
         left: image.left + x * image.width / art.canvas[0], right: image.left + (x + w) * image.width / art.canvas[0],
         slotLeft: slot.left, slotRight: slot.right };
     }));
