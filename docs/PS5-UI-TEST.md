@@ -2,7 +2,7 @@
 
 The local test folder is separate from the first public release. It tests the shared native renderer, DualSense input, persistence, console-local read-only discovery and an **experimental cooperative launch handoff**. The app embeds Shelf's original on-demand helper for the existing console-local loader. The owner confirmed the grid, settings navigation, compact Circle hint and three-second hold-to-close on firmware 12.20. Discovery reports 92 games and 55 emulator/core routes without connection failures. The opening transition remains a known limitation.
 
-The previous standard-runtime helper starts PS5SX2 and RetroArch, but both remain behind the PS5 home screen. The current candidate adds one guarded running-title foreground request after a six-second settling interval. A reported running process or accepted request does not prove visible foreground. Check the TV result before accepting a launch route. No public download is available.
+The previous standard-runtime helper starts PS5SX2 and RetroArch, but both remain behind the PS5 home screen. A delayed running-title request also failed this test on firmware 12.20. The current candidate makes one SystemService launch request, then reads the shell focus flag without sending another launch. A reported process or focus flag does not prove TV output. Check the TV result before accepting a launch route. No public download is available.
 
 Earlier startup diagnostics identified a missing strong lifecycle import. The executable verifier now rejects weak, missing or misbound required shell imports. Hardware and launch acceptance are tracked separately from compilation and structural checks.
 
@@ -37,7 +37,7 @@ After exposing the new tile through the already established ShadowMount procedur
 3. Select Nintendo 64 and its game library; check Mario Party and the other existing titles. Check PS1, PS2 and PS3 as well.
 4. Change a layout/visibility choice, close Shelf, then reopen it to check persistence.
 5. Report any black screen, crash, missing input or incorrect library count. Avoid repeated attempts after a console hang.
-6. Choose PlayStation 2 → Test emulator launch once, then wait up to ten seconds without pressing PS. Check that PS5SX2 appears on the TV, rather than remaining behind the home screen. Only after acceptance, test PS1/PS3 menu routes and a selected Nintendo 64 game through RetroArch. The helper passes game arguments only on its initial launch and cancels its follow-up if the running target changes.
+6. Choose PlayStation 2 → Test emulator launch once, then wait up to ten seconds without pressing PS. Check that PS5SX2 appears on the TV, rather than remaining behind the home screen. Only after acceptance, test PS1/PS3 menu routes and a selected Nintendo 64 game through RetroArch. The helper passes game arguments once and stops observing focus if the target changes; it never retries the launch.
 
 No binary release should be labelled compatible with firmware 12.20 until these results and the later supported launch routes are recorded. Remove only Shelf's owned app folder to roll back the program, retaining its preferences if wanted.
 

@@ -55,7 +55,7 @@ def main():
         copy(ROOT / "assets" / image, "assets/" + image)
     for name in ("Poppins-Regular.ttf", "Poppins-SemiBold.ttf", "OFL.txt"):
         copy(ROOT / "native/assets/fonts" / name, "native/assets/fonts/" + name)
-    for name in ("SDL2-PS5.txt", "libsamplerate-0.2.2.txt", "LGPL-2.1.txt"):
+    for name in ("SDL2-PS5.txt", "libsamplerate-0.2.2.txt", "LGPL-2.1.txt", "LLVM-libcxx.txt"):
         copy(ROOT / "native/third_party/licenses" / name, "licenses/" + name)
     for name in ("LICENSE", "THIRD_PARTY.md"):
         copy(ROOT / name, name)
@@ -88,10 +88,10 @@ The bundled original helper is embedded in eboot.bin and sent only to the consol
 loopback ELF loader when you select a launch action. It waits for Shelf's explicit commitment
 and cooperative closure; it never kills another app or writes emulator settings.
 {permission_notice}
-The helper waits through a monitored idle second after Shelf closes before its one cold launch.
-Once the selected app is observed running, it monitors that same instance for six seconds,
-then makes one guarded running-title foreground request with no repeated game arguments.
-This request is not proof of visible foreground; that result needs the owner's console test.
+The helper waits through a monitored idle second after Shelf closes, then sends one
+SystemService launch request. It only observes the running target and the shell focus
+flag afterward; there is no second launch or focus-changing API call.
+Observed shell focus is not proof of TV output; that result needs the owner's console test.
 It expects the console's existing ftpsrv on 127.0.0.1:2121; no PC DNS host is needed for discovery.
 The app writes only its own preferences, launch request/status and diagnostics under /data/console-shelf.
 

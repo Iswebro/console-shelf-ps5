@@ -161,7 +161,8 @@ enum class LaunchStage {
     reply_failed,
     close_timeout,
     service_unavailable,
-    foreground_requested
+    foreground_requested,
+    foreground_observed
 };
 struct LaunchStatus {
     char id[33]{};
@@ -169,10 +170,10 @@ struct LaunchStatus {
     LaunchStage stage = LaunchStage::invalid;
     std::uint32_t code = 0;
 };
-inline constexpr std::array<std::string_view, 13> launch_stage_names = {
+inline constexpr std::array<std::string_view, 14> launch_stage_names = {
     "sending", "ready",   "committed",          "cancelled",    "started",       "unconfirmed",
     "refused", "invalid", "foreground-changed", "reply-failed", "close-timeout", "service-unavailable",
-    "foreground-requested"};
+    "foreground-requested", "foreground-observed"};
 inline bool encode_launch_status(const LaunchStatus& status, char* output, std::size_t capacity) {
     const auto stage = static_cast<std::size_t>(status.stage);
     if (!output || !capacity || !launch_bounded(status.id) || std::strlen(status.id) != 32 || !status.issued ||
@@ -251,7 +252,7 @@ enum class HandoffResult {
     unconfirmed,
     refused,
     cancelled,
-    foreground_requested
+    foreground_observed
 };
 enum class HandoffConsent { pending, committed, cancelled };
 struct HandoffOps {
@@ -264,11 +265,11 @@ struct HandoffOps {
     int (*launch)(void*, const LaunchRequest&) = nullptr;
     std::uint64_t (*now)(void*) = nullptr;
     HandoffConsent (*consent)(void*) = nullptr;
-    // One foreground request to the already observed, same running target.
-    int (*foreground)(void*, const LaunchRequest&) = nullptr;
+    // Read-only focus observation: 1 target focused, 0 not focused, -1 unknown.
+    int (*focused)(void*, const LaunchRequest&) = nullptr;
 };
 inline HandoffResult cooperative_handoff(const LaunchRequest& request, const HandoffOps& ops) {
-    if (!ops.current || !ops.ready || !ops.wait || !ops.launch || !ops.now || !ops.consent || !ops.foreground ||
+    if (!ops.current || !ops.ready || !ops.wait || !ops.launch || !ops.now || !ops.consent || !ops.focused ||
         !launch_request_valid(request, ops.now(ops.context)))
         return HandoffResult::invalid;
     char title[10]{};
@@ -317,10 +318,9 @@ inline HandoffResult cooperative_handoff(const LaunchRequest& request, const Han
     }
     if (!observed)
         return result >= 0 ? HandoffResult::unconfirmed : HandoffResult::refused;
-    // Swordpdf's console-tested PS5SX2 disc helper uses one +6 s running-title
-    // LaunchApp request to hand focus back after the shell's late transition.
-    // Monitor the exact target throughout; never repeat a cold launch.
-    for (unsigned i = 0; i <= 24; ++i) {
+    // A running title is not proof of focus. Observe the shell after its one
+    // launch flow; never issue a second launch or a focus-changing API call.
+    for (unsigned i = 0; i < 32; ++i) {
         if (!launch_request_valid(request, ops.now(ops.context)))
             return HandoffResult::invalid;
         if (ops.consent(ops.context) != HandoffConsent::committed)
@@ -328,13 +328,14 @@ inline HandoffResult cooperative_handoff(const LaunchRequest& request, const Han
         title[0] = 0;
         if (ops.current(ops.context, title) != 1 || !launch_bounded(title) || std::strcmp(title, request.title) != 0)
             return HandoffResult::foreground_changed;
-        if (i < 24)
+        const int focus = ops.focused(ops.context, request);
+        if (focus == 1)
+            return HandoffResult::foreground_observed;
+        if (focus < 0)
+            return HandoffResult::unconfirmed;
+        if (i < 31)
             ops.wait(ops.context, 250);
     }
-    const int focus = ops.foreground(ops.context, request);
-    // Already-running is the expected reply when the shell resumes this title.
-    // A request being accepted is not a claim that the owner saw it on the TV.
-    return focus >= 0 || static_cast<std::uint32_t>(focus) == 0x8094000cu ? HandoffResult::foreground_requested
-                                                                      : HandoffResult::unconfirmed;
+    return HandoffResult::unconfirmed;
 }
 } // namespace shelf

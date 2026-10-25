@@ -22,8 +22,8 @@ shelf::LaunchRequest request() {
 }
 struct FakeHandoff {
     unsigned checks = 0, launches = 0, waits = 0, ready_calls = 0, idle_checks = 0;
-    unsigned foregrounds = 0, target_checks = 0, launched_at = 0;
-    int scenario = 0, launch_result = 1, foreground_result = static_cast<int>(0x8094000cu);
+    unsigned focus_reads = 0, target_checks = 0;
+    int scenario = 0, launch_result = 1, focus_result = 1;
     std::uint64_t clock = 1000;
     static int current(void* raw, char (&title)[10]) {
         auto& f = *static_cast<FakeHandoff*>(raw);
@@ -74,7 +74,6 @@ struct FakeHandoff {
     static int launch(void* raw, const shelf::LaunchRequest& r) {
         auto& f = *static_cast<FakeHandoff*>(raw);
         ++f.launches;
-        f.launched_at = f.waits;
         check(f.idle_checks >= 5, "the shell settles for a full monitored second before launching");
         check(std::strcmp(r.title, "PPSA99203") == 0, "only the requested target is launched");
         return f.launch_result;
@@ -91,16 +90,19 @@ struct FakeHandoff {
             return shelf::HandoffConsent::cancelled;
         return shelf::HandoffConsent::committed;
     }
-    static int foreground(void* raw, const shelf::LaunchRequest& r) {
+    static int focused(void* raw, const shelf::LaunchRequest& r) {
         auto& f = *static_cast<FakeHandoff*>(raw);
-        ++f.foregrounds;
-        check(f.launches == 1 && f.foregrounds == 1, "only one running-title foreground request follows one cold launch");
-        check((f.waits - f.launched_at) * 250 >= 6000, "the observed running title gets its settling interval");
-        check(std::strcmp(r.title, "PPSA99203") == 0, "foregrounding stays bound to the selected title");
-        return f.foreground_result;
+        ++f.focus_reads;
+        check(f.launches == 1 && f.focus_reads <= 32, "focus observation is bounded after exactly one launch");
+        check(std::strcmp(r.title, "PPSA99203") == 0, "focus observation stays bound to the selected title");
+        if (f.scenario >= 12 && f.scenario <= 16)
+            return 0;
+        if (f.scenario == 19 && f.focus_reads < 3)
+            return 0;
+        return f.focus_result;
     }
     shelf::HandoffOps ops() {
-        return {this, current, ready, wait, launch, now, consent, foreground};
+        return {this, current, ready, wait, launch, now, consent, focused};
     }
 };
 } // namespace
@@ -189,6 +191,11 @@ void test_launch() {
               parse_launch_status(encoded_status, 1000, decoded_status) &&
               decoded_status.stage == LaunchStage::foreground_requested && decoded_status.code == 0x8094000c,
           "an accepted foreground request is distinct from confirmed on-screen visibility");
+    response.stage = LaunchStage::foreground_observed;
+    check(encode_launch_status(response, encoded_status, sizeof(encoded_status)) &&
+              parse_launch_status(encoded_status, 1000, decoded_status) &&
+              decoded_status.stage == LaunchStage::foreground_observed,
+          "observed shell focus has a distinct status without claiming a TV display test");
     LaunchRequest parsed;
     check(parse_launch_request(original, 1000, parsed) && std::strcmp(parsed.id, r.id) == 0 &&
               std::strcmp(parsed.title, r.title) == 0 && parsed.mode == r.mode,
@@ -234,32 +241,32 @@ void test_launch() {
     check(!launch_request_valid(r, 1000), "nonterminated fields are bounded before string operations");
     r = request();
     FakeHandoff f;
-    check(cooperative_handoff(r, f.ops()) == HandoffResult::foreground_requested && f.launches == 1 &&
-              f.foregrounds == 1 && f.ready_calls == 1,
-          "cooperative closure and an observed target permit one guarded foreground request");
+    check(cooperative_handoff(r, f.ops()) == HandoffResult::foreground_observed && f.launches == 1 &&
+              f.focus_reads == 1 && f.ready_calls == 1,
+          "cooperative closure permits one launch followed by a read-only focus check");
     for (int scenario : {1, 2, 3, 4, 6, 8, 9, 10, 11}) {
         FakeHandoff refused;
         refused.scenario = scenario;
         const auto result = cooperative_handoff(r, refused.ops());
-        check(result != HandoffResult::foreground_requested && result != HandoffResult::unconfirmed && refused.launches == 0 &&
-                  refused.foregrounds == 0,
+        check(result != HandoffResult::foreground_observed && result != HandoffResult::unconfirmed && refused.launches == 0 &&
+                  refused.focus_reads == 0,
               "busy/unknown foreground, failed acknowledgement and closure timeout never launch");
     }
     FakeHandoff accepted;
     accepted.scenario = 5;
     check(cooperative_handoff(r, accepted.ops()) == HandoffResult::unconfirmed && accepted.launches == 1 &&
-              accepted.waits < 100 && accepted.foregrounds == 0,
+              accepted.waits < 100 && accepted.focus_reads == 0,
           "an accepted but unobserved launch is not called successful or retried");
     FakeHandoff denied;
     denied.scenario = 5;
     denied.launch_result = -1;
-    check(cooperative_handoff(r, denied.ops()) == HandoffResult::refused && denied.launches == 1 && denied.foregrounds == 0,
+    check(cooperative_handoff(r, denied.ops()) == HandoffResult::refused && denied.launches == 1 && denied.focus_reads == 0,
           "a refused launch has no alternate call or retry");
     FakeHandoff appearing;
     appearing.launch_result = -1;
-    check(cooperative_handoff(r, appearing.ops()) == HandoffResult::foreground_requested && appearing.launches == 1 &&
-              appearing.foregrounds == 1,
-          "an observed target can be foregrounded after a negative cold return without a cold retry");
+    check(cooperative_handoff(r, appearing.ops()) == HandoffResult::foreground_observed && appearing.launches == 1 &&
+              appearing.focus_reads == 1,
+          "an observed focused target wins over a negative return without a second launch");
     FakeHandoff expired;
     expired.scenario = 7;
     check(cooperative_handoff(r, expired.ops()) == HandoffResult::invalid && expired.launches == 0,
@@ -268,14 +275,24 @@ void test_launch() {
         FakeHandoff changed;
         changed.scenario = scenario;
         const auto result = cooperative_handoff(r, changed.ops());
-        check(result != HandoffResult::foreground_requested && changed.launches == 1 && changed.foregrounds == 0,
-              "a changed, unknown, closed, cancelled or expired target is never foregrounded");
+        check(result != HandoffResult::foreground_observed && changed.launches == 1 && changed.focus_reads <= 2,
+              "a changed, unknown, closed, cancelled or expired target stops focus observation without another launch");
     }
-    FakeHandoff focus_denied;
-    focus_denied.foreground_result = static_cast<int>(0x8094000fu);
-    check(cooperative_handoff(r, focus_denied.ops()) == HandoffResult::unconfirmed && focus_denied.launches == 1 &&
-              focus_denied.foregrounds == 1,
-          "a refused foreground request is unconfirmed and never retried");
+    FakeHandoff focus_unknown;
+    focus_unknown.focus_result = -1;
+    check(cooperative_handoff(r, focus_unknown.ops()) == HandoffResult::unconfirmed && focus_unknown.launches == 1 &&
+              focus_unknown.focus_reads == 1,
+          "unavailable focus information stays unconfirmed and causes no alternate launch");
+    FakeHandoff background;
+    background.focus_result = 0;
+    check(cooperative_handoff(r, background.ops()) == HandoffResult::unconfirmed && background.launches == 1 &&
+              background.focus_reads == 32 && background.waits < 100,
+          "a running background app is never called foreground or relaunched");
+    FakeHandoff delayed;
+    delayed.scenario = 19;
+    check(cooperative_handoff(r, delayed.ops()) == HandoffResult::foreground_observed && delayed.launches == 1 &&
+              delayed.focus_reads == 3,
+          "the asynchronous shell flow can finish without an extra launch call");
     std::puts("PASS: bounded launch protocol, stale/injected request refusal, exact RetroArch argv and cooperative "
-              "cold-launch and guarded foreground mocks. No console launch performed.");
+              "single-launch and read-only focus mocks. No console launch performed.");
 }

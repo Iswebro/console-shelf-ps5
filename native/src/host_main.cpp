@@ -311,7 +311,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-14 guarded running-title foreground request; timed Circle hint retained");
+    startup("main entered", "ui-15 SystemService launch flow and read-only focus observation; Circle hint retained");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);

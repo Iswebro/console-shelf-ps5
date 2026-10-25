@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Shelf's cooperative launcher. Public launch ABI/architecture references:
 // Jewel Case helper/jc-launch.c at 765297d2decd1be6c8076261f484e36724250bd7
-// and OpenOrbis include/orbis/_types/sys_service.h at
-// 06fcf7fd108fa080035cdd3259ed22eb07e0508c. No process kill, external
+// OpenOrbis include/orbis/_types/sys_service.h at 06fcf7fd108fa080035cdd3259ed22eb07e0508c,
+// websrv src/ps5/sys.c at 7748df9d2a43822a5ebfda149f43d4f2696d640b,
+// and ShadowMountPlus src/sm_shellcore_flags.c at 9ffcbe131575153266e951ab473bb6fd100d8c80.
+// No process kill, external
 // file-write requests, new server, payload autoload or firmware-update call.
 #include "shelf/launch_protocol.hpp"
 #include <cerrno>
@@ -19,15 +21,19 @@ int sceUserServiceGetForegroundUser(std::uint32_t*);
 int sceSystemServiceGetAppIdOfRunningBigApp();
 int sceSystemServiceGetAppTitleId(int, char*);
 int sceLncUtilInitialize();
-struct LncParams {
+struct AppLaunchContext {
     std::uint32_t size;
-    std::int32_t user;
+    std::uint32_t user;
     std::uint32_t options;
-    std::uint64_t crash_report, check_flags;
+    std::uint64_t crash_report;
+    std::uint32_t check_flags;
 };
-int sceLncUtilLaunchApp(const char*, const char**, LncParams*);
+int sceSystemServiceLaunchApp(const char*, const char**, AppLaunchContext*);
+int sceKernelOpenEventFlag(std::intptr_t*, const char*);
+int sceKernelPollEventFlag(std::intptr_t, std::uint64_t, unsigned, std::uint64_t*);
+int sceKernelCloseEventFlag(std::intptr_t);
 }
-static_assert(sizeof(LncParams) == 32 && offsetof(LncParams, check_flags) == 24, "Unexpected launch ABI");
+static_assert(sizeof(AppLaunchContext) == 32 && offsetof(AppLaunchContext, check_flags) == 24, "Unexpected launch ABI");
 namespace {
 constexpr char request_path[] = "/data/console-shelf/launch-request.txt";
 constexpr char status_path[] = "/data/console-shelf/launch-status.txt";
@@ -38,9 +44,12 @@ struct Context {
     std::uint32_t user = 0;
     int launch_status = 0;
     int probe_status = 0;
-    int foreground_status = 0;
+    std::intptr_t focus_handle = -1;
+    bool focus_open = false;
     FILE* journal = nullptr;
     ~Context() {
+        if (focus_open)
+            sceKernelCloseEventFlag(focus_handle);
         if (journal)
             std::fclose(journal);
     }
@@ -152,21 +161,26 @@ void wait(void*, unsigned milliseconds) {
 }
 int launch(void* raw, const shelf::LaunchRequest& request) {
     auto& context = *static_cast<Context*>(raw);
+    std::uint32_t user = 0;
+    if (sceUserServiceGetForegroundUser(&user) != 0 || user != context.user ||
+        !shelf::launch_request_valid(request, now(nullptr)) || consent(raw) != shelf::HandoffConsent::committed)
+        return context.launch_status = -1;
     auto args = shelf::launch_arguments(request);
-    LncParams params{};
+    AppLaunchContext params{};
     params.size = sizeof(params);
-    params.user = static_cast<std::int32_t>(context.user);
+    params.user = user;
     // Public LaunchApp flag SkipSystemUpdate. This launches only a selected
     // installed title; the helper has no update/reboot/install functionality.
     params.check_flags = 2;
-    context.launch_status = sceLncUtilLaunchApp(request.title, args[0] ? args.data() : nullptr, &params);
+    context.launch_status = sceSystemServiceLaunchApp(request.title, args[0] ? args.data() : nullptr, &params);
     if (context.journal) {
-        std::fprintf(context.journal, "cold launch: 0x%08x\n", static_cast<unsigned>(context.launch_status));
+        std::fprintf(context.journal, "SystemService launch: 0x%08x; check_flags: 0x%08x\n",
+                     static_cast<unsigned>(context.launch_status), params.check_flags);
         std::fflush(context.journal);
     }
     return context.launch_status;
 }
-int foreground(void* raw, const shelf::LaunchRequest& request) {
+int focused(void* raw, const shelf::LaunchRequest& request) {
     auto& context = *static_cast<Context*>(raw);
     char title[10]{};
     std::uint32_t user = 0;
@@ -174,19 +188,31 @@ int foreground(void* raw, const shelf::LaunchRequest& request) {
         sceUserServiceGetForegroundUser(&user) != 0 || user != context.user ||
         !shelf::launch_request_valid(request, now(nullptr)) || consent(raw) != shelf::HandoffConsent::committed)
         return -1;
-    LncParams params{};
-    params.size = sizeof(params);
-    params.user = static_cast<std::int32_t>(user);
-    params.check_flags = 2;
-    // Resume the verified running instance as its home-screen tile does. Null
-    // argv avoids replaying a ROM request. No SetAppFocus, kill or cold retry.
-    context.foreground_status = sceLncUtilLaunchApp(request.title, nullptr, &params);
+    if (!context.focus_open) {
+        const int opened = sceKernelOpenEventFlag(&context.focus_handle, "SceShellCoreUtilAppFocus");
+        if (opened < 0) {
+            if (context.journal)
+                std::fprintf(context.journal, "read-only focus flag unavailable: 0x%08x\n", static_cast<unsigned>(opened));
+            return -1;
+        }
+        context.focus_open = true;
+    }
+    std::uint64_t value = 0;
+    int observed = sceKernelPollEventFlag(context.focus_handle, UINT64_MAX, 2u, &value);
+    // OR over every bit reports EBUSY for zero; never use clear/set wait modes.
+    if (static_cast<std::uint32_t>(observed) == 0x80020010u) {
+        value = 0;
+        observed = 0;
+    }
     if (context.journal) {
-        std::fprintf(context.journal, "running-title foreground request: 0x%08x\n",
-                     static_cast<unsigned>(context.foreground_status));
+        std::fprintf(context.journal, "read-only shell focus: rc=0x%08x value=0x%016llx target=0x%08x\n",
+                     static_cast<unsigned>(observed), static_cast<unsigned long long>(value),
+                     static_cast<unsigned>(context.target_app));
         std::fflush(context.journal);
     }
-    return context.foreground_status;
+    if (observed < 0 || value > UINT32_MAX)
+        return -1;
+    return static_cast<std::uint32_t>(value) == static_cast<std::uint32_t>(context.target_app) ? 1 : 0;
 }
 shelf::LaunchStage result_stage(shelf::HandoffResult result) {
     switch (result) {
@@ -206,8 +232,8 @@ shelf::LaunchStage result_stage(shelf::HandoffResult result) {
         return shelf::LaunchStage::refused;
     case shelf::HandoffResult::cancelled:
         return shelf::LaunchStage::cancelled;
-    case shelf::HandoffResult::foreground_requested:
-        return shelf::LaunchStage::foreground_requested;
+    case shelf::HandoffResult::foreground_observed:
+        return shelf::LaunchStage::foreground_observed;
     }
     return shelf::LaunchStage::invalid;
 }
@@ -236,9 +262,9 @@ int main() {
     if (context.journal) {
         std::fprintf(context.journal,
 #ifdef SHELF_STANDARD_SDK_RUNTIME
-                     "ui-14 standard SDK helper; init: 0x%08x; user query: 0x%08x\n",
+                     "ui-15 standard SDK helper; init: 0x%08x; user query: 0x%08x\n",
 #else
-                     "ui-14 restricted helper; init: 0x%08x; user query: 0x%08x\n",
+                     "ui-15 restricted helper; init: 0x%08x; user query: 0x%08x\n",
 #endif
                      static_cast<unsigned>(initialized), static_cast<unsigned>(user_status));
         std::fflush(context.journal);
@@ -247,9 +273,8 @@ int main() {
         status(request, shelf::LaunchStage::service_unavailable, user_status ? user_status : initialized);
         return 1;
     }
-    const auto result = shelf::cooperative_handoff(request, {&context, current, ready, wait, launch, now, consent, foreground});
+    const auto result = shelf::cooperative_handoff(request, {&context, current, ready, wait, launch, now, consent, focused});
     status(request, result_stage(result),
-           result == shelf::HandoffResult::foreground_changed ? context.probe_status
-           : result == shelf::HandoffResult::foreground_requested ? context.foreground_status : context.launch_status);
-    return result == shelf::HandoffResult::foreground_requested ? 0 : 1;
+           result == shelf::HandoffResult::foreground_changed ? context.probe_status : context.launch_status);
+    return result == shelf::HandoffResult::foreground_observed ? 0 : 1;
 }

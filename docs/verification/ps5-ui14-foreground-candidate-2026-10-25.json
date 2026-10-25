@@ -28,13 +28,24 @@
     "consoleTransfer": "full raw backup and all 76 final file readbacks passed with SELF conversion disabled",
     "preferences": "unchanged",
     "helperExecutedByInstaller": false,
-    "physicalForegroundTest": "pending"
+    "physicalForegroundTest": "failed; owner confirms PS5SX2 still stays behind the home screen",
+    "kernelDiagnostic": "The duplicate launch aborts with 0x8094000c; its return does not confirm a visible foreground transition"
   },
   "previousOwnerResults": {
     "compactCircleHint": "accepted; fades automatically",
     "ps5sx2": "cold launch works, stays behind PS5 home screen",
     "retroarch": "cold launch works, stays behind PS5 home screen",
     "opening": "black before grid; known limitation"
+  },
+  "sourceKitColdRelink": {
+    "sourceCommit": "f45b35a6a2ef765fab0b4d2beecffedfdf04ec75",
+    "bytes": 101284681,
+    "sha256": "b494500eaa1843fb946986cb5bd1662181fd5c30e84d3919de1b12a161ef2240",
+    "members": 265,
+    "result": "passed; exact reference ELF and SELF from extracted kit, fresh compiler prefix and source-rebuilt converter",
+    "applicationRecompiled": false,
+    "runtimeMode": "standard-sdk",
+    "hardwareAcceptance": "failed foreground test; reproducibility does not imply console launch acceptance"
   },
   "policy": "One cold launch after committed cooperative closure and monitored idle; one null-argument running-title request only after the same target remains observed for six seconds. No repeated cold-launch loop or SetAppFocus call.",
   "reference": "https://github.com/Swordpdf/PS5SX2/blob/bea3c2e8420934aad24d5665eb75b8a6e462d452/ps5/disclaunch/disc_launch.c"
