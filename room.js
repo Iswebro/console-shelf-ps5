@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Local preview assets only. No network requests, videos, credentials or PS5 writes.
+// Local preview assets only. No network requests, credentials or PS5 writes.
 window.ShelfRoom = class {
   constructor({ state, toast, icon }) {
     this.state = state; this.toast = toast; this.icon = icon;
-    this.images = new Map(); this.signature = ''; this.rotation = 0; this.lastTurn = Date.now();
+    this.images = new Map(); this.videos = new Map(); this.signature = ''; this.rotation = 0; this.lastTurn = Date.now();
+    this.currentVideo = null; this.staticTimer = 0;
     this.favorites = new Set();
     try {
       const saved = JSON.parse(localStorage.getItem('shelf-game-favorites') || '[]');
@@ -17,20 +18,26 @@ window.ShelfRoom = class {
     document.getElementById('introPicture').onchange = event => this.storeImage('intro:' + select.value, event.target.files[0], event.target);
     document.getElementById('removeTvPicture').onclick = () => this.removeImage('picture');
     document.getElementById('removeIntroPicture').onclick = () => this.removeImage('intro:' + select.value);
+    document.getElementById('introVideo').onchange = event => this.storeVideo('intro:' + select.value, event.target.files[0], event.target);
+    document.getElementById('removeIntroVideo').onclick = () => this.removeImage('intro:' + select.value, 'videos');
     this.database = new Promise((resolve, reject) => {
-      const request = indexedDB.open('console-shelf-room-assets', 1);
-      request.onupgradeneeded = () => request.result.createObjectStore('pictures');
+      const request = indexedDB.open('console-shelf-room-assets', 2);
+      request.onupgradeneeded = () => {
+        for (const store of ['pictures', 'videos']) if (!request.result.objectStoreNames.contains(store)) request.result.createObjectStore(store);
+      };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
       request.onblocked = () => reject(new Error('Room asset storage is busy in another tab.'));
     });
     this.database.then(database => {
-      const request = database.transaction('pictures').objectStore('pictures').openCursor();
+      for (const [store, map] of [['pictures', this.images], ['videos', this.videos]]) {
+      const request = database.transaction(store).objectStore(store).openCursor();
       request.onsuccess = () => {
         const cursor = request.result;
-        if (cursor) { this.images.set(cursor.key, URL.createObjectURL(cursor.value)); cursor.continue(); }
+        if (cursor) { map.set(cursor.key, URL.createObjectURL(cursor.value)); cursor.continue(); }
         else this.render(true);
       };
+      }
     }).catch(() => {});
     this.timer = setInterval(() => this.render(), 1000);
   }
@@ -65,15 +72,41 @@ window.ShelfRoom = class {
     } catch (error) { this.toast(error.message || 'The picture could not be saved on this device.'); }
     finally { input.value = ''; }
   }
-  async removeImage(key) {
+  async storeVideo(key, file, input) {
+    if (!file) return;
+    let url = '';
+    try {
+      if (!file.name.toLowerCase().endsWith('.mp4') || !file.size || file.size > 32 * 1024 * 1024) throw new Error('Choose an MP4 smaller than 32 MB.');
+      url = URL.createObjectURL(file);
+      const video = document.createElement('video'); video.preload = 'metadata'; video.src = url;
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('Video metadata could not be read.')), 10000);
+        video.onloadedmetadata = () => { clearTimeout(timeout); resolve(); };
+        video.onerror = () => { clearTimeout(timeout); reject(new Error('This browser could not read that MP4.')); };
+      });
+      const okay = video.videoWidth > 0 && video.videoHeight > 0 && video.videoWidth <= 640 && video.videoHeight <= 368 && video.duration > 0 && video.duration <= 60;
+      video.removeAttribute('src'); video.load();
+      if (!okay) throw new Error('Choose a clip up to 640 × 368 and 60 seconds.');
+      const database = await this.database;
+      await new Promise((resolve, reject) => {
+        const transaction = database.transaction('videos', 'readwrite'); transaction.objectStore('videos').put(file, key);
+        transaction.oncomplete = resolve; transaction.onerror = () => reject(transaction.error);
+      });
+      const previous = this.videos.get(key); if (previous) URL.revokeObjectURL(previous);
+      this.videos.set(key, url); url = ''; this.render(true); this.toast('Video saved for this browser preview. Use the PC tool for the PS5 copy.');
+    } catch (error) { this.toast(error.message || 'The video could not be saved.'); }
+    finally { if (url) URL.revokeObjectURL(url); input.value = ''; }
+  }
+  async removeImage(key, store = 'pictures') {
     try {
       const database = await this.database;
       await new Promise((resolve, reject) => {
-        const transaction = database.transaction('pictures', 'readwrite'); transaction.objectStore('pictures').delete(key);
+        const transaction = database.transaction(store, 'readwrite'); transaction.objectStore(store).delete(key);
         transaction.oncomplete = resolve; transaction.onerror = () => reject(transaction.error);
       });
-      const previous = this.images.get(key); if (previous) URL.revokeObjectURL(previous);
-      this.images.delete(key); this.render(true); this.toast('Personal picture removed from this preview.');
+      const map = store === 'videos' ? this.videos : this.images;
+      const previous = map.get(key); if (previous) URL.revokeObjectURL(previous);
+      map.delete(key); this.render(true); this.toast('Personal media removed from this preview.');
     } catch { this.toast('The picture could not be removed.'); }
   }
   place() {
@@ -86,24 +119,50 @@ window.ShelfRoom = class {
     document.body.style.setProperty('--room-controls-right', `${Math.max(innerWidth * .0417, innerWidth - x + 28 * scale)}px`);
   }
   render(force = false) {
-    const { active, system, mode, message, interval, introAll, reduced } = this.state();
+    const { active, system, mode, noise, message, interval, introAll, reduced } = this.state();
     const tv = document.getElementById('roomTv');
     tv.hidden = !active || mode === 'off';
-    if (tv.hidden || !system) return;
+    if (tv.hidden || !system) {
+      this.currentVideo?.pause(); this.currentVideo = null; clearInterval(this.staticTimer); this.staticTimer = 0; this.signature = ''; return;
+    }
     this.place();
     const games = window.shelfSystems.flatMap(system => system.games.filter(game => this.favorites.has(this.key(system, game))).map(game => ({ system, game })));
     if (Date.now() - this.lastTurn >= interval * 1000) { this.rotation++; this.lastTurn = Date.now(); }
     const favorite = games[this.rotation % Math.max(1, games.length)];
     const date = new Date(), time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     const eligible = introAll || system.status !== 'reference';
+    const noEmulator = system.status === 'reference', noGames = !system.games.length;
+    const staticOn = noise === 'emulator' && noEmulator || noise === 'games' && noGames || noise === 'either' && (noEmulator || noGames);
+    const clip = this.videos.get('intro:' + system.id);
     const custom = mode === 'picture' ? this.images.get('picture') : mode === 'intro' && eligible ? this.images.get('intro:' + system.id) : null;
-    const signature = JSON.stringify([mode, system.id, message, custom, mode === 'clock' ? time : '', mode === 'favorites' ? favorite?.game : '', eligible]);
-    if (!force && signature === this.signature) return;
+    const signature = JSON.stringify([mode, system.id, message, custom, clip, staticOn, reduced, mode === 'clock' ? time : '', mode === 'favorites' ? favorite?.game : '', eligible]);
+    if (signature === this.signature) return;
+    this.currentVideo?.pause(); this.currentVideo = null; clearInterval(this.staticTimer); this.staticTimer = 0;
     this.signature = signature;
     const content = document.createElement('div'); content.className = 'tv-content';
     const image = (source, className = '') => { const node = document.createElement('img'); node.src = source; node.alt = ''; node.className = className; content.append(node); };
     const text = (value, tag = 'strong', className = '') => { const node = document.createElement(tag); node.textContent = value; node.className = className; content.append(node); };
-    if (custom) image(custom, 'tv-personal-picture');
+    if (staticOn) {
+      const canvas = document.createElement('canvas'); canvas.width = 96; canvas.height = 54; canvas.className = 'tv-static';
+      const context = canvas.getContext('2d'), pixels = context.createImageData(96, 54); let random = 4711;
+      const paint = () => {
+        for (let i = 0; i < pixels.data.length; i += 4) {
+          random ^= random << 13; random ^= random >>> 17; random ^= random << 5;
+          const level = 62 + (random >>> 0) % 83;
+          pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = level; pixels.data[i + 3] = 255;
+        }
+        context.putImageData(pixels, 0, 0);
+      };
+      paint(); if (!reduced) this.staticTimer = setInterval(paint, 100);
+      content.style.padding = '0'; content.append(canvas);
+    } else if (mode === 'video' && eligible) {
+      const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.preload = 'auto';
+      video.src = clip || 'assets/room/shelf-intro.mp4'; video.loop = false;
+      content.append(video); this.currentVideo = video;
+      if (!clip) text('Shelf demo · add your own console intro', 'small', 'tv-video-caption');
+      if (reduced) video.addEventListener('loadeddata', () => video.pause(), { once: true });
+      else video.play().catch(() => { text('Video unavailable in this browser', 'small', 'tv-video-caption'); });
+    } else if (custom) image(custom, 'tv-personal-picture');
     else if (mode === 'clock') {
       image(this.icon(), 'tv-logo'); text(time, 'strong', 'tv-clock');
       text(date.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' }), 'span'); text(message, 'small');
@@ -118,6 +177,7 @@ window.ShelfRoom = class {
     else {
       image(system.image); text(system.name);
       if (mode === 'console') text(`${system.games.length} example games · ${system.emulators.length} listed routes`, 'small');
+      else if (mode === 'intro') text('Add your own console intro picture', 'small');
     }
     tv.replaceChildren(content); tv.setAttribute('aria-label', content.textContent || `TV displaying ${system.name}`);
     if (!reduced && mode === 'intro') content.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' });

@@ -156,7 +156,20 @@ h2 { margin: 5px 0 0; font-size: 28px; letter-spacing: -.035em; }
 .room-shelf .shelf-heading, .room-shelf .swipe-hint { display: none; }
 .room-shelf .shelf-stage { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
 .systems-shelf { position: absolute; inset: 0; z-index: 1; }
-.room-tv { position: absolute; z-index: 0; overflow: hidden; border-radius: 1px; pointer-events: none; color: #def4ec; background: #040d10f0; box-shadow: inset 0 0 12px #0009; isolation: isolate; }
+.room-tv { position: fixed; z-index: 0; overflow: hidden; border-radius: 1px; pointer-events: none; color: #def4ec; background: #040d10f0; box-shadow: inset 0 0 12px #0009; isolation: isolate; }
+.room-console { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+.room-console img { position: absolute; max-width: none; filter: grayscale(var(--art-grey, 0)) drop-shadow(0 4px 2px #0009); }
+.room-details #detail { position: fixed; z-index: 2; top: 10vh; left: 4.17vw; right: var(--room-controls-right, 40vw); bottom: 7vh; overflow-y: auto; padding: 0 18px 25px 0; scrollbar-color: #657b73 #0c171680; }
+.room-details .hero { display: block; min-height: 0; margin: 8px 0 24px; background: #0b1515d9; border-color: #afc7bc38; border-radius: 20px; }
+.room-details .hero-copy { padding: 24px; }
+.room-details .hero h1 { font-size: clamp(24px, 3.5vw, 48px); }
+.room-details .hero-art { display: none; }
+.room-details .detail-controls { margin-top: 20px; }
+.room-details .games { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.room-details .library-heading, .room-details .notice { background: #0b1515df; padding: 14px; border-radius: 12px; }
+.tv-content > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.tv-content .tv-video-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: .4em; background: #04100fe6; font-size: .8em; }
+.tv-static { width: 100%; height: 100%; image-rendering: pixelated; }
 .room-tv::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(116deg, #d7e9df0d 0%, #d7e9df03 38%, transparent 38.2%), linear-gradient(#c4e6d912, transparent 10%, transparent 85%, #0004); box-shadow: inset 0 0 9px 2px #0007; }
 .tv-content { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .48em; padding: 1.2em 1.4em; text-align: center; opacity: .9; text-shadow: 0 0 8px #bbebd529; }
 .tv-content > img { max-width: 60%; width: auto; height: 58%; min-height: 0; object-fit: contain; }
@@ -177,7 +190,7 @@ h2 { margin: 5px 0 0; font-size: 28px; letter-spacing: -.035em; }
 .systems-shelf .shelf-swap-ghost { position: absolute; pointer-events: none; z-index: 3; }
 .reduced-motion .systems-shelf .console-art img, .reduced-motion .systems-shelf .console-art::before { transition: none; }
 .systems-shelf .console-art::before { content: ""; position: absolute; left: 7%; right: 7%; bottom: -2px; height: 125px; background: radial-gradient(ellipse at 50% 70%, #a2caba24, transparent 68%); opacity: 0; transition: opacity .25s ease; }
-.systems-shelf .console-art::after { z-index: -1; left: 18%; width: 64%; height: 10px; bottom: -4px; background: #010408b5; filter: blur(4px); }
+.systems-shelf .console-art::after { z-index: -1; left: calc(50% - 32% * var(--hardware-scale, 1)); width: calc(64% * var(--hardware-scale, 1)); height: 10px; bottom: -4px; background: #010408b5; filter: blur(4px); }
 .systems-shelf .console-art img { inset: auto; max-width: none; object-fit: fill; filter: grayscale(var(--art-grey, 0)) drop-shadow(0 4px 2px #0009); transform: none; transform-origin: var(--art-foot-x, 50%) var(--art-foot-y, 100%); transition: transform .24s cubic-bezier(.2,.65,.3,1), filter .24s ease; }
 .systems-shelf .card:is(:hover, :focus-within, .is-selected) .console-art img { transform: scale(1.045); filter: grayscale(var(--art-grey, 0)) drop-shadow(0 4px 2px #0009) brightness(1.04); }
 .systems-shelf .card:is(:hover, :focus-within, .is-selected) .console-art::before { opacity: 1; }
@@ -197,6 +210,9 @@ h2 { margin: 5px 0 0; font-size: 28px; letter-spacing: -.035em; }
 .room-shelf .empty-search { position: fixed; z-index: 3; top: 37vh; left: 15vw; right: 15vw; background: #101719d9; backdrop-filter: blur(8px); }
 @media (max-width: 600px) {
   .room-tv { display: none; }
+  .room-console { display: none; }
+  .room-details #detail { right: 4.17vw; }
+  .room-details .games { grid-template-columns: 1fr; }
   .room-shelf .browse-panel { padding: 9px 10px; }
   .room-shelf .browse-summary { font-size: 9px; gap: 7px; }
   .room-shelf #shelfFocusStatus { display: none; }

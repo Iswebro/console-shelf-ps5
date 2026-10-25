@@ -74,6 +74,16 @@ def main():
     copy(ROOT / "native/third_party/stb/stb_image.h", "licenses/stb_image-source-with-license.h")
     copy(ROOT / "native/third_party/stb/stb_truetype.h", "licenses/stb_truetype-source-with-license.h")
     copy(ROOT / "native/third_party/stb/stb_image_write.h", "licenses/stb_image_write-source-with-license.h")
+    copy(ROOT / "native/third_party/pl_mpeg/pl_mpeg.h", "licenses/pl_mpeg-source-with-MIT-license.h")
+    room_media = json.loads((ROOT / "assets/room/manifest.json").read_text(encoding="utf-8"))
+    require(room_media.get("officialConsoleIntro") is False and room_media.get("silent") is True,
+            "Expected original silent Shelf demo")
+    for item in room_media["assets"]:
+        require(item["local"] in {"assets/room/shelf-intro.mpg", "assets/room/shelf-intro.mp4"}, "Unexpected demo path")
+        source = ROOT / item["local"]
+        require(source.stat().st_size == item["bytes"] and sha256(source) == item["sha256"], "Room demo hash mismatch")
+        copy(source, item["local"])
+    copy(ROOT / "assets/room/manifest.json", "assets/room/manifest.json")
     copy(ROOT / "assets/CREDITS.md", "assets/CREDITS.md")
     copy(build / "build-source.json", "build-source.json")
 
@@ -118,9 +128,13 @@ L1/R1 swaps pages with only the consoles moving; Down continues between tiers.
 Sort & filter -> Shelf pages also offers one curated display of up to eight consoles,
 chosen in Consoles. Appearance -> Motion offers Reduced motion.
 Play room customises the TV: console artwork, personal text or PNG, clock, rotating
-favourite games, intro pictures (installed emulators or all consoles), or screen off.
+favourite games, intro pictures/videos (installed emulators or all consoles), or screen off.
 Triangle stars games in Shelf's library. Personal PNGs stay in /data/console-shelf:
-tv-image.png or intros/<console-id>.png, up to 2048 x 2048. Video is not supported.
+tv-image.png or intros/<console-id>.png, up to 2048 x 2048. Silent intro videos use
+intros/<console-id>.mpg (MPEG-1); the PC preparation tool makes compatible copies.
+The TV stays visible in console details and libraries. Static for missing emulators/games
+is optional in Play room; reduced motion freezes it and videos on a still frame.
+Up/Down stays on the current Shelf page; Up from its top row reaches the toolbar.
 Sort, visibility and favourite settings apply to all three views.
 Appearance -> Missing emulator artwork chooses Black & white (default) or Full colour.
 Only systems without a detected emulator are desaturated; PS4/PS5 stay in colour.

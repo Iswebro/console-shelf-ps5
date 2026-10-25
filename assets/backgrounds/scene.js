@@ -19,7 +19,7 @@ window.shelfRoomScene = {
       "woodEnd": 449,
       "feet": 441,
       "label": 452,
-      "artHeight": 128
+      "artHeight": 102
     },
     {
       "woodTop": 525,

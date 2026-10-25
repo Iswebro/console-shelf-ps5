@@ -87,11 +87,12 @@ void cycle(UiState& state, int direction) {
         changed(state);
     } else if (state.tab == SettingsTab::room) {
         if (state.settings_focus == 0)
-            p.tv_mode = static_cast<TvMode>((static_cast<int>(p.tv_mode) + direction + 7) % 7);
+            p.tv_mode = static_cast<TvMode>((static_cast<int>(p.tv_mode) + direction + 8) % 8);
         if (state.settings_focus == 1) { open_keyboard(state, false, true); return; }
         if (state.settings_focus == 2)
             p.tv_period = static_cast<std::size_t>((static_cast<int>(p.tv_period) + direction + 4) % 4);
         if (state.settings_focus == 3) p.intro_all = !p.intro_all;
+        if (state.settings_focus == 4) p.tv_noise = static_cast<TvNoise>((static_cast<int>(p.tv_noise) + direction + 4) % 4);
         changed(state);
     } else {
         if (state.settings_focus == 0) {
@@ -252,7 +253,7 @@ void input(UiState& state, Action action) {
         }
         const int max_focus =
             state.tab == SettingsTab::consoles ? 3 + static_cast<int>(console_picker(state).count) :
-            state.tab == SettingsTab::appearance ? 4 : 3;
+            state.tab == SettingsTab::appearance || state.tab == SettingsTab::room ? 4 : 3;
         if (action == Action::up)
             state.settings_focus = clamp(state.settings_focus - 1, max_focus);
         if (action == Action::down)
@@ -435,13 +436,18 @@ void input(UiState& state, Action action) {
     }
     const int stride = state.settings.preferences.layout == Layout::swipe ? 1 : 4;
     const bool swipe = state.settings.preferences.layout == Layout::swipe;
-    if (action == Action::up && (swipe || state.focus < stride)) {
+    const bool room = state.settings.preferences.layout == Layout::shelf;
+    const int page_start = room ? state.focus / 8 * 8 : 0;
+    const int local_focus = state.focus - page_start;
+    if (action == Action::up && (swipe || local_focus < stride)) {
         state.tools = true;
-        state.tool = swipe || state.focus < 3 ? 0 : 1;
+        state.tool = swipe || local_focus < 3 ? 0 : 1;
     } else if (action == Action::up)
         state.focus -= stride;
     if (action == Action::down && !swipe)
-        state.focus = clamp(state.focus + stride, static_cast<int>(shown.count) - 1);
+        state.focus = room && local_focus >= stride ? state.focus :
+                      clamp(state.focus + stride, std::min(room ? page_start + 7 : static_cast<int>(shown.count) - 1,
+                                                          static_cast<int>(shown.count) - 1));
     if (action == Action::left)
         state.focus = swipe ? (state.focus + static_cast<int>(shown.count) - 1) % static_cast<int>(shown.count)
                             : std::max(state.focus - state.focus % stride, state.focus - 1);

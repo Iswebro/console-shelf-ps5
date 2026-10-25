@@ -15,9 +15,12 @@ enum class Sort { featured, name_asc, name_desc, newest, oldest, brand, games, f
 enum class LaunchCapability { unavailable, emulator_menu, direct_game };
 enum class SystemFilter { all, emulators, games, built_in, no_route };
 enum class AppIcon { gaming, classic, jade };
-enum class TvMode { console, intro, picture, clock, message, favorites, off };
-inline constexpr std::array<std::string_view, 7> tv_labels = {
-    "Selected console", "Console intro picture", "My picture", "Clock & Shelf logo", "My message", "Favourite games", "Screen off"};
+enum class TvMode { console, intro, picture, clock, message, favorites, off, video };
+inline constexpr std::array<std::string_view, 8> tv_labels = {
+    "Selected console", "Console intro picture", "My picture", "Clock & Shelf logo", "My message", "Favourite games", "Screen off", "Console intro video"};
+enum class TvNoise { off, emulator, games, either };
+inline constexpr std::array<std::string_view, 4> noise_labels = {
+    "Off", "No emulator installed", "No games found", "No emulator or no games"};
 inline constexpr std::array<unsigned, 4> tv_periods = {10, 20, 30, 60};
 
 // Filled only by runtime adapters. A suggested core is never evidence of installation.
@@ -40,6 +43,7 @@ struct Preferences {
     bool shelf_single = false;
     bool reduced_motion = false;
     TvMode tv_mode = TvMode::console;
+    TvNoise tv_noise = TvNoise::off;
     bool intro_all = false;
     std::size_t tv_period = 1;
     std::size_t brand = 0;
@@ -53,6 +57,12 @@ struct BrowseRequest {
     std::string_view query;
     std::string_view brand;
 };
+inline bool tv_noise_for(const Preferences& p, const Availability& a) {
+    const bool no_emulator = !a.built_in && !a.emulator_count, no_games = !a.game_count;
+    return p.tv_mode != TvMode::off &&
+           ((p.tv_noise == TvNoise::emulator && no_emulator) || (p.tv_noise == TvNoise::games && no_games) ||
+            (p.tv_noise == TvNoise::either && (no_emulator || no_games)));
+}
 struct BrowseResult {
     std::array<std::size_t, system_count> indices{};
     std::size_t count = 0;

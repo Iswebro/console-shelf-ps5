@@ -34,7 +34,8 @@ const settings = {
   missing: savedChoice('shelf-missing', ['mono', 'colour'], 'mono'),
   pages: savedChoice('shelf-pages', ['paged', 'single'], 'paged'),
   motion: savedChoice('shelf-motion', ['smooth', 'reduced'], 'smooth'),
-  tvMode: savedChoice('shelf-tvMode', ['console', 'intro', 'picture', 'clock', 'message', 'favorites', 'off'], 'console'),
+  tvMode: savedChoice('shelf-tvMode', ['console', 'intro', 'picture', 'clock', 'message', 'favorites', 'off', 'video'], 'console'),
+  tvNoise: savedChoice('shelf-tvNoise', ['off', 'emulator', 'games', 'either'], 'off'),
   tvMessage: (safeStorage.get('shelf-tvMessage') || 'Welcome to your play room').replace(/[\x00-\x1f\x7f]/g, '').slice(0, 95),
   tvInterval: savedChoice('shelf-tvInterval', ['10', '20', '30', '60'], '20'),
   introScope: savedChoice('shelf-introScope', ['installed', 'all'], 'installed')
@@ -71,8 +72,8 @@ let orbitFrame = 0;
 const orbitMotion = new ShelfOrbit.Motion();
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const reduceMotion = () => reducedMotion.matches || settings.motion === 'reduced';
-const roomTv = new ShelfRoom({ state: () => ({ active: settings.layout === 'shelf' && !$('home').hidden,
-  system: systems.find(system => system.id === carouselId) || systems[0], mode: settings.tvMode,
+const roomTv = new ShelfRoom({ state: () => ({ active: settings.layout === 'shelf',
+  system: !$('detail').hidden && selected ? selected : systems.find(system => system.id === carouselId) || systems[0], mode: settings.tvMode, noise: settings.tvNoise,
   message: settings.tvMessage, interval: Number(settings.tvInterval), introAll: settings.introScope === 'all', reduced: reduceMotion()
 }), toast, icon: () => appIcons[settings.icon] });
 
@@ -107,6 +108,7 @@ function renderSettings() {
   $('shelfMode').value = settings.pages;
   $('motionStyle').value = settings.motion;
   $('tvMode').value = settings.tvMode;
+  $('tvNoise').value = settings.tvNoise;
   $('tvMessage').value = settings.tvMessage;
   $('tvInterval').value = settings.tvInterval;
   $('introScope').value = settings.introScope;
@@ -395,8 +397,16 @@ function renderSystems() {
 }
 
 function updateRoomView() {
-  const active = settings.layout === 'shelf' && !$('home').hidden;
+  const active = settings.layout === 'shelf';
   document.body.classList.toggle('room-shelf', active);
+  document.body.classList.toggle('room-details', active && !$('detail').hidden);
+  const consoleArt = $('roomConsole');
+  consoleArt.hidden = !active || $('detail').hidden || !selected;
+  if (!consoleArt.hidden) {
+    consoleArt.querySelector('img').src = selected.image;
+    consoleArt.classList.toggle('is-missing', selected.status === 'reference');
+    placeRoomConsole();
+  }
   if (active) $('homeHeading').textContent = 'Your console collection';
   else $('homeHeading').innerHTML = 'What do you want<br><em>to play today?</em>';
   roomTv.render();
@@ -485,6 +495,18 @@ function shelfColumnCount() {
   return width < 560 ? 2 : width < 950 ? 3 : 4;
 }
 
+function placeRoomConsole() {
+  if (settings.layout !== 'shelf' || !selected || $('roomConsole').hidden) return;
+  const art = shelfArtLayout[selected.id];
+  if (!art) return;
+  const scale = Math.max(innerWidth / roomScene.width, innerHeight / roomScene.height);
+  const ox = (innerWidth - roomScene.width * scale) / 2, oy = (innerHeight - roomScene.height * scale) / 2;
+  const [x, y, w, h] = art.bounds, fit = Math.min(280 * scale / w, roomScene.rows[0].artHeight * scale / h) * selected.roomScale;
+  const image = $('roomConsole').querySelector('img');
+  Object.assign(image.style, { width: `${art.canvas[0] * fit}px`, height: `${art.canvas[1] * fit}px`,
+    left: `${ox + 1320 * scale - (x + w / 2) * fit}px`, top: `${oy + roomScene.rows[0].feet * scale - (art.supportY ?? y + h) * fit}px` });
+}
+
 function placeShelfIcons() {
   if (settings.layout !== 'shelf' || $('home').hidden) return;
   roomTv.place();
@@ -513,7 +535,9 @@ function placeShelfIcons() {
     const image = surface.querySelector('img');
     if (!bounds || !image || !surface.clientWidth) return;
     const [x, y, w, h] = bounds.bounds;
-    const fit = Math.min((surface.clientWidth - 24) / w, Number(card.parentElement.dataset.artLimit) / h);
+    const physicalScale = systems.find(system => system.id === card.dataset.system)?.roomScale || 1;
+    card.style.setProperty('--hardware-scale', physicalScale);
+    const fit = Math.min((surface.clientWidth - 24) / w, Number(card.parentElement.dataset.artLimit) / h) * physicalScale;
     image.style.width = `${bounds.canvas[0] * fit}px`;
     image.style.height = `${bounds.canvas[1] * fit}px`;
     image.style.left = `${(surface.clientWidth - w * fit) / 2 - x * fit}px`;
@@ -533,9 +557,9 @@ function moveShelf(key, current = document.activeElement) {
   if (key === 'ArrowLeft') next = at % shelfColumns ? at - 1 : at;
   else if (key === 'ArrowRight') next = at % shelfColumns < shelfColumns - 1 ? Math.min(at + 1, cards.length - 1) : at;
   else if (key === 'ArrowUp') {
-    if (at < shelfColumns) { $('toggleLayout').focus(); return true; }
+    if (at % (shelfColumns * 2) < shelfColumns) { $('toggleLayout').focus(); return true; }
     next = at - shelfColumns;
-  } else if (key === 'ArrowDown') next = Math.min(at + shelfColumns, cards.length - 1);
+  } else if (key === 'ArrowDown') next = at % (shelfColumns * 2) >= shelfColumns ? at : Math.min(at + shelfColumns, cards.length - 1);
   else if (key === 'PageDown' || key === 'PageUp') { moveShelfPage(key === 'PageDown' ? 1 : -1); return true; }
   else if (key === 'Home') next = 0;
   else if (key === 'End') next = cards.length - 1;
@@ -706,6 +730,7 @@ $('scopeFavorites').onclick = () => setChoice('scope', 'favorites');
 $('shelfMode').onchange = event => { setChoice('pages', event.target.value); renderConsolePicker(); };
 $('motionStyle').onchange = event => setChoice('motion', event.target.value);
 $('tvMode').onchange = event => setChoice('tvMode', event.target.value);
+$('tvNoise').onchange = event => setChoice('tvNoise', event.target.value);
 $('tvInterval').onchange = event => setChoice('tvInterval', event.target.value);
 $('introScope').onchange = event => setChoice('introScope', event.target.value);
 $('tvMessage').oninput = event => {
@@ -841,6 +866,7 @@ window.addEventListener('pointerup', endDrag);
 window.addEventListener('pointercancel', endDrag);
 window.addEventListener('resize', () => {
   updateCarouselPosition();
+  roomTv.place(); placeRoomConsole();
   if (settings.layout !== 'shelf' || $('home').hidden) return;
   const focused = document.activeElement.closest('.card')?.dataset.system;
   if (shelfColumnCount() !== shelfColumns) {

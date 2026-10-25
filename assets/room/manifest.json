@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "title": "Original Shelf intro demo",
+  "creator": "Console Shelf project",
+  "license": "GPL-3.0-only",
+  "officialConsoleIntro": false,
+  "silent": true,
+  "width": 640,
+  "height": 360,
+  "fps": 25,
+  "seconds": 5,
+  "logo": {
+    "path": "assets/shelf-icon.png",
+    "sha256": "2a6a3c7d542076083132eba87dd8c2c78b49add59d6fe113a66849c3c518311b"
+  },
+  "assets": [
+    {
+      "local": "assets/room/shelf-intro.mpg",
+      "bytes": 112640,
+      "sha256": "c669c8291a9a800c4f7665259b89d3422a8c4204a96c7796501651bc06c72624"
+    },
+    {
+      "local": "assets/room/shelf-intro.mp4",
+      "bytes": 23482,
+      "sha256": "29b4bf62887740fe73c2771866cc8d3713f2021ad97f292789005393df6e76d9"
+    }
+  ]
+}

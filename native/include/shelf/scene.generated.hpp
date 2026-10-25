@@ -8,5 +8,5 @@ inline constexpr const char* base_image="assets/backgrounds/gamer-lounge-v1.png"
 inline constexpr const char* shelf_image="assets/backgrounds/gamer-lounge-deep-v1.png";
 inline constexpr int tv_x=1045, tv_y=75, tv_width=497, tv_height=258;
 struct Tier { int wood_top, wood_end, feet, label, art_height; };
-inline constexpr std::array<Tier,2> tiers = {{{360,449,441,452,128},{525,615,607,618,128}}};
+inline constexpr std::array<Tier,2> tiers = {{{360,449,441,452,102},{525,615,607,618,128}}};
 } // namespace shelf::room_scene

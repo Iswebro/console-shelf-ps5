@@ -1,0 +1,435 @@
+{
+  "revision": "UI-20",
+  "version": "00.100.019",
+  "scope": "PC checks and cross-compiled artifacts; no hardware acceptance claimed",
+  "self": {
+    "bytes": 2770001,
+    "sha256": "c83ab301d92bb4d9c4efe6731b32bfb9cb9cb948f3aa87f35df2c8ecfca945c4"
+  },
+  "elf": {
+    "bytes": 2890076,
+    "sha256": "e4fc8a3aef387fd927812a4491eaa55650d4c6e3f77e5226ef2b8729370459fb",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "nativeFrames": 57,
+  "nativeSessionClosed": true,
+  "nativeFrameLedger": [
+    {
+      "name": "home.png",
+      "bytes": 2169848,
+      "sha256": "9e15b1dfb042a80f49a02c5091afe5d07b415b6013d625b668da83b957ebcd01"
+    },
+    {
+      "name": "details.png",
+      "bytes": 3254929,
+      "sha256": "6c63ee6edca818a7a5230cfa161ed873acdc87f0f5dc5fe9271623c6bfc3e1fa"
+    },
+    {
+      "name": "appearance.png",
+      "bytes": 1294754,
+      "sha256": "e30c076ad4f3cb3d2a52b2cbce83c87eddcedfab6abd892af959a52e1740b5b8"
+    },
+    {
+      "name": "browse.png",
+      "bytes": 1294571,
+      "sha256": "489f4f22b52335ca08d53e54da428acaaeecb9dfa132a03c91a3bc513e9bad48"
+    },
+    {
+      "name": "consoles.png",
+      "bytes": 1299377,
+      "sha256": "e8f3042008a4d45148a3902b80f5ae4d23b94300c882deafae9526cdbc2c0fb7"
+    },
+    {
+      "name": "swipe.png",
+      "bytes": 3358301,
+      "sha256": "5321334f29e07f33dfaad0af5ca9f8af4c5d8d2680f4fff5894f7263eca1e9ed"
+    },
+    {
+      "name": "megadrive.png",
+      "bytes": 3244740,
+      "sha256": "ee77fa173107d70f82c1432698195d962df15eb62c6e0b4916da8db791b13919"
+    },
+    {
+      "name": "display-shelf.png",
+      "bytes": 3079220,
+      "sha256": "195b1a5a00a20931eac96e8e9a1c6636a3664d98de6a07b3a6af543211847c67"
+    },
+    {
+      "name": "display-shelf-page2.png",
+      "bytes": 3070840,
+      "sha256": "447501ab56267a8066b29699d8c2cf1c8ae8e22612d84cc8642f567c26ea5f5a"
+    },
+    {
+      "name": "display-shelf-reopened.png",
+      "bytes": 3079220,
+      "sha256": "195b1a5a00a20931eac96e8e9a1c6636a3664d98de6a07b3a6af543211847c67"
+    },
+    {
+      "name": "orbit-start.png",
+      "bytes": 3376318,
+      "sha256": "f2d2e253740ca3a043be6f875c00acb5713f6d4e0ee22a7440b85bf831e872e7"
+    },
+    {
+      "name": "orbit-middle.png",
+      "bytes": 3375239,
+      "sha256": "7e43119360296f4bd048030ba9c6b43ed15ca019d02963d09c48eba0e8bfa97c"
+    },
+    {
+      "name": "orbit-end.png",
+      "bytes": 3359725,
+      "sha256": "19fdd2c95a7996fa7bece6420054e00884c26c0cfd62ba0aa43ef9e12265d771"
+    },
+    {
+      "name": "orbit-reference.png",
+      "bytes": 3359725,
+      "sha256": "19fdd2c95a7996fa7bece6420054e00884c26c0cfd62ba0aa43ef9e12265d771"
+    },
+    {
+      "name": "loading.png",
+      "bytes": 112664,
+      "sha256": "b722a10e673c858a0d18b0384a8d66ef3e04fbd16488c52de5d48659ebbbf7ee"
+    },
+    {
+      "name": "prepared-cover.png",
+      "bytes": 112664,
+      "sha256": "b722a10e673c858a0d18b0384a8d66ef3e04fbd16488c52de5d48659ebbbf7ee"
+    },
+    {
+      "name": "loading-motion.png",
+      "bytes": 114601,
+      "sha256": "33b8b285ad6adccfb691439b923d9bbbbae2f5355e0d705a11d7b963560224b2"
+    },
+    {
+      "name": "reveal-start.png",
+      "bytes": 113045,
+      "sha256": "7b433d131f25aec94b58deb5b5c47a49e5cadcb3f6e53563ad7082e38e97fe33"
+    },
+    {
+      "name": "reveal-middle.png",
+      "bytes": 1681920,
+      "sha256": "4b89fff21c465e7e7a94e5c9712ee01fe2242320857dbf14a8f63f9572dfdad5"
+    },
+    {
+      "name": "reveal-end.png",
+      "bytes": 2169848,
+      "sha256": "9e15b1dfb042a80f49a02c5091afe5d07b415b6013d625b668da83b957ebcd01"
+    },
+    {
+      "name": "reveal-reference.png",
+      "bytes": 2169848,
+      "sha256": "9e15b1dfb042a80f49a02c5091afe5d07b415b6013d625b668da83b957ebcd01"
+    },
+    {
+      "name": "hold-middle.png",
+      "bytes": 2155924,
+      "sha256": "70f49251b9ff82065250b24d4ed02a5b664006e57ded5b54c7e61b5bb8d92ede"
+    },
+    {
+      "name": "hold-cancelled.png",
+      "bytes": 2169848,
+      "sha256": "9e15b1dfb042a80f49a02c5091afe5d07b415b6013d625b668da83b957ebcd01"
+    },
+    {
+      "name": "close-start.png",
+      "bytes": 2155923,
+      "sha256": "00edc4c643821a8cf0e0dfd5290de397852e99155fff2aa702ffd2cdeb85b52b"
+    },
+    {
+      "name": "close-middle.png",
+      "bytes": 1672641,
+      "sha256": "09484068318c3b95daaf03102ace86b2894d6262d7287a66e9209bc3984710ae"
+    },
+    {
+      "name": "settings-focus.png",
+      "bytes": 2136592,
+      "sha256": "d99775635a5dace0a9c6f3a48715c8a9aa681f676684c50947af2b554e553a52"
+    },
+    {
+      "name": "layout-focus.png",
+      "bytes": 2135406,
+      "sha256": "fb68f343e688c86a6641a3461cb0e7075349c7d3659f9a03bcc5abba346fb09d"
+    },
+    {
+      "name": "launch-art.png",
+      "bytes": 113045,
+      "sha256": "7b433d131f25aec94b58deb5b5c47a49e5cadcb3f6e53563ad7082e38e97fe33"
+    },
+    {
+      "name": "close-hint.png",
+      "bytes": 2159253,
+      "sha256": "346a5dee6e4172c17d767106a248977894c726a6302449ee0f4e277386201ba4"
+    },
+    {
+      "name": "close-hint-fade.png",
+      "bytes": 2176679,
+      "sha256": "ecbbdb5b182c9a53612d2ef5f5d769f3c09975a3934719e9ff55086f465fb1bf"
+    },
+    {
+      "name": "close-hint-gone.png",
+      "bytes": 2169848,
+      "sha256": "9e15b1dfb042a80f49a02c5091afe5d07b415b6013d625b668da83b957ebcd01"
+    },
+    {
+      "name": "missing-monochrome.png",
+      "bytes": 3079220,
+      "sha256": "195b1a5a00a20931eac96e8e9a1c6636a3664d98de6a07b3a6af543211847c67"
+    },
+    {
+      "name": "missing-setting.png",
+      "bytes": 1219561,
+      "sha256": "c46284b63731bfe5b0517bb0f8ee0cffd0c0601728fd1fd9c81164451fa1ecf0"
+    },
+    {
+      "name": "missing-full-colour.png",
+      "bytes": 3112525,
+      "sha256": "1ad8443c8858ffc4bcf7dc711407e0c8f1b7c75b51921b93d367d3c513e7474d"
+    },
+    {
+      "name": "room-settings.png",
+      "bytes": 1228870,
+      "sha256": "5d4be983ce075be42fbba2357474003fc260f2b9a8ae36b3235ea6ad81ac160a"
+    },
+    {
+      "name": "room-intro.png",
+      "bytes": 3049966,
+      "sha256": "fa0ee9e4dd5395f02feaf3ec0dfc0749122acf72d9e4faec66a16ba4e84bbbbe"
+    },
+    {
+      "name": "room-picture-fallback.png",
+      "bytes": 3054770,
+      "sha256": "7fa8feee4389787cbc8fb1c9b38befe4ca05f8ee6c1e5f4e5a618c10ce396525"
+    },
+    {
+      "name": "room-clock.png",
+      "bytes": 3052774,
+      "sha256": "1d7195cb55ada70f1807e8649a285c0a40fc89d15d745ef94559d113a36515b2"
+    },
+    {
+      "name": "room-message.png",
+      "bytes": 3047320,
+      "sha256": "052a9ebff40a3a72ea1f69789b9351cc00efa4ffc54386c059fed0a0f49c3869"
+    },
+    {
+      "name": "room-favourites.png",
+      "bytes": 3052837,
+      "sha256": "b3d87ef3d05830b31fa3a1bd214f2d8b92e43c88a5c4941d25d6c416eac400e5"
+    },
+    {
+      "name": "room-screen-off.png",
+      "bytes": 3193280,
+      "sha256": "9eb572878d1c001776fd58adc1a2cb87653503533f7ecdb5907036fd50f1a26b"
+    },
+    {
+      "name": "shelf-swap-before.png",
+      "bytes": 3193280,
+      "sha256": "9eb572878d1c001776fd58adc1a2cb87653503533f7ecdb5907036fd50f1a26b"
+    },
+    {
+      "name": "shelf-swap-start.png",
+      "bytes": 3189171,
+      "sha256": "082981aa4cef1475b9b93736d36fbc092bd3ba50b82f84ffeadb49337c5e934d"
+    },
+    {
+      "name": "shelf-swap-out.png",
+      "bytes": 3191469,
+      "sha256": "c29ecdc0bf7d20d074b79fd15665f7687691c142843409f8f22c31cda254ad8a"
+    },
+    {
+      "name": "shelf-swap-in.png",
+      "bytes": 3185734,
+      "sha256": "cecaf14e6e13bcd371517f1ef195a0d7acb743ac0f6f0a072d458bae3c336f74"
+    },
+    {
+      "name": "shelf-swap-end.png",
+      "bytes": 3184502,
+      "sha256": "237ff2841063ceabcc9cf97f05a7be5c57d908be76428c229a2b7a483188a57f"
+    },
+    {
+      "name": "shelf-swap-reference.png",
+      "bytes": 3184502,
+      "sha256": "237ff2841063ceabcc9cf97f05a7be5c57d908be76428c229a2b7a483188a57f"
+    },
+    {
+      "name": "tv-main.png",
+      "bytes": 3050994,
+      "sha256": "31bd29b6b4b15c3e9b86ab354229e9a6bdd3a187bc33a99b0b635000ee019f4a"
+    },
+    {
+      "name": "tv-detail.png",
+      "bytes": 2898081,
+      "sha256": "45f9b61be156b1bb2172a09a65a09370e6e7a880969049a2a0422e29532f4eba"
+    },
+    {
+      "name": "tv-library.png",
+      "bytes": 3081812,
+      "sha256": "90febc1900d95b24a852a7e9f5ecfa69b76bfbe673d64727c07b3cd20f460bf1"
+    },
+    {
+      "name": "tv-video-start.png",
+      "bytes": 3042464,
+      "sha256": "2164e53544e258928e4501bdfdb9489f92947cf2eceac35685aa721505e1373b"
+    },
+    {
+      "name": "tv-video-middle.png",
+      "bytes": 3043121,
+      "sha256": "5636906fbe3491a5ef1e9e1cd27ca3e9153ba6fe6d971698f91c8db87b64736e"
+    },
+    {
+      "name": "tv-video-later.png",
+      "bytes": 3044524,
+      "sha256": "2c908b5c8dbd903400828145d82a208f15f227e77d859332e8283dfe760a40da"
+    },
+    {
+      "name": "tv-static-a.png",
+      "bytes": 3221332,
+      "sha256": "0319abe485669eab21e6cff3cb8dc3c868dd964557fd90f5ed64820725821a34"
+    },
+    {
+      "name": "tv-static-b.png",
+      "bytes": 3224227,
+      "sha256": "1ed148519f420e526074ae9c6479006ce0d0d866e5c15504e453c179c81166fe"
+    },
+    {
+      "name": "tv-static-reduced-a.png",
+      "bytes": 3221332,
+      "sha256": "0319abe485669eab21e6cff3cb8dc3c868dd964557fd90f5ed64820725821a34"
+    },
+    {
+      "name": "tv-static-reduced-b.png",
+      "bytes": 3221332,
+      "sha256": "0319abe485669eab21e6cff3cb8dc3c868dd964557fd90f5ed64820725821a34"
+    }
+  ],
+  "browserChecks": "passed",
+  "movieChecks": [
+    "actual MPEG frame decoding",
+    "frame pacing",
+    "reduced-motion still",
+    "cleanup/reopen",
+    "timer wrap",
+    "bounded backlog",
+    "bad format and oversized sequence refusal"
+  ],
+  "roomChecks": [
+    "page-local Up/Down",
+    "toolbar from page two",
+    "TV persists in details/library",
+    "wood and floor stay fixed",
+    "native and browser video",
+    "optional static and still mode",
+    "PNG/MP4 preview persistence",
+    "smaller default room scale for all 15 handheld/hybrid systems"
+  ],
+  "plMpeg": {
+    "project": "PL_MPEG",
+    "repository": "https://github.com/phoboslab/pl_mpeg",
+    "commit": "c871f2be022ece7ef4f64230b4fb8e1fb9eb6023",
+    "license": "MIT",
+    "files": [
+      {
+        "path": "pl_mpeg.h",
+        "bytes": 141424,
+        "sha256": "3a8cb30c83c2a1147719c30fe0c8b93da2987aa43140077c575b39aaa75fc2c9"
+      }
+    ]
+  },
+  "pcEncoderProvenance": {
+    "source": "https://github.com/GyanD/codexffmpeg/releases/download/9.0.2/ffmpeg-9.0.2-essentials_build.zip",
+    "checksumSource": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip.sha256",
+    "archiveBytes": 114768076,
+    "archiveSha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+    "githubDigest": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+    "zipIntegrity": "passed",
+    "files": [
+      {
+        "path": "ffmpeg.exe",
+        "sha256": "3256173f3f8bffd7df12227c68adf68025edb1832273a9530688a7bb1ed8edec"
+      },
+      {
+        "path": "ffprobe.exe",
+        "sha256": "f0d36ecbbdd3bcfac3efa078c96c7271c2e68b3810595552ac3b7f17e9a65c52"
+      }
+    ]
+  },
+  "packagedVideo": {
+    "schema": 1,
+    "title": "Original Shelf intro demo",
+    "creator": "Console Shelf project",
+    "license": "GPL-3.0-only",
+    "officialConsoleIntro": false,
+    "silent": true,
+    "width": 640,
+    "height": 360,
+    "fps": 25,
+    "seconds": 5,
+    "logo": {
+      "path": "assets/shelf-icon.png",
+      "sha256": "2a6a3c7d542076083132eba87dd8c2c78b49add59d6fe113a66849c3c518311b"
+    },
+    "assets": [
+      {
+        "local": "assets/room/shelf-intro.mpg",
+        "bytes": 112640,
+        "sha256": "c669c8291a9a800c4f7665259b89d3422a8c4204a96c7796501651bc06c72624"
+      },
+      {
+        "local": "assets/room/shelf-intro.mp4",
+        "bytes": 23482,
+        "sha256": "29b4bf62887740fe73c2771866cc8d3713f2021ad97f292789005393df6e76d9"
+      }
+    ]
+  },
+  "psxs5": {
+    "sourceCommit": "5c17ea31aec5791c12451e915386fa98d670adb4",
+    "startup": "main(void); opens its shelf; no game-argument handling found",
+    "companion": "settings/saves/account controls; no launch endpoint found",
+    "capability": "emulator library only; emulator configuration unchanged"
+  },
+  "firmware": "12.20 retained; no firmware/network/security setting change",
+  "launchHelper": "same SHA-256 as owner-tested UI-15; see build record",
+  "sourceFingerprintSHA256": "3dadd048814e59d6d2404713bd1a0c3d9179e25e78bfcf43f2defb79bdf4a9d8",
+  "handheldProportions": {
+    "defaultRoomScale": 0.62,
+    "systems": [
+      "psp",
+      "switch2",
+      "switch",
+      "3ds",
+      "ds",
+      "gba",
+      "gbc",
+      "gb",
+      "pokemonmini",
+      "gamegear",
+      "atarilynx",
+      "neogeopocketcolor",
+      "neogeopocket",
+      "wonderswancolor",
+      "wonderswan"
+    ],
+    "homeConsoleRatioCheck": "PS2/PS3 visible artwork is taller than PSP/Switch 2 by more than 18 percent; grounding unchanged",
+    "scope": "room shelves and room detail hardware; catalogue focus views unchanged"
+  }
+}

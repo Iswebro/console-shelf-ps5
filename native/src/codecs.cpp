@@ -11,6 +11,9 @@
 #define STBIW_MALLOC(size) gs_malloc(size)
 #define STBIW_REALLOC(ptr, size) gs_realloc(ptr, size)
 #define STBIW_FREE(ptr) gs_free(ptr)
+#define PLM_MALLOC(size) gs_malloc(size)
+#define PLM_REALLOC(ptr, size) gs_realloc(ptr, size)
+#define PLM_FREE(ptr) gs_free(ptr)
 #endif
 #ifdef _MSC_VER
 #pragma warning(push, 0)
@@ -22,6 +25,8 @@
 #include "stb/stb_truetype.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
+#define PL_MPEG_IMPLEMENTATION
+#include "pl_mpeg/pl_mpeg.h"
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

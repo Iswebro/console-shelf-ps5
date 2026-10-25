@@ -27,6 +27,8 @@
       </div>
     </header>
 
+    <div id="roomTv" class="room-tv" role="img" aria-label="Your play room TV" hidden></div>
+    <div id="roomConsole" class="room-console" aria-hidden="true" hidden><img alt=""></div>
     <main>
       <section id="home">
         <div class="welcome">
@@ -62,7 +64,6 @@
         </div>
         <p id="swipeHint" class="swipe-hint" hidden>Find your next favourite. Move the stick, swipe or use ← →. Select the centre console to explore.</p>
         <div id="shelfStage" class="shelf-stage">
-          <div id="roomTv" class="room-tv" role="img" aria-label="Your play room TV" hidden></div>
           <div id="systems" class="systems-grid" role="list" aria-label="Systems"></div>
           <div id="carouselCaption" class="carousel-caption" hidden aria-live="polite" aria-atomic="true">
             <span id="carouselFamily" class="eyebrow"></span>
@@ -151,19 +152,22 @@
         </section>
         <section id="panelRoom" role="tabpanel" aria-labelledby="tabRoom" hidden>
           <h3>Your room, your screen</h3><p class="settings-description">A personal TV behind the glass. Available in Shelf layout.</p>
-          <label class="settings-field select-block" for="tvMode"><span>TV display</span><select id="tvMode"><option value="console">Selected console</option><option value="intro">Console intro picture</option><option value="picture">My picture</option><option value="clock">Clock &amp; Shelf logo</option><option value="message">My message</option><option value="favorites">Favourite games</option><option value="off">Screen off</option></select></label>
+          <label class="settings-field select-block" for="tvMode"><span>TV display</span><select id="tvMode"><option value="console">Selected console</option><option value="intro">Console intro picture</option><option value="picture">My picture</option><option value="clock">Clock &amp; Shelf logo</option><option value="message">My message</option><option value="favorites">Favourite games</option><option value="off">Screen off</option><option value="video">Console intro video</option></select></label>
           <label class="settings-field select-block" for="tvMessage"><span>Personal message or name</span><input id="tvMessage" type="text" maxlength="95" placeholder="Welcome to your play room" autocomplete="off"></label>
           <div class="settings-columns">
             <label class="settings-field select-block" for="tvInterval"><span>Rotate favourite games</span><select id="tvInterval"><option value="10">Every 10 seconds</option><option value="20">Every 20 seconds</option><option value="30">Every 30 seconds</option><option value="60">Every minute</option></select></label>
             <label class="settings-field select-block" for="introScope"><span>Play console intros for</span><select id="introScope"><option value="installed">Installed emulators</option><option value="all">All consoles</option></select></label>
           </div>
-          <p class="field-help">Mark favourite games with the star in a console’s game library. The TV rotates through them. This prototype uses intro pictures with console artwork as a fallback; it does not play intro videos.</p>
+          <label class="settings-field select-block" for="tvNoise"><span>TV static for missing content</span><select id="tvNoise"><option value="off">Off</option><option value="emulator">No emulator installed</option><option value="games">No games found</option><option value="either">No emulator or no games</option></select></label>
+          <p class="field-help">Mark favourite games with the star in a console’s game library. The TV rotates through them. Intro videos play once per selection, silently; reduced motion shows their first frame. Without your own clip, the TV plays the labelled Shelf demo.</p>
           <label class="settings-field select-block" for="tvPicture"><span>Choose my TV picture</span><input id="tvPicture" type="file" accept="image/png"><span class="field-help">PNG, up to 2048 × 2048 and 8 MB. Stored in this browser only.</span></label>
           <button type="button" id="removeTvPicture" class="text-button">Remove my picture</button>
           <label class="settings-field select-block" for="introConsole"><span>Console intro picture</span><select id="introConsole"></select></label>
           <label class="settings-field select-block" for="introPicture"><span>Choose that console’s intro picture</span><input id="introPicture" type="file" accept="image/png"></label>
           <button type="button" id="removeIntroPicture" class="text-button">Remove this intro picture</button>
-          <p class="field-help">On PS5, place your own PNG in <code>/data/console-shelf/tv-image.png</code> or <code>/data/console-shelf/intros/&lt;console-id&gt;.png</code> over your existing local FTP connection, while Shelf is closed. No official intro files are bundled.</p>
+          <label class="settings-field select-block" for="introVideo"><span>Choose that console’s intro video</span><input id="introVideo" type="file" accept="video/mp4"><span class="field-help">MP4 up to 640 × 368, 60 seconds and 32 MB. Stored in this browser only.</span></label>
+          <button type="button" id="removeIntroVideo" class="text-button">Remove this intro video</button>
+          <p class="field-help">On PS5, use the PC intro preparation tool for your own video, then place the resulting MPEG-1 <code>intros/&lt;console-id&gt;.mpg</code> in <code>/data/console-shelf</code> while Shelf is closed. PNG intro pictures use the same console ID. No official console intros are bundled.</p>
         </section>
       </div>
       <footer class="settings-footer"><span><span class="saved-dot" aria-hidden="true"></span>Saved on this device</span><button type="button" id="doneSettings" class="primary">Done</button></footer>

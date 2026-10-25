@@ -39,6 +39,15 @@ The LLVM libc++ 18.1.8 header license is retained in [LLVM-libcxx.txt](native/th
 
 Complete linked-library source pins and original PacBrew recipes are in [tools/linked-sources.json](tools/linked-sources.json). The source preparation tool verifies them without running upstream scripts. The local source-kit assembler includes those archives with matching application objects and static libraries for relinking; these private artifacts are not a public binary release.
 
+### PL_MPEG
+
+Silent local TV intro playback uses [PL_MPEG by Dominic Szablewski](https://github.com/phoboslab/pl_mpeg),
+commit `c871f2be022ece7ef4f64230b4fb8e1fb9eb6023`. Its unmodified header declares `SPDX-License-Identifier: MIT`;
+the exact source, attribution and file SHA-256 are retained in
+[native/third_party/pl_mpeg](native/third_party/pl_mpeg). Shelf's wrapper bounds clip size, sequence dimensions,
+frame rate and decode work. No official console boot video is included. The bundled Shelf animation is original.
+The optional PC converter invokes the user's FFmpeg installation; FFmpeg executables are not redistributed here.
+
 No emulator binaries, payloads, games, BIOS, proprietary firmware/runtime binaries, keys, account data, or complete reference-project source checkouts are bundled in this source repository.
 
 Hardware image references and the generated icon credits are in [assets/CREDITS.md](assets/CREDITS.md). The original source photographs are linked there but are not included in the public repository.

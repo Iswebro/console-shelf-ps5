@@ -4,7 +4,9 @@ Shelf is a fixed-camera room with layered console artwork. It is not a navigable
 
 ## Arrange the consoles
 
-Use Square to choose **Shelf**. Eight consoles fit the two counters on PS5. **L1/R1** changes pages, retaining the same row/column where possible; it stops at either end. D-pad/left-stick navigation also continues between rows. Keyboard Page Up/Down provides the equivalent in the PC preview. Small preview screens use four or six spaces per page.
+Handhelds and Switch hybrids use a smaller default room scale (62% of the standard artwork fit), so a portable does not visually dwarf PS2, PS3 or other full-sized systems. This is an illustration balance, not a claim of exact real-world dimensions. The contact anchor remains on the wood when size changes. Grid and Swipe remain focus-oriented catalogue views.
+
+Use Square to choose **Shelf**. Eight consoles fit the two counters on PS5. **L1/R1** changes pages, retaining the same row/column where possible; it stops at either end. Up/Down moves between the two rows on the current page; Down stops on the bottom row. Up from the top row reaches the search/layout toolbar on every page, then Up reaches Settings. Keyboard Page Up/Down provides the page controls in the PC preview. Small preview screens use four or six spaces per page.
 
 In **Settings → Sort & filter → Shelf pages**, choose:
 
@@ -21,15 +23,18 @@ In **Settings → Sort & filter → Shelf pages**, choose:
 | --- | --- |
 | Selected console | Its illustration, name and discovered game/emulator counts |
 | Console intro picture | Your per-console still, fading in on selection; otherwise the console illustration |
+| Console intro video | Your local, silent clip plays once when the selected console changes; a labelled original Shelf demo plays if the clip is missing or invalid |
 | My picture | Your personal PNG, cropped to fill the TV screen |
 | Clock & Shelf logo | The device's local time/date and your personal message |
 | My message | Your name or short message with the selected Shelf logo |
 | Favourite games | Names and console illustrations for games starred in Shelf's library, rotating every 10, 20, 30 or 60 seconds |
 | Screen off | The room's original unlit TV |
 
-Console intro pictures can apply to **installed emulators and built-in systems**, or **all consoles**. Missing emulators still remain unavailable to launch. Video decoding and official boot animations/audio are not included in this prototype. Favourite-game rotation uses the games discovered by Shelf; it does not import another emulator's favourites or download covers.
+Console intros can apply to **installed emulators and built-in systems**, or **all consoles**. Missing emulators remain unavailable to launch. No official console boot animations or audio are bundled. Favourite-game rotation uses the games discovered by Shelf; it does not import another emulator's favourites or download covers. The TV and its saved display stay visible when opening a console's details or game library. Entering the same console does not restart its intro.
 
-Choose **Personal message** and press Cross to edit it on PS5. Up to 95 UTF-8 bytes fit; spaces are available on the keyboard. The text, rotation interval, display mode, intro scope and favourites save in Shelf's own settings. Game favourites use local stable path identities; moving or renaming the game can require starring it again.
+**TV static for missing content** is optional and starts Off. Choose No emulator installed, No games found, or No emulator or no games. This overrides the chosen content for matching consoles; Screen off still takes priority. Static stays inside the screen and uses low-contrast grain. Reduced motion freezes static and intro videos on a still frame.
+
+Choose **Personal message** and press Cross to edit it on PS5. Up to 95 UTF-8 bytes fit; spaces are available on the keyboard. The text, rotation interval, display mode, static policy, intro scope and favourites save in Shelf's own settings. Game favourites use local stable path identities; moving or renaming the game can require starring it again.
 
 ## Add your own pictures on PS5
 
@@ -42,7 +47,19 @@ Use a complete PNG up to **2048 × 2048 pixels**, preferably less than **8 MB**.
 
 Examples are `intros/ps2.png`, `intros/ps3.png`, `intros/n64.png`, `intros/genesis.png` and `intros/switch2.png`. The stable IDs are in `systems-data.js` and the console-art manifest. These images are personal content; they are not added to the public release or another app's folders.
 
-In the **browser preview**, Play room has PNG file pickers for your TV and individual console intros. Pictures stay in that browser's IndexedDB storage; text and choices stay in local storage. This does not transfer them to the console. The TV display is hidden on narrow phone previews where the photographed TV is outside the cropped room; the console library remains usable.
+## Add your own intro videos
+
+The PS5 uses silent **MPEG-1 video in an MPEG program stream** (`.mpg`), up to 640 × 368 pixels, 30 fps, 60 seconds and 32 MB. Renaming an MP4 to `.mpg` does not convert it. A missing, corrupt or unsupported clip falls back to the original Shelf demo. No PC streaming host is needed.
+
+Prepare a copy with Python and a portable [FFmpeg build](https://ffmpeg.org/download.html), keeping your original untouched:
+
+```powershell
+python tools/prepare-intro.py "C:\My clips\my-ps2-intro.mp4" --console ps2 --seconds 10 --ffmpeg "C:\Tools\ffmpeg\bin\ffmpeg.exe"
+```
+
+The tool creates a new directory under `.cache/room-intros` with a validated `ps2.mpg`, an MP4 for the browser preview, and a size/SHA-256 manifest. Existing output directories are refused. It does not contact the console. With Shelf closed, copy the MPEG to `/data/console-shelf/intros/ps2.mpg` through your existing local FTP connection, retaining a backup of any personal clip already there. Reopen Shelf, choose Console intro video, then select PS2. Use only clips you have permission to use.
+
+In the **browser preview**, Play room has PNG and MP4 file pickers for individual console intros. Media stays in that browser's IndexedDB storage; text and choices stay in local storage. This does not transfer it to the console. The TV display is hidden on narrow phone previews where the TV is outside the cropped room; the console library remains usable.
 
 ## Prototype status
 

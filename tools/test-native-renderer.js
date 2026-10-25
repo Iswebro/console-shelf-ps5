@@ -41,7 +41,7 @@ const walked=JSON.parse(fs.readFileSync(path.join(captures,'all-systems.json')))
 assert.match(run('unknown-action',allData,1).stderr,/Unknown scripted action/);
 const motionData=path.join(directory,'motion-data');fs.mkdirSync(motionData);
 const shelfData=path.join(directory,'shelf-data');fs.mkdirSync(shelfData);
-run('layout,layout,shot:display-shelf.png,down,right,right,right,down,shot:display-shelf-page2.png,report:display-shelf.json',shelfData);
+run('layout,layout,shot:display-shelf.png,right,right,right,tab,shot:display-shelf-page2.png,report:display-shelf.json',shelfData);
 const displayed=JSON.parse(fs.readFileSync(path.join(captures,'display-shelf.json')));
 assert.equal(displayed.layout,'shelf');assert.equal(displayed.shown,52);assert.equal(displayed.selected,catalogue[11].id);
 run('shot:display-shelf-reopened.png,report:display-shelf-reopened.json',shelfData);
@@ -70,6 +70,20 @@ for(const area of [[200,548,1500,4],[200,739,1500,3],[100,820,1700,70]]){
     assert.deepEqual(region(path.join(captures,frame),...area),stationary,'wood, wall and floor pixels stay fixed during page changes');
 }
 assert.notEqual(digest('missing-monochrome.png'),digest('missing-full-colour.png'),'missing-emulator style changes the rendered artwork');
+const tvData=path.join(directory,'tv-detail-data');fs.mkdirSync(tvData);
+run('layout,layout,settings,tab,tab,tab,right,right,right,right,back,shot:tv-main.png,confirm,shot:tv-detail.png,down,down,confirm,shot:tv-library.png',tvData);
+const screen=[1200,88,568,293];
+for(const name of ['tv-detail.png','tv-library.png']) assert.ok(region(path.join(captures,name),...screen).equals(region(path.join(captures,'tv-main.png'),...screen)),'TV content and room screen plane stay intact inside console details and library');
+const videoData=path.join(directory,'tv-video-data');fs.mkdirSync(videoData);
+run('layout,layout,settings,tab,tab,tab,left,down,down,down,confirm,back,report:tv-video.json,shot:tv-video-start.png,frame:1000,shot:tv-video-middle.png,frame:1000,shot:tv-video-later.png',videoData,0,true);
+const videoReport=JSON.parse(fs.readFileSync(path.join(captures,'tv-video.json')));
+assert.equal(videoReport.layout,'shelf');assert.equal(videoReport.tvMode,7);
+assert.ok(!region(path.join(captures,'tv-video-start.png'),...screen).equals(region(path.join(captures,'tv-video-middle.png'),...screen)),'the native decoder displays actual moving MPEG video');
+assert.ok(region(path.join(captures,'tv-video-start.png'),100,820,1700,70).equals(region(path.join(captures,'tv-video-middle.png'),100,820,1700,70)),'video never animates the room outside the TV');
+const noiseData=path.join(directory,'tv-noise-data');fs.mkdirSync(noiseData);
+run('layout,layout,settings,tab,tab,tab,down,down,down,down,confirm,back,shot:tv-static-a.png,frame:200,shot:tv-static-b.png,settings,previous-tab,previous-tab,previous-tab,down,down,down,down,confirm,back,shot:tv-static-reduced-a.png,frame:200,shot:tv-static-reduced-b.png',noiseData,0,true);
+assert.ok(!region(path.join(captures,'tv-static-a.png'),...screen).equals(region(path.join(captures,'tv-static-b.png'),...screen)),'optional TV grain animates inside the screen');
+assert.ok(region(path.join(captures,'tv-static-reduced-a.png'),...screen).equals(region(path.join(captures,'tv-static-reduced-b.png'),...screen)),'reduced motion keeps the static screen still');
 assert.notEqual(digest('orbit-start.png'),digest('orbit-middle.png'),'native motion must draw a new intermediate frame');
 assert.notEqual(digest('orbit-middle.png'),digest('orbit-end.png'),'native motion must continue to its target');
 assert.equal(digest('orbit-end.png'),digest('orbit-reference.png'),'animated motion must settle at the correct console pose');
@@ -93,6 +107,7 @@ assert.equal(digest('close-hint-gone.png'),digest('reveal-reference.png'),'the t
 const images=['home.png','details.png','appearance.png','browse.png','consoles.png','swipe.png','megadrive.png','display-shelf.png','display-shelf-page2.png','display-shelf-reopened.png','orbit-start.png','orbit-middle.png','orbit-end.png','orbit-reference.png','loading.png','prepared-cover.png','loading-motion.png','reveal-start.png','reveal-middle.png','reveal-end.png','reveal-reference.png','hold-middle.png','hold-cancelled.png','close-start.png','close-middle.png','settings-focus.png','layout-focus.png','launch-art.png','close-hint.png','close-hint-fade.png','close-hint-gone.png'];
 images.push('missing-monochrome.png','missing-setting.png','missing-full-colour.png');
 images.push('room-settings.png','room-intro.png','room-picture-fallback.png','room-clock.png','room-message.png','room-favourites.png','room-screen-off.png','shelf-swap-before.png','shelf-swap-start.png','shelf-swap-out.png','shelf-swap-in.png','shelf-swap-end.png','shelf-swap-reference.png');
+images.push('tv-main.png','tv-detail.png','tv-library.png','tv-video-start.png','tv-video-middle.png','tv-video-later.png','tv-static-a.png','tv-static-b.png','tv-static-reduced-a.png','tv-static-reduced-b.png');
 const output=[];
 for(const name of images){const filename=path.join(captures,name),bytes=fs.readFileSync(filename);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1080);assert.ok(bytes.length>(name.startsWith('loading')?1000:40000),name+' should contain its rendered frame');output.push({name,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
 fs.writeFileSync(path.join(root,'.cache/native-render-tests/latest.json'),JSON.stringify({directory,captures,processClosed:true,images:output},null,2)+'\n');

@@ -63,7 +63,8 @@ def verify_asset_sources(app_data, kit_data):
     mapped = {"sce_sys/param.json": "native/ps5/param.json",
               "sce_sys/pic0.dds": "native/ps5/sce_sys/pic0.dds",
               "sce_sys/pic1.dds": "native/ps5/sce_sys/pic1.dds",
-              "licenses/cJSON-MIT.txt": "native/third_party/cjson/LICENSE"}
+              "licenses/cJSON-MIT.txt": "native/third_party/cjson/LICENSE",
+              "licenses/pl_mpeg-source-with-MIT-license.h": "native/third_party/pl_mpeg/pl_mpeg.h"}
     for name in ("SDL2-PS5.txt", "libsamplerate-0.2.2.txt", "LGPL-2.1.txt", "LLVM-libcxx.txt"):
         mapped["licenses/" + name] = "native/third_party/licenses/" + name
     for name in ("stb_image", "stb_image_write", "stb_truetype"):

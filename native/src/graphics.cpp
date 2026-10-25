@@ -3,6 +3,7 @@
 #include "shelf/carousel.hpp"
 #include "shelf/scene.generated.hpp"
 #include "shelf/memory.hpp"
+#include "shelf/movie.hpp"
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
 #include "stb/stb_truetype.h"
@@ -51,7 +52,18 @@ OrbitMotion orbit;
 ShelfPageMotion shelf_motion;
 BrowseResult shelf_list{};
 bool shelf_visible = false;
+bool room_visible = false;
 bool tv_motion = false;
+Movie tv_movie;
+SDL_Texture* movie_texture = nullptr;
+SDL_Texture* noise_texture = nullptr;
+std::size_t movie_selected = system_count;
+bool movie_demo = false;
+void stop_movie() {
+    tv_movie.close();
+    if (movie_texture) SDL_DestroyTexture(movie_texture);
+    movie_texture = nullptr; movie_selected = system_count;
+}
 float room_scale() {
     return std::max(static_cast<float>(width) / room_scene::width, static_cast<float>(height) / room_scene::height);
 }
@@ -365,13 +377,13 @@ void picture(std::string_view name, int x, int y, int w, int h, Uint8 alpha = 25
     SDL_RenderCopy(renderer, entry->texture, nullptr, &dest);
 }
 void shelf_picture(std::string_view name, int cx, int base, int w, int h, bool selected, int floor_top, int floor_end,
-                   bool monochrome, Uint8 alpha = 255) {
+                   bool monochrome, Uint8 alpha = 255, float display_scale = 1.f) {
     auto* entry = image(name, monochrome);
     if (!entry || !entry->texture)
         return;
     const auto& bounds = entry->bounds;
     const float fit = std::min(static_cast<float>(w) / bounds.w, static_cast<float>(h) / bounds.h) *
-                      (selected ? 1.045f : 1.f);
+                      (selected ? 1.045f : 1.f) * display_scale;
     const int dw = static_cast<int>(bounds.w * fit), dh = static_cast<int>(bounds.h * fit);
     const int feet = static_cast<int>((entry->support_y - bounds.y) * fit);
     SDL_Rect dest{cx - dw / 2, base - feet, dw, dh};
@@ -536,10 +548,62 @@ void tv_lines(std::string_view value, int x, int y, int w, int size, SDL_Color t
         text(std::string_view(value.data() + cut, value.size() - cut), x, y + size + 7, size, tint, true, w);
     }
 }
+void tv_static(const SDL_Rect& target, bool still) {
+    static unsigned last_phase = ~0u;
+    const unsigned phase = still ? 0 : render_time / 100;
+    if (!noise_texture) {
+        noise_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, 96, 54);
+        last_phase = ~0u;
+    }
+    if (!noise_texture) return;
+    if (phase != last_phase) {
+        std::array<Uint32, 96 * 54> pixels{};
+        unsigned random = phase + 4711;
+        for (auto& pixel : pixels) {
+            random ^= random << 13; random ^= random >> 17; random ^= random << 5;
+            const Uint32 level = 62 + random % 83;
+            pixel = 0xff000000u | level | (level << 8) | (level << 16);
+        }
+        SDL_UpdateTexture(noise_texture, nullptr, pixels.data(), 96 * 4);
+        last_phase = phase;
+    }
+    SDL_RenderCopy(renderer, noise_texture, nullptr, &target);
+}
+bool tv_video(const SystemDefinition& system, std::size_t id, const SDL_Rect& target, bool still) {
+    bool changed = false;
+    if (movie_selected != id) {
+        stop_movie(); movie_selected = id; movie_demo = false;
+        char path[4096];
+        std::snprintf(path, sizeof(path), "%s/intros/%.*s.mpg", room_data, static_cast<int>(system.id.size()), system.id.data());
+        bool loaded = room_data[0] && tv_movie.open(path, render_time);
+        if (!loaded) {
+            std::snprintf(path, sizeof(path), "%s/assets/room/shelf-intro.mpg", root);
+            loaded = tv_movie.open(path, render_time); movie_demo = true;
+        }
+        if (loaded) {
+            movie_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING,
+                                               tv_movie.width(), tv_movie.height());
+            changed = true;
+        }
+    }
+    if (!movie_texture) return false;
+    changed = tv_movie.advance(render_time, still) || changed;
+    if (changed) SDL_UpdateTexture(movie_texture, nullptr, tv_movie.pixels(), tv_movie.width() * 4);
+    const float fit = std::min(static_cast<float>(target.w) / tv_movie.width(), static_cast<float>(target.h) / tv_movie.height());
+    const int w = static_cast<int>(tv_movie.width() * fit), h = static_cast<int>(tv_movie.height() * fit);
+    SDL_Rect fitted{target.x + (target.w - w) / 2, target.y + (target.h - h) / 2, w, h};
+    SDL_RenderCopy(renderer, movie_texture, nullptr, &fitted);
+    tv_motion = !still && tv_movie.playing();
+    if (movie_demo) {
+        rect(target.x, target.y + target.h - 30, target.w, 30, {4, 12, 15, 220});
+        centered("Shelf demo - add your own console intro", target.x + target.w / 2, target.y + target.h - 24, 16, muted);
+    }
+    return true;
+}
 void room_tv(const UiState& state) {
     const auto& p = state.settings.preferences;
     tv_motion = false;
-    if (p.tv_mode == TvMode::off) return;
+    if (p.tv_mode == TvMode::off) { stop_movie(); return; }
     const int x = room_x(static_cast<float>(room_scene::tv_x)), y = room_y(static_cast<float>(room_scene::tv_y));
     const int w = static_cast<int>(room_scene::tv_width * room_scale()), h = static_cast<int>(room_scene::tv_height * room_scale());
     SDL_Rect clip{x, y, w, h};
@@ -547,16 +611,21 @@ void room_tv(const UiState& state) {
     rect(x, y, w, h, {4, 12, 15, 238});
     const auto id = state.selected_system;
     const auto& system = catalog[id];
+    const bool eligible = p.intro_all || state.inventory[id].built_in || state.inventory[id].emulator_count;
+    const bool noise = tv_noise_for(p, state.inventory[id]);
+    if (p.tv_mode != TvMode::video || !eligible || noise) stop_movie();
     if (tv_selected != id) { tv_selected = id; tv_changed_at = render_time; }
     const float reveal = p.tv_mode == TvMode::intro && !p.reduced_motion ?
                          std::min(1.f, static_cast<unsigned>(render_time - tv_changed_at) / 420.f) : 1;
     tv_motion = reveal < 1;
     const auto alpha = static_cast<Uint8>(225 * reveal);
     bool pictured = false;
-    if (p.tv_mode == TvMode::picture || p.tv_mode == TvMode::intro) {
+    if (noise) { tv_static(clip, p.reduced_motion); tv_motion = !p.reduced_motion; pictured = true; }
+    if (!noise && p.tv_mode == TvMode::video && eligible)
+        pictured = tv_video(system, id, clip, p.reduced_motion || state.presentation.loading);
+    if (!noise && (p.tv_mode == TvMode::picture || p.tv_mode == TvMode::intro)) {
         char intro[96]; std::snprintf(intro, sizeof(intro), "@intro/%.*s", static_cast<int>(system.id.size()), system.id.data());
-        const bool eligible = p.tv_mode == TvMode::picture || p.intro_all || state.inventory[id].built_in || state.inventory[id].emulator_count;
-        auto* custom = eligible ? image(p.tv_mode == TvMode::picture ? std::string_view("@room") : std::string_view(intro)) : nullptr;
+        auto* custom = (p.tv_mode == TvMode::picture || eligible) ? image(p.tv_mode == TvMode::picture ? std::string_view("@room") : std::string_view(intro)) : nullptr;
         if (custom && custom->texture) {
             SDL_Rect source{0, 0, custom->w, custom->h};
             const float fit = std::max(static_cast<float>(w) / custom->w, static_cast<float>(h) / custom->h);
@@ -573,20 +642,21 @@ void room_tv(const UiState& state) {
             pictured = true;
         }
     }
-    if (!pictured && (p.tv_mode == TvMode::console || p.tv_mode == TvMode::intro)) {
+    if (!pictured && (p.tv_mode == TvMode::console || p.tv_mode == TvMode::intro || p.tv_mode == TvMode::video)) {
         picture(system.image, x + w / 2 - 140, y + 21, 280, h - 97, alpha, use_monochrome(p, state.inventory[id], system.id));
         tv_lines(system.name, x + 32, y + h - 79, w - 64, 25, {233, 249, 246, alpha});
         if (p.tv_mode == TvMode::console) {
             char counts[96]; std::snprintf(counts, sizeof(counts), "%zu games  /  %zu emulator routes",
                                          state.inventory[id].game_count, state.inventory[id].emulator_count);
             centered(counts, x + w / 2, y + h - 39, 17, {166, 202, 197, alpha});
-        }
+        } else centered(eligible ? "Add your own intro in Play room" : "Intro set to installed consoles only",
+                        x + w / 2, y + h - 39, 17, {166, 202, 197, alpha});
     } else if (!pictured && (p.tv_mode == TvMode::picture || p.tv_mode == TvMode::message)) {
         picture(icon_files[static_cast<std::size_t>(p.icon)], x + w / 2 - 31, y + 33, 62, 62, 210);
         tv_lines(state.settings.tv_text, x + 42, y + 129, w - 84, 31, {230, 248, 243, 230});
         if (p.tv_mode == TvMode::picture)
             centered("Add tv-image.png to your Shelf data folder", x + w / 2, y + h - 38, 17, muted);
-    } else if (p.tv_mode == TvMode::clock) {
+    } else if (!pictured && p.tv_mode == TvMode::clock) {
         const auto now = std::time(nullptr); const auto* local = std::localtime(&now);
         char clock[16] = "--:--", date[80]{};
         if (local) { std::strftime(clock, sizeof(clock), "%H:%M", local); std::strftime(date, sizeof(date), "%A, %d %B", local); }
@@ -594,7 +664,7 @@ void room_tv(const UiState& state) {
         centered(clock, x + w / 2, y + 88, 66, {229, 249, 244, 230}, true);
         centered(date, x + w / 2, y + 172, 20, {180, 212, 204, 230});
         tv_lines(state.settings.tv_text, x + 42, y + 222, w - 84, 18, {180, 212, 204, 200});
-    } else if (p.tv_mode == TvMode::favorites) {
+    } else if (!pictured && p.tv_mode == TvMode::favorites) {
         static const Library* previous_library = nullptr;
         static std::size_t previous_count = 0, count = 0;
         static std::array<std::uint64_t, 64> previous_keys{};
@@ -635,7 +705,6 @@ void home(const UiState& state) {
     const auto& p = state.settings.preferences;
     text("ONE HOME FOR YOUR SYSTEMS", 80, 119, 19, purple, true);
     const bool room = p.layout == Layout::shelf;
-    if (room) room_tv(state);
     if (room)
         text("Your console collection", 80, 154, 50, white, true);
     else {
@@ -707,13 +776,16 @@ void home(const UiState& state) {
                 const auto& system = catalog[id];
                 const int cx = room_x(room_scene::left + (col + .5f) * column);
                 const bool active = !state.tools && at == state.focus;
+                const int hardware_width = static_cast<int>(280 * system.room_scale);
+                const int hardware_height = static_cast<int>(art_height * system.room_scale);
                 if (active)
-                    glow(cx + offset - 140, contact - art_height, 280, art_height + 10, {125, 223, 211, 255},
+                    glow(cx + offset - hardware_width / 2, contact - hardware_height, hardware_width, hardware_height + 10, {125, 223, 211, 255},
                          static_cast<Uint8>(48u * opacity / 255u));
-                glow(cx + offset - 111, contact - 11, 222, 22, {0, 0, 0, 255}, static_cast<Uint8>(225u * opacity / 255u));
+                const int shadow_width = static_cast<int>(222 * system.room_scale);
+                glow(cx + offset - shadow_width / 2, contact - 11, shadow_width, 22, {0, 0, 0, 255}, static_cast<Uint8>(225u * opacity / 255u));
                 shelf_picture(system.image, cx + offset, contact, static_cast<int>(column * room_scale() * .83f), art_height,
                               active, room_y(static_cast<float>(plane.wood_top)), room_y(static_cast<float>(plane.wood_end)),
-                              use_monochrome(p, state.inventory[id], system.id), opacity);
+                              use_monochrome(p, state.inventory[id], system.id), opacity, system.room_scale);
                 if (active)
                     rounded(cx - 31, contact + 8, 62, 3, 1, {150, 235, 219, opacity});
                 const int label_y = room_y(static_cast<float>(plane.label));
@@ -786,13 +858,24 @@ void detail(const UiState& state) {
     text("YOUR SYSTEM COLLECTION", 80, 145, 20, purple, true);
     text(s.name, 80, 194, 58, white, true, 1100);
     text(s.brand, 84, 275, 27, muted);
-    glow(1190, 230, 640, 630, accent(s), 110);
-    picture(s.image, 1160, 205, 640, 640, 255, use_monochrome(state.settings.preferences, state.inventory[id], s.id));
+    if (state.settings.preferences.layout == Layout::shelf) {
+        const auto& plane = room_scene::tiers[0];
+        const int contact = room_y(static_cast<float>(plane.feet));
+        shelf_picture(s.image, room_x(1320), contact, 310, static_cast<int>(plane.art_height * room_scale()), false,
+                      room_y(static_cast<float>(plane.wood_top)), room_y(static_cast<float>(plane.wood_end)),
+                       use_monochrome(state.settings.preferences, state.inventory[id], s.id), 255, s.room_scale);
+    } else {
+        glow(1190, 230, 640, 630, accent(s), 110);
+        picture(s.image, 1160, 205, 640, 640, 255, use_monochrome(state.settings.preferences, state.inventory[id], s.id));
+    }
     text(availability(state, id), 84, 366, 29, purple, true);
     char count[80];
     std::snprintf(count, sizeof(count), "%zu discovered games", state.inventory[id].game_count);
     text(count, 84, 415, 24, muted);
     if (state.page == Page::library) {
+        const auto* route = state.library ? preferred_route(*state.library, id, state.settings.preferred_emulator[id].data()) : nullptr;
+        if (route && std::strcmp(route->title_id, "PPSA99169") != 0 && !state.inventory[id].built_in)
+            text("Opens the emulator library; choose your game there.", 84, 453, 20, muted);
         if (!state.library) {
             text("Your library", 84, 522, 38, white, true);
             text("Connect a library to see your games here.", 84, 587, 26, muted);
@@ -874,13 +957,14 @@ void settings(const UiState& state) {
     } else if (state.tab == SettingsTab::room) {
         text("Your room, your screen", 394, 338, 34, white, true);
         text("TV content sits behind the glass. Shelf layout only.", 394, 388, 24, muted);
-        label(394, 429, "TV display", tv_labels[static_cast<std::size_t>(p.tv_mode)], state.settings_focus == 0);
-        label(394, 525, "Personal message - Cross to edit", state.settings.tv_text, state.settings_focus == 1);
+        label(394, 421, "TV display", tv_labels[static_cast<std::size_t>(p.tv_mode)], state.settings_focus == 0);
+        label(394, 505, "Personal message - Cross to edit", state.settings.tv_text, state.settings_focus == 1);
         char interval[64]; std::snprintf(interval, sizeof(interval), "Every %u seconds", tv_periods[p.tv_period]);
-        label(394, 621, "Favourite game rotation", interval, state.settings_focus == 2);
-        label(394, 717, "Console intros", p.intro_all ? "All consoles" : "Installed emulators and built-in systems", state.settings_focus == 3);
-        text("Own PNG: /data/console-shelf/tv-image.png (up to 2048 x 2048).", 400, 819, 21, muted);
-        text("Intros: intros/<console-id>.png. Artwork fallback; video is not supported yet.", 400, 853, 20, muted);
+        label(394, 589, "Favourite game rotation", interval, state.settings_focus == 2);
+        label(394, 673, "Console intros", p.intro_all ? "All consoles" : "Installed emulators and built-in systems", state.settings_focus == 3);
+        label(394, 757, "TV static for missing content", noise_labels[static_cast<std::size_t>(p.tv_noise)], state.settings_focus == 4);
+        text("Own intros: /data/console-shelf/intros/<console-id>.png or .mpg", 400, 854, 20, muted);
+        text("Silent MPEG-1 clips. Use the PC intro preparation tool; Shelf demo if absent.", 400, 882, 19, muted);
     } else {
         label(394, 330, "Show on my shelf", p.scope == Scope::all ? "All consoles" :
               p.scope == Scope::available ? "Emulator or games" : "Favourites only",
@@ -1067,11 +1151,13 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
         shelf_list = list;
     } else shelf_motion.active = false;
     shelf_visible = show_shelf;
+    room_visible = state.settings.preferences.layout == Layout::shelf;
+    if (!room_visible) { stop_movie(); tv_motion = false; }
     SDL_SetRenderDrawColor(renderer, 11, 13, 28, 255);
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, state.page == Page::home && state.settings.preferences.layout == Layout::shelf ?
-                   shelf_background : background, nullptr, nullptr);
+    SDL_RenderCopy(renderer, room_visible ? shelf_background : background, nullptr, nullptr);
     if (!state.presentation.loading || state.presentation.preparing) {
+        if (room_visible) room_tv(state);
         picture(icon_files[static_cast<std::size_t>(state.settings.preferences.icon)], 80, 30, 50, 50);
         text("Console Shelf", 147, 36, 29, white, true);
 #ifdef SHELF_PS5
@@ -1080,7 +1166,7 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
         text("NATIVE DEVELOPMENT BUILD / PC", 1388, 42, 18, muted, true);
 #endif
         settings_button(state.tools && state.tool == 2);
-        line(80, 99, shelf_visible ? 1100 : 1840, 99, {43, 48, 69, 255});
+        line(80, 99, room_visible ? 1100 : 1840, 99, {43, 48, 69, 255});
         if (state.page == Page::home)
             home(state);
         else if (state.page == Page::details || state.page == Page::library)
@@ -1123,7 +1209,7 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
     SDL_RenderPresent(renderer);
 }
 bool graphics_animating() {
-    return (orbit_visible && orbit.active) || (shelf_visible && (shelf_motion.active || tv_motion));
+    return (orbit_visible && orbit.active) || (shelf_visible && shelf_motion.active) || (room_visible && tv_motion);
 }
 bool graphics_capture(const char* path) {
     auto* pixels = static_cast<Uint32*>(allocate(static_cast<std::size_t>(width) * height * 4));
@@ -1138,6 +1224,9 @@ unsigned graphics_errors() {
     return resource_errors;
 }
 void graphics_shutdown() {
+    stop_movie();
+    if (noise_texture) SDL_DestroyTexture(noise_texture);
+    noise_texture = nullptr;
     for (auto*& texture : settings_buttons) {
         if (texture)
             SDL_DestroyTexture(texture);

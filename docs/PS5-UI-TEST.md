@@ -47,4 +47,16 @@ The native template supports static selection and launch backgrounds as `sce_sys
 
 These are standard PS5-managed static presentation assets; the moving transition remains app code. The owner confirms the selection background appears, but opening the app still shows black before the shelf. This is not an accepted launch-animation fix. The candidate disables the two diagnostic PNG writes in normal startup to remove their measured delay; developers can explicitly define `SHELF_CAPTURE_STARTUP` for the bounded probes.
 
+## UI-20 follow-up checks
+
+The [PC evidence](verification/ui20-pc-checks-2026-10-25.json) records 57 native frames, browser checks and real MPEG decoding; this does not claim physical PS5 acceptance. The launch helper remains byte-identical to the owner-tested UI-15 helper.
+
+- In Shelf layout, change to page two with R1. Up/Down should move between its two rows; Up from the top row reaches the toolbar without going back through earlier pages.
+- Keep Clock or My message selected, then enter a console and its game library. The TV should retain that display. The upper-row artwork should clear the screen's lower edge.
+- Choose Play room → Console intro video. Select an installed console: the labelled Shelf demo should move inside the TV. Your own compatible clip in Shelf's data folder replaces it. See the [room guide](ROOM.md).
+- Try the optional static policy for a console without an emulator. Reduced motion should freeze grain and video. Restore your preferred display afterward.
+- PSXS5 currently opens its own library. Its inspected startup and companion source do not expose a supported direct-game command. Shelf labels that route accordingly; RetroArch's supported game/core forwarder remains separate. No PSXS5 settings are changed to imitate a direct launch.
+
+The normal-console-restart check remains deferred at the owner's request. Keep firmware 12.20 and the established payload sequence.
+
 An existing title without these assets needs its own registration refreshed before the PS5 adopts them. First verify that ShadowMountPlus reports this exact title as an owned, managed folder at `/data/homebrew/PPSA99541`, not a package or image. With apps closed, retain a full raw program backup and the owned preferences, add/verify both artwork files, and use the existing ShadowMountPlus title-only uninstall/scan API to register that same folder again. Never use its source-deletion operation. Recheck every program/artwork hash and the preference bytes afterward. This registration refresh was verified for the owner's title; it need not be repeated for an ordinary program update. Keep firmware 12.20 and leave other titles, PSN, global shell settings and payload order untouched.

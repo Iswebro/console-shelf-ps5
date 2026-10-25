@@ -318,7 +318,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-19 integrated lounge, console-only page motion, curated display and personal TV; UI-15 helper unchanged");
+    startup("main entered", "ui-20 page-local navigation, persistent room TV, local intro video and optional static; UI-15 helper unchanged");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -892,7 +892,7 @@ int main(int argc, char** argv) {
             }
             state.changed = false;
         }
-        if (!scripting && state.page == shelf::Page::home && state.settings.preferences.layout == shelf::Layout::shelf &&
+        if (!scripting && state.settings.preferences.layout == shelf::Layout::shelf &&
             (state.settings.preferences.tv_mode == shelf::TvMode::clock || state.settings.preferences.tv_mode == shelf::TvMode::favorites) &&
             static_cast<unsigned>(now - tv_redraw_at) >= 1000) {
             redraw = true;

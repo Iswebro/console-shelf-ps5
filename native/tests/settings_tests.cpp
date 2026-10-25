@@ -76,6 +76,7 @@ void test_settings() {
     displayed.preferences.shelf_selected[find_system("n64")] = true;
     displayed.preferences.reduced_motion = true;
     displayed.preferences.tv_mode = TvMode::message;
+    displayed.preferences.tv_noise = TvNoise::either;
     displayed.preferences.tv_period = 3;
     displayed.preferences.intro_all = true;
     std::strcpy(displayed.tv_text, "Iswebro's play room = home");
@@ -84,13 +85,18 @@ void test_settings() {
               !read.preferences.monochrome_missing, "the full-colour override survives an atomic save and reopen");
     check(read.preferences.shelf_single && read.preferences.shelf_selected[find_system("n64")] &&
           read.preferences.reduced_motion, "curated selection and motion choice survive reopen");
-    check(read.preferences.tv_mode == TvMode::message && read.preferences.tv_period == 3 &&
+    check(read.preferences.tv_mode == TvMode::message && read.preferences.tv_noise == TvNoise::either && read.preferences.tv_period == 3 &&
           read.preferences.intro_all && std::strcmp(read.tv_text, "Iswebro's play room = home") == 0 &&
           read.game_favorites[3] == 0x0123456789abcdefull, "room display, text, timing and game identities survive atomic save/reopen");
     auto injected = read; std::strcpy(injected.tv_text, "name\nlayout=swipe");
     check(!save_settings(path, injected), "personal text cannot inject settings lines");
     auto duplicate = read; duplicate.game_favorites[4] = duplicate.game_favorites[3];
     check(!save_settings(path, duplicate), "duplicate game identities cannot corrupt a slideshow");
+    auto video = read; video.preferences.tv_mode = TvMode::video;
+    check(save_settings(path, video) && load_settings(path, read) == SettingsLoad::loaded && read.preferences.tv_mode == TvMode::video,
+          "video mode survives an atomic save/reopen");
+    video.preferences.tv_noise = static_cast<TvNoise>(99);
+    check(!save_settings(path, video), "unknown static policy cannot replace saved preferences");
     auto overfull = read;
     overfull.preferences.shelf_selected.fill(true);
     check(!save_settings(path, overfull), "an overfull curated display cannot replace saved settings");
@@ -102,7 +108,7 @@ void test_settings() {
           "old settings remain valid and receive the default missing-emulator style");
     check(!old_settings.preferences.shelf_single && !old_settings.preferences.reduced_motion,
           "legacy settings use paged browsing and smooth motion without losing their choices");
-    check(old_settings.preferences.tv_mode == TvMode::console && old_settings.game_favorites[0] == 0,
+    check(old_settings.preferences.tv_mode == TvMode::console && old_settings.preferences.tv_noise == TvNoise::off && old_settings.game_favorites[0] == 0,
           "legacy settings acquire room defaults without acquiring fabricated favourite games");
     write(legacy, "version=1\nlayout=grid\nlook=icons\nscope=all\nsort=featured\nfilter=all\nicon=gaming\nbrand=\nmonochrome_missing=2\n");
     check(load_settings(legacy, old_settings) == SettingsLoad::invalid, "malformed optional styles are not accepted");

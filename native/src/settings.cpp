@@ -23,7 +23,8 @@ constexpr std::array<const char*, 8> sort_names = {"featured", "az",    "za",   
                                                    "oldest",   "brand", "games", "favorites"};
 constexpr std::array<const char*, 5> filter_names = {"all", "emulators", "games", "built_in", "no_route"};
 constexpr std::array<const char*, 3> icon_names = {"gaming", "classic", "jade"};
-constexpr std::array<const char*, 7> tv_names = {"console", "intro", "picture", "clock", "message", "favorites", "off"};
+constexpr std::array<const char*, 8> tv_names = {"console", "intro", "picture", "clock", "message", "favorites", "off", "video"};
+constexpr std::array<const char*, 4> noise_names = {"off", "emulator", "games", "either"};
 bool valid_text(const char* text, std::size_t capacity) {
     if (!std::memchr(text, 0, capacity)) return false;
     for (const unsigned char* at = reinterpret_cast<const unsigned char*>(text); *at; ++at)
@@ -90,7 +91,8 @@ bool valid(const Settings& settings) {
         static_cast<unsigned>(p.scope) >= scope_names.size() || static_cast<unsigned>(p.sort) >= sort_names.size() ||
         static_cast<unsigned>(p.filter) >= filter_names.size() || static_cast<unsigned>(p.icon) >= icon_names.size() ||
         p.brand >= brands.size() || static_cast<unsigned>(p.tv_mode) >= tv_names.size() ||
-        p.tv_period >= tv_periods.size() || !valid_text(settings.tv_text, sizeof(settings.tv_text)))
+        p.tv_period >= tv_periods.size() || static_cast<unsigned>(p.tv_noise) >= noise_names.size() ||
+        !valid_text(settings.tv_text, sizeof(settings.tv_text)))
         return false;
     for (const auto& route : settings.preferred_emulator) {
         if (!std::memchr(route.data(), 0, route.size()) || !valid_route(route.data()))
@@ -117,7 +119,7 @@ bool read_file(const char* path, Settings& output) {
     std::rewind(file);
     Settings parsed;
     constexpr std::size_t room_keys = 11 + system_count * 4;
-    std::array<bool, room_keys + 4 + 64> seen{};
+    std::array<bool, room_keys + 5 + 64> seen{};
     char line[256];
     std::size_t bytes = 0;
     bool okay = true;
@@ -214,6 +216,11 @@ bool read_file(const char* path, Settings& output) {
             const int n = choice(value, tv_names);
             if (n < 0) okay = false;
             else parsed.preferences.tv_mode = static_cast<TvMode>(n);
+        } else if (std::strcmp(line, "tv_noise") == 0) {
+            key = static_cast<int>(room_keys + 68); // Optional: legacy schema-1 settings keep static off.
+            const int n = choice(value, noise_names);
+            if (n < 0) okay = false;
+            else parsed.preferences.tv_noise = static_cast<TvNoise>(n);
         } else if (std::strcmp(line, "tv_period") == 0) {
             key = static_cast<int>(room_keys + 1);
             bool found = false;
@@ -368,9 +375,9 @@ bool save_settings(const char* path, const Settings& settings) {
         okay = std::fprintf(file, "monochrome_missing=%d\nshelf_single=%d\nreduced_motion=%d\n",
                             p.monochrome_missing ? 1 : 0, p.shelf_single ? 1 : 0, p.reduced_motion ? 1 : 0) > 0;
     if (okay)
-        okay = std::fprintf(file, "tv_mode=%s\ntv_period=%u\nintro_all=%d\ntv_text=%s\n",
+        okay = std::fprintf(file, "tv_mode=%s\ntv_period=%u\nintro_all=%d\ntv_text=%s\ntv_noise=%s\n",
                             tv_names[static_cast<std::size_t>(p.tv_mode)], tv_periods[p.tv_period], p.intro_all ? 1 : 0,
-                            settings.tv_text) > 0;
+                            settings.tv_text, noise_names[static_cast<std::size_t>(p.tv_noise)]) > 0;
     for (std::size_t i = 0; i < settings.game_favorites.size() && okay; ++i)
         okay = std::fprintf(file, "game_favorite.%zu=%016llx\n", i,
                             static_cast<unsigned long long>(settings.game_favorites[i])) > 0;

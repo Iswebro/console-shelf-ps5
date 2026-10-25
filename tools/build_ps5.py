@@ -23,6 +23,11 @@ def cached_run(args, inputs, output, env):
 
 def build(standard_runtime=False):
     identity = source_fingerprint()
+    video_sources = ROOT / "native/third_party/pl_mpeg"
+    for entry in json.loads((video_sources / "SOURCE.json").read_text())["files"]:
+        source = video_sources / entry["path"]
+        require(source.stat().st_size == entry["bytes"] and sha256(source) == entry["sha256"],
+                "PL_MPEG source differs from the recorded upstream pin")
     prefix = prepare_compiler()
     env = environment(prefix)
     sdk, ports, zlib = prepare_dependencies()
@@ -84,7 +89,7 @@ def build(standard_runtime=False):
               "-DSHELF_PS5", "-DGS_NATIVE", "-DNDEBUG", "-D_REENTRANT", "-D_THREAD_SAFE",
               "-I", ROOT / "native/include", "-I", ROOT / "native/ps5", "-I", ROOT / "native/third_party", "-I", output,
               "-I", ports / "include/SDL2", "-I", ports / "include"]
-    sources = [ROOT / "native/src" / (name + ".cpp") for name in ("model", "settings", "ui", "graphics", "codecs", "library", "filesystem", "metadata", "ftp", "launch_client", "host_main")]
+    sources = [ROOT / "native/src" / (name + ".cpp") for name in ("model", "settings", "ui", "graphics", "codecs", "movie", "library", "filesystem", "metadata", "ftp", "launch_client", "host_main")]
     sources += [ROOT / "native/src/json.c"]
     sources += [ROOT / "native/ps5/platform" / name for name in ("alloc.c", "vout.c", "shims.c", "lifecycle.c")]
     sources += [runtime / "app_crt.cpp", runtime / "app_cpp_runtime.cpp"]

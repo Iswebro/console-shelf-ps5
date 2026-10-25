@@ -1,7 +1,11 @@
 // Local preview inventory, checked against this PS5's 24 October 2026 emulator notes.
 // A mapped RetroArch core is an installed route to try, not a gameplay guarantee.
+// Furniture scale is separate from artwork bounds: portable hardware should
+// not fill the same physical shelf space as a full-sized home console.
+const handhelds = new Set(['psp', 'switch2', 'switch', '3ds', 'ds', 'gba', 'gbc', 'gb', 'pokemonmini',
+  'gamegear', 'atarilynx', 'neogeopocketcolor', 'neogeopocket', 'wonderswancolor', 'wonderswan']);
 const system = ({ id, name, family, year = null, symbol, color, status, emulators, core = null, games = [] }) => ({
-  id, name, family, year, symbol, color, status, emulators, core, games,
+  id, name, family, year, symbol, color, status, emulators, core, games, roomScale: handhelds.has(id) ? .62 : 1,
   image: `assets/3d-icons/${id}.png`
 });
 const ra = (id, name, family, year, symbol, color, core, extra = {}) => system({
