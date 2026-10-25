@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1656" height="1728" viewBox="-18 -18 828 864" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">isShelf gaming mark</title>
+  <desc id="desc">A transparent vector redraw of the approved mint and cyan S bookshelf, with six ivory and periwinkle game-case spines.</desc>
+  <defs>
+    <linearGradient id="shelf-mint" x1="50" y1="0" x2="740" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#89FFE0"/>
+      <stop offset=".46" stop-color="#35F3E3"/>
+      <stop offset="1" stop-color="#00DDF2"/>
+    </linearGradient>
+    <linearGradient id="shelf-edge" x1="0" y1="0" x2="780" y2="825" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1595AA"/>
+      <stop offset="1" stop-color="#03758D"/>
+    </linearGradient>
+    <linearGradient id="shelf-ice" x1="0" y1="120" x2="180" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3FBFF"/>
+      <stop offset="1" stop-color="#D5EAF5"/>
+    </linearGradient>
+    <linearGradient id="shelf-periwinkle" x1="250" y1="130" x2="380" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9DB7FF"/>
+      <stop offset="1" stop-color="#7595F1"/>
+    </linearGradient>
+    <path id="shelf-s" d="M66 0H750L789 40L745 80H118L94 104V348L114 368H736L782 418V750L722 811H42L0 769L42 726H666L689 703V472L665 447H67L2 383V62Z"/>
+  </defs>
+  <use href="#shelf-s" transform="translate(0 14)" fill="url(#shelf-edge)"/>
+  <use href="#shelf-s" fill="url(#shelf-mint)"/>
+  <rect x="185" y="188" width="89" height="160" rx="4" fill="url(#shelf-ice)"/>
+  <rect x="306" y="135" width="88" height="213" rx="4" fill="url(#shelf-periwinkle)"/>
+  <rect x="426" y="193" width="88" height="155" rx="4" fill="url(#shelf-ice)"/>
+  <rect x="211" y="563" width="88" height="141" rx="4" fill="url(#shelf-periwinkle)"/>
+  <rect x="332" y="497" width="94" height="207" rx="4" fill="url(#shelf-ice)"/>
+  <rect x="463" y="540" width="98" height="164" rx="4" fill="url(#shelf-ice)"/>
+</svg>

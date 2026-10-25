@@ -42,7 +42,7 @@ def main():
     copy(build / "libc-a.prx", "sce_module/libc.prx")
     require(sha256(app / "sce_module/libc.prx") == "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036", "Wrong clean-room runtime")
     copy(ROOT / "native/ps5/param.json", "sce_sys/param.json")
-    verify_presentation()
+    presentation = verify_presentation()
     for name in ("pic0.dds", "pic1.dds"):
         copy(ROOT / "native/ps5/sce_sys" / name, "sce_sys/" + name)
     metadata = json.loads((app / "sce_sys/param.json").read_text())
@@ -53,6 +53,7 @@ def main():
         copy(image, "assets/3d-icons/" + image.name)
     for image in ("shelf-icon.png", "shelf-icon-v1.png", "shelf-icon-premium-v2.png"):
         copy(ROOT / "assets" / image, "assets/" + image)
+    copy(ROOT / "assets/branding/shelf-gaming-mark.png", "assets/branding/shelf-gaming-mark.png")
     scenery = json.loads((ROOT / "assets/backgrounds/manifest.json").read_text(encoding="utf-8"))
     require(scenery.get("schema") == 1 and len(scenery.get("assets", [])) == 2, "Expected two reviewed scenery assets")
     require({item["local"] for item in scenery["assets"]} == {
@@ -105,7 +106,7 @@ def main():
     copy(build / "build-source.json", "build-source.json")
 
     executable = ROOT / ".cache/package-tools/prepare-package-art"
-    arguments = [ROOT / "assets/shelf-icon.png", app / "sce_sys/icon0.png"]
+    arguments = [ROOT / presentation.get("icon", {}).get("source", "assets/shelf-icon.png"), app / "sce_sys/icon0.png"]
     if executable.with_suffix(".exe").exists():
         executable = executable.with_suffix(".exe")
         arguments = [subprocess.check_output(["wslpath", "-w", str(path)], text=True).strip() for path in arguments]
@@ -116,7 +117,7 @@ def main():
     icon = (app / "sce_sys/icon0.png").read_bytes()
     require(icon[:8] == b"\x89PNG\r\n\x1a\n" and struct.unpack_from(">II", icon, 16) == (512, 512), "Invalid tile icon")
 
-    readme = f"""# Console Shelf: local UI test
+    readme = f"""# isShelf: local UI test
 
 Source: https://github.com/Iswebro/console-shelf-ps5/tree/{commit}
 Unofficial test identity: PPSA99541. This build is not hardware-validated or a public release.

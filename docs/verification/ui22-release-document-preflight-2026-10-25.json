@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "scope": "In-memory documentation transform of the verified private source kit; no release ZIP or physical acceptance claim",
+  "sourceCommit": "dde972c01e0ab0cb8378eedb411de18d9ceb8fdc",
+  "privateArchiveSHA256": "55cffc53c386aaddcc9d285582efa7ea1e6ddc6f0f316b166cb7bf2115499e46",
+  "status": "passed",
+  "changedMembers": [
+    "README.md",
+    "SOURCE-KIT-MANIFEST.json",
+    "SOURCE-KIT.txt"
+  ],
+  "unchangedMembers": 483,
+  "compiledInputsUnchanged": 252,
+  "memberManifestVerified": true,
+  "privateArchiveUnchanged": true,
+  "consoleContacted": false,
+  "releaseAssetsWritten": false,
+  "documentChanges": [
+    {
+      "path": "SOURCE-KIT.txt",
+      "baseline": {
+        "bytes": 2146,
+        "sha256": "02a8c96b24a9915c421610f98ea708871aef486bf474a4befda3796d577877fb"
+      },
+      "planned": {
+        "bytes": 2494,
+        "sha256": "983ea4eb567c2b3498a1285764c6f80687854bacee78be70d71cb44ee55400de"
+      }
+    },
+    {
+      "path": "README.md",
+      "baseline": {
+        "bytes": 8373,
+        "sha256": "f738367af478631be6fbef56f082f679f01ea83a478e7af4954696c8fb2b3d58"
+      },
+      "planned": {
+        "bytes": 8707,
+        "sha256": "0beb5894e5460826dab0d6c4d0c61b4bbbc3ca0770b2f331998430b8c393ce18"
+      }
+    }
+  ]
+}

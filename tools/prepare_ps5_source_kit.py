@@ -14,7 +14,7 @@ from ps5_common import ROOT, CACHE, member_path, sha256
 from relink_ps5 import LIBRARIES, OBJECTS, checked
 from verify_ps5_build import require, source_fingerprint
 
-INSTRUCTIONS = """Console Shelf source and relink kit (development build)
+INSTRUCTIONS = """isShelf source and relink kit (development build)
 
 This folder contains the tracked application source, artwork, credits and
 licenses, complete source archives and original release recipes for the three

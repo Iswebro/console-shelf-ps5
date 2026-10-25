@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "programSourceCommit": "dde972c01e0ab0cb8378eedb411de18d9ceb8fdc",
+  "privateArchiveBytes": 146388896,
+  "privateArchiveSHA256": "55cffc53c386aaddcc9d285582efa7ea1e6ddc6f0f316b166cb7bf2115499e46",
+  "sourceKitMembers": 486,
+  "applicationObjects": 19,
+  "replaceableLibraries": 3,
+  "freshCompilerPrefix": true,
+  "converterRebuilt": true,
+  "applicationRecompiled": false,
+  "consoleContacted": false,
+  "status": "passed",
+  "elf": {
+    "bytes": 2890092,
+    "sha256": "363bc315e054921d9b04888b85aec19ea62a32b610fc7d0bf30e6d1bcb238380",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2772833,
+    "sha256": "33722d8b88eca1ea3fe4e2dfdd03ab654617011556af860aedd57b3a454949cc"
+  },
+  "hardwareAcceptance": "pending owner tests; this is a source/relink check",
+  "publicBinaryRelease": "not published"
+}

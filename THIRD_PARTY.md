@@ -1,6 +1,6 @@
 # Project references and credits
 
-Console Shelf's preview and C++ UI are original code. Its PS5 platform/build integration now incorporates the reviewed GPL components identified below. Emulator implementations are references and are not bundled. Names and trademarks remain with their respective owners.
+isShelf's preview and C++ UI are original code. Its PS5 platform/build integration now incorporates the reviewed GPL components identified below. Emulator implementations are references and are not bundled. Names and trademarks remain with their respective owners.
 
 | Project | Creator / publisher | How it informs Shelf | Source and license |
 | --- | --- | --- | --- |

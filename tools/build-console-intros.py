@@ -71,7 +71,7 @@ def main():
             top = max(102, 162 - len(lines) * step / 2)
             for index, line in enumerate(lines): paint.text((38, round(top + index * step)), line, font=title_font, fill=(234, 243, 238, 255))
             if system['year']: paint.text((39, 247), str(system['year']), font=regular(15), fill=(160, 186, 178, 255))
-            paint.text((38, 305), 'SHELF ORIGINAL', font=bold(10), fill=(154, 182, 172, 255))
+            paint.text((38, 305), 'isShelf ORIGINAL', font=bold(10), fill=(154, 182, 172, 255))
             brightness = round(95 + 45 * (.5 + .5 * math.sin(time * 2)))
             length = round(36 + 178 * min(1, time / 1.2))
             paint.line((38, 73, 38 + length, 73), fill=(brightness, min(230, brightness + 60), min(220, brightness + 42), 255), width=2)
@@ -95,7 +95,7 @@ def main():
         entries.append({'id': ident, 'name': name, 'artwork': {'path': system['image'], 'sha256': digest(original)},
                         'assets': [{'file': p.name, 'bytes': p.stat().st_size, 'sha256': digest(p)} for p in [poster, *files]]})
         print('Prepared original intro:', ident, flush=True)
-    manifest = {'schema': 1, 'creator': 'Console Shelf project', 'license': 'GPL-3.0-only',
+    manifest = {'schema': 1, 'creator': 'isShelf project', 'license': 'GPL-3.0-only',
                 'officialConsoleIntros': False, 'silent': True, 'width': WIDTH, 'height': HEIGHT,
                 'fps': FPS, 'frames': FRAMES, 'seconds': FRAMES / FPS, 'posterSeconds': 1.6,
                 'generator': 'tools/build-console-intros.py', 'encoderSha256': digest(executable), 'consoles': entries}

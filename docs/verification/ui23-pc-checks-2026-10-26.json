@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "revision": "UI-23",
+  "product": "isShelf",
+  "date": "2026-10-26",
+  "self": {
+    "bytes": 2773057,
+    "sha256": "d5ff3af66e442e846d31c672ea984f2803b4a566e45cfbaa495f24ab341159fb"
+  },
+  "elf": {
+    "bytes": 2890164,
+    "sha256": "8e0ad62098de7a5e47982f0c3557881ddac2992f3174ed4c6196e07d3f0cb73b",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "launcher": {
+    "bytes": 108792,
+    "sha256": "6a848266e473351f0b3ccc2dcd23a3a022e392e2f0d81ddf7281e97a7605eaef",
+    "offset": 1697408,
+    "runtimeMode": "standard-sdk",
+    "permissionChanges": true
+  },
+  "compiledInputs": 262,
+  "sourceFingerprintSHA256": "576b733577789179b3fba51b05aa3fe23a3ba08b9c9ee404588fd8fc68f21247",
+  "nativeModelSettingsAndController": "passed; includes all four logo settings roundtrips",
+  "browser": "passed; default vector, all four logo choices persist, existing layout/library checks",
+  "nativeRenderer": "passed; 66 captures, default vector inspected",
+  "platformMocks": "passed",
+  "damagedExecutableFixtures": "14 rejected",
+  "releaseInputFixtures": "12 passed",
+  "homePresentation": "PNG CRCs, 4K DDS and vector master pins passed",
+  "consoleTest": "pending; prior UI-22 owner acceptance is retained separately"
+}

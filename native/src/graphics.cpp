@@ -82,9 +82,9 @@ const std::array<std::string_view, 8> sorts = {"Featured order",   "Name: A to Z
                                                "Most games first", "Favorites first"};
 const std::array<std::string_view, 5> filters = {"All systems", "Emulator detected", "Games detected",
                                                  "Built-in systems", "No launch route"};
-const std::array<std::string_view, 3> icon_names = {"Gaming", "Classic mint", "Jade"};
-const std::array<std::string_view, 3> icon_files = {"assets/shelf-icon.png", "assets/shelf-icon-v1.png",
-                                                    "assets/shelf-icon-premium-v2.png"};
+const std::array<std::string_view, 4> icon_names = {"Gaming", "Classic mint", "Jade", "Vector (default)"};
+const std::array<std::string_view, 4> icon_files = {"assets/shelf-icon.png", "assets/shelf-icon-v1.png",
+                                                "assets/shelf-icon-premium-v2.png", "assets/branding/shelf-gaming-mark.png"};
 void color(SDL_Color c) {
     SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
 }
@@ -515,14 +515,14 @@ void footer(std::string_view hint) {
     rect(0, 1015, width, 65, {9, 12, 26, 245});
     text(hint, 80, 1032, 21, muted);
 }
-void splash(float opacity, unsigned time_ms, bool loading, float appearance = 1) {
+void splash(float opacity, unsigned time_ms, bool loading, float appearance = 1, AppIcon icon = AppIcon::vector) {
     const auto alpha = static_cast<Uint8>(std::clamp(opacity, 0.0f, 1.0f) * 255);
     rect(0, 0, width, height, {11, 13, 28, alpha});
     const auto ink = alpha;
     const int rise = static_cast<int>(12 * (1 - appearance));
     const int side = static_cast<int>(116 * (.92f + .08f * appearance));
-    picture(icon_files[0], 960 - side / 2, 347 + rise, side, side, ink);
-    centered("Console Shelf", 960, 505 + rise, 48, {241, 240, 251, ink}, true);
+    picture(icon_files[static_cast<std::size_t>(icon)], 960 - side / 2, 347 + rise, side, side, ink);
+    centered("isShelf", 960, 505 + rise, 48, {241, 240, 251, ink}, true);
     centered(loading ? "Finding your emulators and games" : "Your systems, together", 960, 578 + rise, 23,
              {180, 174, 205, ink});
     if (loading) {
@@ -621,7 +621,7 @@ bool tv_video(const SystemDefinition& system, std::size_t id, const SDL_Rect& ta
     tv_motion = !still && tv_movie.playing();
     if (movie_demo) {
         rect(target.x, target.y + target.h - 30, target.w, 30, {4, 12, 15, 220});
-        centered("Shelf demo - add your own console intro", target.x + target.w / 2, target.y + target.h - 24, 16, muted);
+        centered("isShelf demo - add your own console intro", target.x + target.w / 2, target.y + target.h - 24, 16, muted);
     }
     return true;
 }
@@ -684,7 +684,7 @@ void room_tv(const UiState& state) {
         picture(icon_files[static_cast<std::size_t>(p.icon)], x + w / 2 - 31, y + 33, 62, 62, 210);
         tv_lines(state.settings.tv_text, x + 42, y + 129, w - 84, 31, {230, 248, 243, 230});
         if (p.tv_mode == TvMode::picture)
-            centered("Add tv-image.png to your Shelf data folder", x + w / 2, y + h - 38, 17, muted);
+            centered("Add tv-image.png to your isShelf data folder", x + w / 2, y + h - 38, 17, muted);
     } else if (!pictured && p.tv_mode == TvMode::clock) {
         const auto now = std::time(nullptr); const auto* local = std::localtime(&now);
         char clock[16] = "--:--", date[80]{};
@@ -715,7 +715,7 @@ void room_tv(const UiState& state) {
         } else {
             picture(icon_files[static_cast<std::size_t>(p.icon)], x + w / 2 - 30, y + 41, 60, 60, 200);
             centered("Your favourite games", x + w / 2, y + 136, 27, {233, 249, 246, 230}, true);
-            centered("Press Triangle on a game in Shelf's library", x + w / 2, y + 193, 19, {180, 212, 204, 230});
+            centered("Press Triangle on a game in isShelf's library", x + w / 2, y + 193, 19, {180, 212, 204, 230});
         }
     }
     // Glass, a soft upper reflection and edge falloff keep content inside the photographed screen.
@@ -969,7 +969,7 @@ void settings(const UiState& state) {
     rect(0, 0, width, height, {4, 6, 16, 180});
     box(350, 76, 1220, 900, false, {20, 23, 41, 255});
     text("MAKE IT YOURS", 394, 108, 19, purple, true);
-    text("Shelf settings", 394, 139, 43, white, true);
+    text("isShelf settings", 394, 139, 43, white, true);
     text("Changes save automatically", 396, 199, 22, muted);
     const std::array<std::string_view, 4> tabs = {"Appearance", "Sort & filter", "Consoles", "Play room"};
     for (int i = 0; i < 4; ++i) {
@@ -987,7 +987,7 @@ void settings(const UiState& state) {
         label(394, 519, "Grid look", p.layout != Layout::grid ? "Available in Grid layout" :
               p.grid_look == GridLook::icons ? "3D console icons" : "Classic cards",
               state.settings_focus == 1);
-        label(394, 609, "Shelf logo", icon_names[static_cast<std::size_t>(p.icon)], state.settings_focus == 2);
+        label(394, 609, "isShelf logo", icon_names[static_cast<std::size_t>(p.icon)], state.settings_focus == 2);
         label(394, 699, "Missing emulator artwork", p.monochrome_missing ? "Black & white" : "Full colour",
               state.settings_focus == 3);
         label(394, 789, "Motion", p.reduced_motion ? "Reduced: instant page changes" : "Smooth console transitions",
@@ -1012,7 +1012,7 @@ void settings(const UiState& state) {
         label(394, 673, "Console intros", p.intro_all ? "All consoles" : "Installed emulators and built-in systems", state.settings_focus == 3);
         label(394, 757, "TV static for missing content", noise_labels[static_cast<std::size_t>(p.tv_noise)], state.settings_focus == 4);
         text("Own intros: /data/console-shelf/intros/<console-id>.png or .mpg", 400, 854, 20, muted);
-        text("Shelf originals included. Your personal PNG or MPEG-1 clip takes priority.", 400, 882, 19, muted);
+        text("isShelf originals included. Your personal PNG or MPEG-1 clip takes priority.", 400, 882, 19, muted);
     } else {
         label(394, 330, "Show on my shelf", p.scope == Scope::all ? "All consoles" :
               p.scope == Scope::available ? "Emulator or games" : "Favourites only",
@@ -1207,7 +1207,7 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
     if (!state.presentation.loading || state.presentation.preparing) {
         if (room_visible) room_tv(state);
         picture(icon_files[static_cast<std::size_t>(state.settings.preferences.icon)], 80, 30, 50, 50);
-        text("Console Shelf", 147, 36, 29, white, true);
+        text("isShelf", 147, 36, 29, white, true);
 #ifdef SHELF_PS5
         text("PS5 / DEVELOPMENT BUILD", 1388, 42, 18, muted, true);
 #else
@@ -1232,26 +1232,26 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
         }
     }
     if (state.presentation.loading)
-        splash(1, time_ms, true, state.presentation.appear);
+        splash(1, time_ms, true, state.presentation.appear, state.settings.preferences.icon);
     else if (state.presentation.reveal < 1)
-        splash(1 - state.presentation.reveal, time_ms, false);
+        splash(1 - state.presentation.reveal, time_ms, false, 1, state.settings.preferences.icon);
     if (state.presentation.hold > 0 && state.presentation.close == 0) {
         rounded(660, 909, 600, 88, 18, {30, 30, 48, 245});
-        centered("Hold Circle to close Shelf", 960, 924, 24, white);
+        centered("Hold Circle to close isShelf", 960, 924, 24, white);
         rounded(707, 969, 506, 5, 2, {64, 62, 83, 255});
         rounded(707, 969, std::max(1, static_cast<int>(506 * state.presentation.hold)), 5, 2, purple);
     } else if (state.presentation.close_hint > 0 && !state.presentation.loading && state.presentation.close == 0) {
         const float opacity = state.presentation.close_hint;
         rounded(660, 909, 600, 88, 18, {30, 30, 48, static_cast<Uint8>(245 * opacity)});
-        centered("Hold Circle to close Shelf", 960, 924, 24, {white.r, white.g, white.b, static_cast<Uint8>(255 * opacity)});
+        centered("Hold Circle to close isShelf", 960, 924, 24, {white.r, white.g, white.b, static_cast<Uint8>(255 * opacity)});
         centered("Keep holding for 3 seconds", 960, 961, 18,
                  {muted.r, muted.g, muted.b, static_cast<Uint8>(255 * opacity)});
     }
     if (state.presentation.close > 0) {
         const auto alpha = static_cast<Uint8>(state.presentation.close * 255);
         rect(0, 0, width, height, {9, 12, 26, alpha});
-        picture(icon_files[0], 916, 413, 88, 88, alpha);
-        centered(state.presentation.launching ? "Opening your selection" : "Closing Shelf", 960, 552, 29,
+        picture(icon_files[static_cast<std::size_t>(state.settings.preferences.icon)], 916, 413, 88, 88, alpha);
+        centered(state.presentation.launching ? "Opening your selection" : "Closing isShelf", 960, 552, 29,
                  {241, 240, 251, alpha});
     }
     SDL_RenderPresent(renderer);

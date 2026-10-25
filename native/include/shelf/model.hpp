@@ -14,7 +14,7 @@ inline constexpr std::size_t shelf_capacity = 8;
 enum class Sort { featured, name_asc, name_desc, newest, oldest, brand, games, favorites };
 enum class LaunchCapability { unavailable, emulator_menu, direct_game };
 enum class SystemFilter { all, emulators, games, built_in, no_route };
-enum class AppIcon { gaming, classic, jade };
+enum class AppIcon { gaming, classic, jade, vector, count };
 enum class TvMode { console, intro, picture, clock, message, favorites, off, video };
 inline constexpr std::array<std::string_view, 8> tv_labels = {
     "Selected console", "Console intro picture", "My picture", "Clock & Shelf logo", "My message", "Favourite games", "Screen off", "Console intro video"};
@@ -38,7 +38,7 @@ struct Preferences {
     Scope scope = Scope::all;
     Sort sort = Sort::featured;
     SystemFilter filter = SystemFilter::all;
-    AppIcon icon = AppIcon::gaming;
+    AppIcon icon = AppIcon::vector;
     bool monochrome_missing = true;
     bool shelf_single = false;
     bool reduced_motion = false;

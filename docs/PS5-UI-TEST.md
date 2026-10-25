@@ -6,7 +6,7 @@ The previous standard-runtime helper starts PS5SX2 and RetroArch, but both remai
 
 Earlier startup diagnostics identified a missing strong lifecycle import. The executable verifier now rejects weak, missing or misbound required shell imports. Hardware and launch acceptance are tracked separately from compilation and structural checks.
 
-The unofficial test title identity is `PPSA99541`, shown as **Console Shelf (UI test)**. It is not a globally reserved ID. The owner's console was checked for a collision; every installation must repeat that check and refuse to overwrite any existing title. The target app folder is `/data/homebrew/PPSA99541`; preferences are written only to `/data/console-shelf/settings.ini` and its recovery files. Existing game libraries are read in place.
+The unofficial test title identity is `PPSA99541`, shown as **isShelf (UI test)** in new builds. Earlier console receipts retain the former **Console Shelf (UI test)** name. It is not a globally reserved ID. The owner's console was checked for a collision; every installation must repeat that check and refuse to overwrite any existing title. The target app folder is `/data/homebrew/PPSA99541`; preferences are written only to `/data/console-shelf/settings.ini` and its recovery files. Existing game libraries are read in place.
 
 ## Assemble locally
 
@@ -32,7 +32,7 @@ Use the owner's established local FTP transfer workflow, with no game or downloa
 
 After exposing the new tile through the already established ShadowMount procedure:
 
-1. Open **Console Shelf (UI test)** and check that the picture is stable and fits the TV.
+1. Open **isShelf (UI test)** and check that the picture is stable and fits the TV.
 2. Test D-pad/stick and Cross/Circle. From the search/layout row, Up focuses the settings button; Down returns to layout. Options opens the single settings panel; Square or the labelled layout button cycles Grid/Swipe/Shelf. A short Circle tap on the home page shows a small three-second hint; on other pages it remains Back. Hold Circle for three seconds to check its progress indicator and closing fade. Releasing early leaves the app open. The owner accepted the compact hint and closing behavior. Opening still shows black before the grid; submitted diagnostic frames do not prove a visible opening animation. Startup PNG probes are disabled by default.
 3. Select Nintendo 64 and its game library; check Mario Party and the other existing titles. Check PS1, PS2 and PS3 as well.
 4. Change a layout/visibility choice, close Shelf, then reopen it to check persistence.

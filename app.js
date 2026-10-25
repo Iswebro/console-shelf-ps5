@@ -11,6 +11,7 @@ const yearText = system => system.year === null ? '' : String(system.year);
 
 const $ = id => document.getElementById(id);
 const appIcons = {
+  vector: 'assets/branding/shelf-gaming-mark.png',
   gaming: 'assets/shelf-icon.png',
   classic: 'assets/shelf-icon-v1.png',
   jade: 'assets/shelf-icon-premium-v2.png'
@@ -30,7 +31,7 @@ const settings = {
   sort: savedChoice('shelf-sort', ['featured', 'az', 'za', 'newest', 'oldest', 'brand', 'games', 'favorites'], 'featured'),
   family: savedChoice('shelf-family', ['all', 'PlayStation', 'Nintendo', 'Sega', 'Sammy', 'Atari', 'NEC', 'SNK', 'Bandai', '3DO', 'Arcade', 'Commodore', 'Computer'], 'all'),
   availability: savedChoice('shelf-availability', ['all', 'tested', 'native', 'mapped', 'app', 'reference'], 'all'),
-  icon: savedChoice('shelf-icon', Object.keys(appIcons), 'gaming'),
+  icon: savedChoice('shelf-icon', Object.keys(appIcons), 'vector'),
   missing: savedChoice('shelf-missing', ['mono', 'colour'], 'mono'),
   pages: savedChoice('shelf-pages', ['paged', 'single'], 'paged'),
   motion: savedChoice('shelf-motion', ['smooth', 'reduced'], 'smooth'),

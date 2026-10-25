@@ -1,0 +1,17 @@
+Shelf PS5 home-screen artwork v2 — Glass and Light
+Mode: built-in image_gen for the background plate; native SVG vector redraw and browser rendering for the logo/composition requested by the user.
+
+Background plate prompt
+
+Use case: stylized-concept.
+Asset type: ultra-high-quality 4K 3840 x 2160, 16:9 background plate for the PS5 home-screen selection artwork of Shelf, a premium gaming library app. This is finished brand artwork, not a room, website screenshot or console UI mockup.
+
+Art direction: an exquisite, cinematic study of dark glass, satin graphite and light. Almost-black midnight navy throughout; exceptionally elegant broad sculptural smoked-glass ribbons and precision-machined curved surfaces sweep upward through the RIGHT third, with beautiful restrained cyan, seafoam-mint and a trace of periwinkle grazing their edges. Expensive contemporary product-launch campaign quality, strong design discipline, rich blacks, pristine surfaces, subtle real depth, controlled specular highlights, immaculate anti-aliasing. The forms should feel abstract and purposeful, evoking an expertly curated game collection and fluid movement, without drawing literal shelves or any objects. The finish is sleek and tactile, with no noise or dirty texture.
+
+Composition: asymmetric full-bleed widescreen. The entire LEFT 55 percent stays very dark, calm and almost empty, with only a beautifully smooth tonal falloff so white system interface elements will remain legible. Keep the TOP 20 percent especially quiet. Concentrate the sculptural drama along the far-right edge and lower-right corner, with one refined sweeping mint/cyan light edge leading toward the right-center. Keep the area at x=62–88 percent, y=25–78 percent visually calm and dark enough to receive a large bright vector logo afterward: do not place busy shapes, a panel, or a bright hotspot inside this area. The large transparent Shelf S logo will be composited onto that space separately. The right-center should feel naturally illuminated by its future cyan light. Deep vignette toward left and bottom edges, but no visible frame.
+
+Deliver only the full image plate, at the highest available detail and landscape resolution, targeting 3840 x 2160. No logo, letters, words, UI, buttons, symbols, controllers, consoles, books, people, furniture, literal room, planets, stars, sparkles, particles, bokeh, circuits, grid, wireframe, rainbow RGB, excessive neon bloom, watermark, tile, border, or mockup. Do not include any placeholder or empty frame for the logo.
+
+Composition
+
+3840 x 2160. Approved gaming S logo redrawn as real vector paths with transparent gaps and no icon-tile background. Mark placed at x=2200, y=500, width=1160, height=1210, leaving the left side and upper strip quiet for system UI. The generated background plate is retained at its original resolution; the logo and final composition are rendered directly at output resolution.

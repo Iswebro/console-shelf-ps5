@@ -90,9 +90,18 @@ def verify_asset_sources(app_data, kit_data):
             "lineEndingOnlyNotices": line_endings}
 
 
+def packaged_icon_source(kit_data):
+    manifest = json.loads(kit_data["native/ps5/presentation-assets.json"])
+    source = manifest.get("icon", {}).get("source", "assets/shelf-icon.png")
+    require(source in ("assets/shelf-icon.png", "assets/branding/isshelf-home-icon.png"),
+            "Unexpected packaged icon source")
+    return source
+
+
 def verify_generated_icon(app_data, kit_data):
-    source = ROOT / "assets/shelf-icon.png"
-    require(source.read_bytes() == kit_data["assets/shelf-icon.png"], "Logo generator input differs from source")
+    source_name = packaged_icon_source(kit_data)
+    source = ROOT / source_name
+    require(source.read_bytes() == kit_data[source_name], "Logo generator input differs from source")
     for name in ("tools/prepare-package-art.cpp", "native/third_party/stb/stb_image.h",
                  "native/third_party/stb/stb_image_write.h"):
         require((ROOT / name).read_bytes() == kit_data[name], "Logo generator source differs from the source kit")
@@ -126,16 +135,17 @@ def public_source_documents(kit_data, version):
         "Published prototype " + version + ". The matching executable has the owner\n"
         "hardware checks listed in the release's HARDWARE-CHECKS.json. Other routes\n"
         "remain experimental. Rebuilding or changing the program needs new tests.")
-    instructions = instructions.replace("Console Shelf source and relink kit (development build)",
-                                        "Console Shelf " + version + " source and relink kit")
-    instructions += ("\nProject documents retain the compiled-source snapshot, with a release note\n"
-                     "and the stale no-video sentence corrected in README.md. Publication-only\n"
-                     "document changes and hashes are recorded in SOURCE-KIT-MANIFEST.json.\n"
+    for name in ("Console Shelf", "isShelf"):
+        instructions = instructions.replace(name + " source and relink kit (development build)",
+                                            "isShelf " + version + " source and relink kit")
+    instructions += ("\nProject documents retain the compiled-source snapshot. Publication notes\n"
+                     "and any necessary README corrections, together with document hashes,\n"
+                     "are recorded in SOURCE-KIT-MANIFEST.json.\n"
                      "The release hardware checks record later owner acceptance of the exact program.\n")
     readme = kit_data["README.md"].decode("utf-8")
     readme = readme.replace("This prototype uses an artwork fallback and does not play video.",
         "The prototype includes original Shelf stills and silent intro animations, with personal overrides.")
-    note = ("> Source snapshot for Console Shelf " + version + ". The program code, build inputs and\n"
+    note = ("> Source snapshot for isShelf " + version + ". The program code, build inputs and\n"
             "> bundled media are unchanged from the compiled revision. Current release hardware\n"
             "> checks are recorded in SOURCE-KIT-MANIFEST.json. The project status below is\n"
             "> historical; publication-only documentation changes are recorded in that manifest.\n\n")
@@ -264,18 +274,20 @@ def main():
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ-") + uuid.uuid4().hex[:8]
     output = CACHE / "releases" / (args.version + "-" + stamp)
     output.mkdir(parents=True, exist_ok=False)
-    source_zip = output / ("Console-Shelf-" + args.version + "-Source-and-Relink.zip")
+    source_zip = output / ("isShelf-" + args.version + "-Source-and-Relink.zip")
     with zipfile.ZipFile(source_zip, "x", compression=zipfile.ZIP_DEFLATED, compresslevel=7) as target:
         for name, raw in kit_data.items():
-            target.writestr("Console-Shelf/" + name, raw)
+            target.writestr("isShelf/" + name, raw)
     source_info = {"file": source_zip.name, "bytes": source_zip.stat().st_size, "sha256": sha256(source_zip)}
 
     guide = (ROOT / "docs/PS5-INSTALL.md").read_text(encoding="utf-8")
     old = ("Preparation guide for the first prototype. A public binary has not been published yet; see the "
-           "[acceptance status](PROTOTYPE-PLAN.md). The tested app currently appears as **Console Shelf (UI test)**.")
+           "[acceptance status](PROTOTYPE-PLAN.md). New builds are named **isShelf (UI test)**; "
+           "earlier console-tested builds used **Console Shelf (UI test)**.")
     require(old in guide, "Install-guide preparation notice was not found")
+    installed_name = json.loads(app_data["sce_sys/param.json"])["localizedParameters"]["en-US"]["titleName"]
     guide = guide.replace(old, "Native PS5 prototype " + args.version + ", tested on firmware **12.20**. "
-                          "The app appears as **Console Shelf (UI test)**.")
+                          "The app appears as **" + installed_name + "**.")
     guide = guide.replace("from this repository's release page when available", "from this release")
     guide += "\n## Verified launch routes\n\n" + "\n".join("- " + route for route in ROUTES)
     guide += ("\n\nProgram source: https://github.com/Iswebro/console-shelf-ps5/tree/" + package["sourceCommit"] +
@@ -290,7 +302,7 @@ def main():
                        "sourceAssetComparison": compared, "generatedIconReproduced": True,
                        "publicationToolsCommit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                        "programComparison": "All hardware-tested files unchanged except START-HERE.md documentation"}
-    app_zip = output / ("Console-Shelf-PS5-" + args.version + ".zip")
+    app_zip = output / ("isShelf-PS5-" + args.version + ".zip")
     app_extras = {**guides,
                   "MANIFEST.json": (json.dumps(public_manifest, indent=2) + "\n").encode("utf-8"),
                   "HARDWARE-CHECKS.json": (json.dumps(evidence, indent=2) + "\n").encode("utf-8")}
@@ -299,7 +311,7 @@ def main():
             target.writestr("PPSA99541/" + name, raw)
         for name, raw in app_extras.items():
             target.writestr(name, raw)
-    for path, expected in ((source_zip, {"Console-Shelf/" + name: raw for name, raw in kit_data.items()}),
+    for path, expected in ((source_zip, {"isShelf/" + name: raw for name, raw in kit_data.items()}),
                            (app_zip, {**{"PPSA99541/" + name: raw for name, raw in app_data.items()}, **app_extras})):
         with zipfile.ZipFile(path) as completed:
             require(completed.testzip() is None, "Public ZIP integrity failed")

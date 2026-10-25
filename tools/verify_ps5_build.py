@@ -24,11 +24,11 @@ def source_fingerprint():
     inputs = []
     for directory in ("native/src", "native/include", "native/ps5", "native/third_party/stb",
                       "native/third_party/ps5-runtime", "native/third_party/cjson", "native/third_party/pl_mpeg",
-                      "assets/backgrounds", "assets/room"):
+                      "assets/backgrounds", "assets/branding", "assets/room"):
         inputs.extend(p for p in (ROOT / directory).rglob("*") if p.is_file())
     inputs += [ROOT / "tools" / name for name in ("build_ps5.py", "bootstrap_ps5_toolchain.py", "fetch_ps5_deps.py",
                                                    "ps5_common.py", "verify_ps5_build.py", "build_launch_helper.py",
-                                                   "prepare_corresponding_source.py", "linked-sources.json")]
+                                                   "prepare_corresponding_source.py", "linked-sources.json", "build-home-art.js")]
     return {p.relative_to(ROOT).as_posix(): sha256(p) for p in sorted(inputs)}
 
 

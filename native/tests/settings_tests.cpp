@@ -36,6 +36,14 @@ void test_settings() {
     std::snprintf(path, sizeof(path), "%s/settings.ini", directory);
     Settings settings;
     check(load_settings(path, settings) == SettingsLoad::missing, "first run uses defaults");
+    check(settings.preferences.icon == AppIcon::vector, "new settings use the vector logo");
+    for (const auto logo : {AppIcon::gaming, AppIcon::classic, AppIcon::jade, AppIcon::vector}) {
+        settings.preferences.icon = logo;
+        check(save_settings(path, settings), "each old and new logo can be saved");
+        Settings reopened;
+        check(load_settings(path, reopened) == SettingsLoad::loaded && reopened.preferences.icon == logo,
+              "each old and new logo survives reopening");
+    }
     settings.preferences.hidden[find_system("ps2")] = true;
     settings.preferences.favorite[find_system("n64")] = true;
     settings.preferences.sort = Sort::favorites;

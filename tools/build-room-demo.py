@@ -36,7 +36,7 @@ def main():
                 draw.ellipse((320 - radius, 155 - radius, 320 + radius, 155 + radius), outline=(8, int(22 + 10 * strength), int(21 + 8 * strength)), width=2)
             icon = logo.copy(); icon.putalpha(icon.getchannel('A').point(lambda a: int(a * phase)))
             image.paste(icon, (251, int(91 + (1 - phase) * 10)), icon)
-            draw.text((320, 259), 'SHELF', fill=tuple(int(v * phase) for v in (209, 238, 226)), font=font, anchor='mm')
+            draw.text((320, 259), 'isShelf', fill=tuple(int(v * phase) for v in (209, 238, 226)), font=font, anchor='mm')
             draw.rounded_rectangle((269, 292, 371, 294), radius=1, fill=(23, 42, 36))
             draw.rounded_rectangle((269, 292, 269 + max(1, int(102 * min(1, time / 3))), 294), radius=1, fill=(105, 164, 139))
             process.stdin.write(image.tobytes())
@@ -45,7 +45,7 @@ def main():
     finally:
         if process.poll() is None: process.kill(); process.wait()
     digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
-    manifest = {'schema': 1, 'title': 'Original Shelf intro demo', 'creator': 'Console Shelf project',
+    manifest = {'schema': 1, 'title': 'Original isShelf intro demo', 'creator': 'isShelf project',
                 'license': 'GPL-3.0-only', 'officialConsoleIntro': False, 'silent': True,
                 'width': 640, 'height': 360, 'fps': 25, 'seconds': 5,
                 'logo': {'path': 'assets/shelf-icon.png', 'sha256': digest(ROOT / 'assets/shelf-icon.png')},

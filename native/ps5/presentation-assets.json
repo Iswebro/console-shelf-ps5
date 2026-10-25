@@ -17,24 +17,89 @@
     "sha256": "dcfdec10244e02cf5037fba089c55fb7e1326b1c8181742d77d15fa5cb5eef06",
     "digestEvidence": "GitHub official release-asset SHA-256 matched",
     "authenticode": "Valid; Microsoft 3rd Party Application Component",
-    "bundled": false
+    "bundled": false,
+    "compressionOptions": [
+      "-f",
+      "BC7_UNORM",
+      "-m",
+      "1",
+      "-dx10",
+      "-bc",
+      "x"
+    ]
   },
   "files": [
     {
       "path": "assets/launch-background-source.png",
-      "bytes": 113045,
-      "sha256": "7b433d131f25aec94b58deb5b5c47a49e5cadcb3f6e53563ad7082e38e97fe33"
+      "bytes": 3886111,
+      "sha256": "82c120c60617edbe7c513dd8537f3ca721ec0ecf4c54159145b82d5c4c4ebd28"
     },
     {
       "path": "native/ps5/sce_sys/pic0.dds",
       "bytes": 8294548,
-      "sha256": "382b846eface2975c4437a1958f6275ecd808dc88bb0e9805d3da820ef6d6726"
+      "sha256": "b8a41774002c013af27323c1e42da3f154c1372fb71f0840bf76c153ea003e1b"
     },
     {
       "path": "native/ps5/sce_sys/pic1.dds",
       "bytes": 8294548,
-      "sha256": "382b846eface2975c4437a1958f6275ecd808dc88bb0e9805d3da820ef6d6726"
+      "sha256": "b8a41774002c013af27323c1e42da3f154c1372fb71f0840bf76c153ea003e1b"
     }
   ],
-  "hardwareTest": "Owner confirms PS5 selection background; opening still shows black before the shelf"
+  "hardwareTest": "NOT_RUN for Glass and Light v2. The previous v1 PS5 selection background was owner-confirmed; that acceptance does not cover this artwork revision.",
+  "sourceImage": {
+    "width": 3840,
+    "height": 2160,
+    "format": "PNG"
+  },
+  "design": {
+    "name": "Glass and Light",
+    "version": 2,
+    "master": "assets/backgrounds/shelf-ps5-home-v2.png",
+    "composition": "assets/backgrounds/shelf-ps5-home-v2.svg",
+    "transparentVectorLogo": "assets/branding/shelf-gaming-mark.svg",
+    "transparentPngLogo": "assets/branding/shelf-gaming-mark.png",
+    "generatedPlate": {
+      "path": "assets/backgrounds/shelf-ps5-home-v2-plate.png",
+      "width": 1672,
+      "height": 941,
+      "method": "Built-in image_gen"
+    },
+    "compositionMethod": "Native SVG vector redraw and direct 3840x2160 browser render; original square app icon unchanged",
+    "previousArtwork": {
+      "path": "assets/backgrounds/shelf-ps5-home-v1.png",
+      "sha256": "7b433d131f25aec94b58deb5b5c47a49e5cadcb3f6e53563ad7082e38e97fe33"
+    }
+  },
+  "localChecks": {
+    "pngCrcs": "passed",
+    "sourceAndDdsSize": [
+      3840,
+      2160
+    ],
+    "transparentLogo": "real SVG geometry; transparent PNG corners and open bays verified",
+    "ddsRawRgbPsnrDb": 56.96425458111101,
+    "ddsMeanAbsoluteRgbError": 0.10667462384259259,
+    "ddsAlphaMode": "opaque",
+    "ddsMaximumAlphaQuantizationError": 1,
+    "visualReview": "4K composition and decoded DDS inspected locally"
+  },
+  "icon": {
+    "source": "assets/branding/isshelf-home-icon.png",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 125768,
+    "sha256": "235c4ff3bc105d9799a858d27d7bd14a406934322aa8fb42ba66fd0cc9b1e0b0",
+    "vectorSource": {
+      "path": "assets/branding/isshelf-home-icon.svg",
+      "bytes": 2432,
+      "sha256": "cb6a43d51759b86487f7592de683c4e7218b030f03e7f85f9ba600c9847b21ff"
+    },
+    "markSource": {
+      "path": "assets/branding/shelf-gaming-mark.svg",
+      "bytes": 2009,
+      "sha256": "1cdd37b78f4f03115f096d5ebad2c2bfb11a7d33b25380be616e66add26c808b"
+    },
+    "purpose": "PS5 home tile from the vector mark; Vector is the in-app default alongside Gaming, Classic mint and Jade",
+    "hardwareTest": "pending"
+  }
 }

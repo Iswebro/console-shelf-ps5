@@ -1,6 +1,6 @@
 # Native PS5 integration plan
 
-Console Shelf has an offline browser design preview, a native C++ UI running on PC and a private PS5 test app. Its original [read-only discovery adapter](DISCOVERY.md) has scanned the owner's existing libraries from PC and inside the console app without moving their games. The owner confirmed UI-15 closes Shelf and opens PS5SX2 directly on the TV. Other launch routes remain pending console acceptance.
+isShelf has an offline browser design preview, a native C++ UI running on PC and a private PS5 test app. Its original [read-only discovery adapter](DISCOVERY.md) has scanned the owner's existing libraries from PC and inside the console app without moving their games. The owner confirmed UI-15 closes Shelf and opens PS5SX2 directly on the TV. Other launch routes remain pending console acceptance.
 
 The [first native prototype](PROTOTYPE-PLAN.md) is the main goal. Its C++17 renderer, catalogue/browsing model, navigation, recoverable settings and bounded discovery pass host checks. The owner has confirmed the grid, settings access, compact Circle hint and three-second hold-to-close on firmware 12.20. Console-local discovery records 92 games and 55 routes without a connection failure. The selection artwork is visible; opening still shows black before the grid. Further emulator layouts and launch routes need console validation. A public installable package remains pending.
 

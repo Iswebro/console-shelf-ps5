@@ -115,7 +115,7 @@ void accept_library(shelf::UiState& state, shelf::Library& library, shelf::ReadO
         state.selected_system = shown.indices[static_cast<std::size_t>(state.focus)];
     if (!library.scan.complete && !state.notice[0])
         std::snprintf(state.notice, sizeof(state.notice),
-                      "Library scan incomplete. Keep ftpsrv running and reopen Shelf to try again.");
+                      "Library scan incomplete. Keep ftpsrv running and reopen isShelf to try again.");
 }
 #ifdef SHELF_PS5
 std::uint64_t monotonic_ms() {
@@ -318,12 +318,12 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-22 persistent pre-launch explanation and clear library/direct-play actions; UI-15 helper unchanged");
+    startup("main entered", "ui-23 isShelf branding and vector home artwork; UI-15 helper unchanged");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
         char message[1200];
-        std::snprintf(message, sizeof(message), "Shelf cannot start: missing console functions: %s", missing);
+        std::snprintf(message, sizeof(message), "isShelf cannot start: missing console functions: %s", missing);
         std::fprintf(stderr, "%s\n", message);
         gs_notify(message);
         return 1;
@@ -331,7 +331,7 @@ int main(int argc, char** argv) {
     startup("imports ready");
     if (SDL_SetMemoryFunctions(gs_malloc, gs_calloc, gs_realloc, gs_free) != 0) {
         startup("SDL allocator rejected", SDL_GetError());
-        gs_notify("Shelf could not initialise its memory allocator.");
+        gs_notify("isShelf could not initialise its memory allocator.");
         return 1;
     }
     startup("SDL allocator ready");
@@ -404,7 +404,7 @@ int main(int argc, char** argv) {
         startup("owned directory unavailable", error);
         std::fprintf(stderr, "Cannot create the requested owned data directory.\n");
 #ifdef SHELF_PS5
-        gs_notify("Shelf cannot access its own settings folder: /data/console-shelf.");
+        gs_notify("isShelf cannot access its own settings folder: /data/console-shelf.");
 #endif
         return 1;
     }
@@ -471,7 +471,7 @@ int main(int argc, char** argv) {
                       "Settings could not be read. Defaults are in use; the original file is kept.");
     if (state.library && !state.library->scan.complete && !state.notice[0])
         std::snprintf(state.notice, sizeof(state.notice),
-                      "Library scan incomplete. Keep ftpsrv running and reopen Shelf to try again.");
+                      "Library scan incomplete. Keep ftpsrv running and reopen isShelf to try again.");
     SDL_SetMainReady();
 #ifdef SHELF_PS5
     startup("video starting");
@@ -503,7 +503,7 @@ int main(int argc, char** argv) {
 #ifndef SHELF_PS5
     window = headless
                  ? nullptr
-                 : SDL_CreateWindow("Console Shelf - native host build", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                 : SDL_CreateWindow("isShelf - native host build", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                     1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!headless && !window) {
         std::fprintf(stderr, "Window: %s\n", SDL_GetError());
@@ -834,7 +834,7 @@ int main(int argc, char** argv) {
                     launcher.cancel();
                     std::snprintf(state.notice, sizeof(state.notice), "%s",
                                   foreground ? launcher.error()
-                                             : "Launch cancelled while Shelf was not in the foreground.");
+                                             : "Launch cancelled while isShelf was not in the foreground.");
                 }
                 state.launch_busy = false;
                 redraw = true;

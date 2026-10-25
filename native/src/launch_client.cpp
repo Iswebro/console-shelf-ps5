@@ -265,7 +265,7 @@ int LaunchClient::run(void* raw) {
     path(temporary, client.root, "launch-request.tmp");
     if (!encode_launch_request(client.request, now(), data, sizeof(data)) ||
         !client.write_status(LaunchStage::sending) || !write(temporary, target, data)) {
-        client.failed("Shelf could not prepare its launch request.");
+        client.failed("isShelf could not prepare its launch request.");
         return 1;
     }
     client.owns_request = true;
@@ -289,7 +289,7 @@ int LaunchClient::run(void* raw) {
             }
             if (reply.stage != LaunchStage::sending) {
                 client.failed(reply.stage == LaunchStage::foreground_changed
-                                  ? "The launcher could not confirm Shelf is the active app. Diagnostic details were saved."
+                                  ? "The launcher could not confirm isShelf is the active app. Diagnostic details were saved."
                                   : "The launcher could not prepare the handoff. Diagnostic details were saved.");
                 return 1;
             }
@@ -336,7 +336,7 @@ bool LaunchClient::start(const LaunchRequest& next, const char* directory, const
     SDL_AtomicSet(&result, static_cast<int>(LaunchClientState::sending));
     thread = SDL_CreateThread(run, "Shelf launch", this);
     if (!thread) {
-        failed("Shelf could not start its launcher task.");
+        failed("isShelf could not start its launcher task.");
         return false;
     }
     return true;

@@ -22,7 +22,7 @@ constexpr std::array<const char*, 3> scope_names = {"all", "available", "favorit
 constexpr std::array<const char*, 8> sort_names = {"featured", "az",    "za",    "newest",
                                                    "oldest",   "brand", "games", "favorites"};
 constexpr std::array<const char*, 5> filter_names = {"all", "emulators", "games", "built_in", "no_route"};
-constexpr std::array<const char*, 3> icon_names = {"gaming", "classic", "jade"};
+constexpr std::array<const char*, 4> icon_names = {"gaming", "classic", "jade", "vector"};
 constexpr std::array<const char*, 8> tv_names = {"console", "intro", "picture", "clock", "message", "favorites", "off", "video"};
 constexpr std::array<const char*, 4> noise_names = {"off", "emulator", "games", "either"};
 bool valid_text(const char* text, std::size_t capacity) {
@@ -376,7 +376,7 @@ bool save_settings(const char* path, const Settings& settings) {
     const auto& p = settings.preferences;
     bool okay = std::fprintf(
                     file,
-                    "# Console Shelf settings; schema 1; console keys use stable "
+                    "# isShelf settings; schema 1; console keys use stable "
                     "IDs\nversion=1\nlayout=%s\nlook=%s\nscope=%s\nsort=%s\nfilter=%s\nicon=%s\nbrand=%.*s\n",
                     layout_names[static_cast<std::size_t>(p.layout)], look_names[static_cast<std::size_t>(p.grid_look)],
                     scope_names[static_cast<std::size_t>(p.scope)], sort_names[static_cast<std::size_t>(p.sort)],

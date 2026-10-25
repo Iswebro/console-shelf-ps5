@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0c1c">
-  <title>Console Shelf — design preview</title>
-  <link id="appFavicon" rel="icon" type="image/png" href="assets/shelf-icon.png">
-  <link id="appTouchIcon" rel="apple-touch-icon" href="assets/shelf-icon.png">
+  <title>isShelf — design preview</title>
+  <link id="appFavicon" rel="icon" type="image/png" href="assets/branding/shelf-gaming-mark.png">
+  <link id="appTouchIcon" rel="apple-touch-icon" href="assets/branding/shelf-gaming-mark.png">
   <link rel="stylesheet" href="styles.css">
   <script src="systems-data.js" defer></script>
   <script src="orbit.js" defer></script>
@@ -18,10 +18,10 @@
 <body>
   <div class="app">
     <header class="site-header">
-      <div class="brand"><img id="brandIcon" class="mark" src="assets/shelf-icon.png" width="40" height="40" alt=""><span>Console Shelf</span></div>
+      <div class="brand"><img id="brandIcon" class="mark" src="assets/branding/shelf-gaming-mark.png" width="40" height="40" alt=""><span>isShelf</span></div>
       <div class="header-actions">
         <span class="preview-badge">DESIGN PREVIEW · PC ONLY</span>
-        <button type="button" id="openAppearance" class="icon-button" aria-label="Open shelf settings" title="Shelf settings" aria-haspopup="dialog">
+        <button type="button" id="openAppearance" class="icon-button" aria-label="Open isShelf settings" title="isShelf settings" aria-haspopup="dialog">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.7 3-.6 2.2-1.8 1-2.2-.6-2.2 3.8 1.6 1.6v2l-1.6 1.6 2.2 3.8 2.2-.6 1.8 1 .6 2.2h4.6l.6-2.2 1.8-1 2.2.6 2.2-3.8-1.6-1.6v-2l1.6-1.6-2.2-3.8-2.2.6-1.8-1-.6-2.2Z"/><circle cx="12" cy="12" r="3.1"/></svg>
         </button>
       </div>
@@ -111,7 +111,7 @@
   <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsTitle" aria-describedby="settingsHint">
     <div class="settings-shell">
       <header class="settings-heading">
-        <div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settingsTitle">Shelf settings</h2><p id="settingsHint">Changes save automatically.</p></div>
+        <div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settingsTitle">isShelf settings</h2><p id="settingsHint">Changes save automatically.</p></div>
         <button type="button" id="closeSettings" class="icon-button" aria-label="Close settings" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
       </header>
       <div class="settings-tabs" role="tablist" aria-label="Settings sections">
@@ -129,7 +129,7 @@
             <button type="button" id="layoutShelf" class="layout-choice" aria-pressed="false"><svg viewBox="0 0 32 24" aria-hidden="true"><path d="M2 2v20M30 2v20M2 12h28M2 22h28M8 6v6M16 3v9M24 7v5M8 17v5M16 15v7M24 17v5"/></svg><strong>Shelf</strong><span>Your collection on display</span></button>
           </div></fieldset>
           <fieldset class="settings-field"><legend>Grid look</legend><div class="segmented" role="group" aria-label="Console look"><button type="button" id="lookImages" aria-pressed="true">3D system icons</button><button type="button" id="lookCards" aria-pressed="false">Classic cards</button></div><p class="field-help">Swipe and Shelf always use 3D console icons.</p></fieldset>
-          <label class="settings-field select-block" for="iconStyle"><span>App icon</span><select id="iconStyle"><option value="gaming">Gaming · default</option><option value="classic">Classic mint</option><option value="jade">Jade</option></select></label>
+          <label class="settings-field select-block" for="iconStyle"><span>App icon</span><select id="iconStyle"><option value="vector">Vector · default</option><option value="gaming">Gaming</option><option value="classic">Classic mint</option><option value="jade">Jade</option></select></label>
           <fieldset class="settings-field"><legend>Missing emulator artwork</legend><div class="segmented" role="group" aria-label="Missing emulator artwork"><button type="button" id="missingMono" aria-pressed="true">Black &amp; white</button><button type="button" id="missingColour" aria-pressed="false">Full colour</button></div><p class="field-help">Installed emulators and built-in systems stay in colour. This changes the artwork, not which consoles are shown. Availability here uses the demo snapshot.</p></fieldset>
           <label class="settings-field select-block" for="motionStyle"><span>Motion</span><select id="motionStyle"><option value="smooth">Smooth console transitions</option><option value="reduced">Reduced motion</option></select><span class="field-help">Reduced motion removes page sliding. Your device’s reduced-motion preference is also respected.</span></label>
         </section>
@@ -154,7 +154,7 @@
         </section>
         <section id="panelRoom" role="tabpanel" aria-labelledby="tabRoom" hidden>
           <h3>Your room, your screen</h3><p class="settings-description">A personal TV behind the glass. Available in Shelf layout.</p>
-          <label class="settings-field select-block" for="tvMode"><span>TV display</span><select id="tvMode"><option value="console">Selected console</option><option value="intro">Console intro picture</option><option value="picture">My picture</option><option value="clock">Clock &amp; Shelf logo</option><option value="message">My message</option><option value="favorites">Favourite games</option><option value="off">Screen off</option><option value="video">Console intro video</option></select></label>
+          <label class="settings-field select-block" for="tvMode"><span>TV display</span><select id="tvMode"><option value="console">Selected console</option><option value="intro">Console intro picture</option><option value="picture">My picture</option><option value="clock">Clock &amp; isShelf logo</option><option value="message">My message</option><option value="favorites">Favourite games</option><option value="off">Screen off</option><option value="video">Console intro video</option></select></label>
           <label class="settings-field select-block" for="tvMessage"><span>Personal message or name</span><input id="tvMessage" type="text" maxlength="95" placeholder="Welcome to your play room" autocomplete="off"></label>
           <div class="settings-columns">
             <label class="settings-field select-block" for="tvInterval"><span>Rotate favourite games</span><select id="tvInterval"><option value="10">Every 10 seconds</option><option value="20">Every 20 seconds</option><option value="30">Every 30 seconds</option><option value="60">Every minute</option></select></label>
@@ -169,7 +169,7 @@
           <button type="button" id="removeIntroPicture" class="text-button">Remove this intro picture</button>
           <label class="settings-field select-block" for="introVideo"><span>Choose that console’s intro video</span><input id="introVideo" type="file" accept="video/mp4"><span class="field-help">MP4 up to 640 × 368, 60 seconds and 32 MB. Stored in this browser only.</span></label>
           <button type="button" id="removeIntroVideo" class="text-button">Remove this intro video</button>
-          <p class="field-help">On PS5, use the PC intro preparation tool for your own video, then place the resulting MPEG-1 <code>intros/&lt;console-id&gt;.mpg</code> in <code>/data/console-shelf</code> while Shelf is closed. PNG intro pictures use the same console ID. No official console intros are bundled.</p>
+          <p class="field-help">On PS5, use the PC intro preparation tool for your own video, then place the resulting MPEG-1 <code>intros/&lt;console-id&gt;.mpg</code> in <code>/data/console-shelf</code> while isShelf is closed. PNG intro pictures use the same console ID. No official console intros are bundled.</p>
         </section>
       </div>
       <footer class="settings-footer"><span><span class="saved-dot" aria-hidden="true"></span>Saved on this device</span><button type="button" id="doneSettings" class="primary">Done</button></footer>

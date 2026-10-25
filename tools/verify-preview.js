@@ -37,6 +37,19 @@ const manifest = require('../assets/3d-icons/manifest.json');
     const closePanel = () => page.click('#doneSettings');
     await page.goto(pathToFileURL(path.join(root, 'index.html')).href);
     await page.locator('.card').first().waitFor();
+    assert.equal(await page.locator('#brandIcon').getAttribute('src'), 'assets/branding/shelf-gaming-mark.png', 'new profiles use the vector logo');
+    await openPanel('Appearance');
+    assert.deepEqual(await page.locator('#iconStyle option').evaluateAll(options => options.map(option => option.value)), ['vector', 'gaming', 'classic', 'jade']);
+    for (const [choice, image] of Object.entries({vector: 'assets/branding/shelf-gaming-mark.png', gaming: 'assets/shelf-icon.png', classic: 'assets/shelf-icon-v1.png', jade: 'assets/shelf-icon-premium-v2.png'})) {
+      await page.selectOption('#iconStyle', choice);
+      await page.reload();
+      await page.locator('.card').first().waitFor();
+      assert.equal(await page.locator('#brandIcon').getAttribute('src'), image, choice + ' logo persists');
+      assert.equal(await page.locator('#brandIcon').evaluate(image => image.complete && image.naturalWidth > 0), true);
+      await openPanel('Appearance');
+    }
+    await page.selectOption('#iconStyle', 'vector');
+    await closePanel();
     assert.equal(systems.length, 52);
     assert.equal(systems.filter(system => system.core).length, 46);
     assert.equal(await page.locator('.card').count(), 52);

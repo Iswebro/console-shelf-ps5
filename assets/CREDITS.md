@@ -1,6 +1,6 @@
 # Console icon references and credits
 
-The Shelf includes 52 newly generated, transparent 3D-style system icons in [`3d-icons/`](3d-icons/). The Switch 2 card and detail view both show the revised generated icon. The icons are stylized illustrations, **not photographs or rotatable 3D models**, and small details may differ from the real hardware. The original Wikimedia Commons photographs are linked below, not bundled in the public repository. Grid view can also show text cards; Swipe and Shelf always use the console illustrations.
+isShelf includes 52 newly generated, transparent 3D-style system icons in [`3d-icons/`](3d-icons/). The Switch 2 card and detail view both show the revised generated icon. The icons are stylized illustrations, **not photographs or rotatable 3D models**, and small details may differ from the real hardware. The original Wikimedia Commons photographs are linked below, not bundled in the public repository. Grid view can also show text cards; Swipe and Shelf always use the console illustrations.
 
 ## Room scenery
 
@@ -20,7 +20,7 @@ The active [gaming lounge](backgrounds/gamer-lounge-v1.png) and [deep-counter Sh
 
 A [standard-depth alternative](backgrounds/gamer-lounge-standard-v1.png) is retained as an artwork variant. Prompts: [base room](backgrounds/gamer-lounge-v1.prompt.txt), [standard counters](backgrounds/gamer-lounge-standard-v1.prompt.txt), [deeper counters](backgrounds/gamer-lounge-deep-v1.prompt.txt). The standard variant used the project's own [layout diagram](backgrounds/gamer-lounge-layout-guide.svg) as a composition guide and the base room as a style reference. The deeper variant edits that room. No outside room photograph was used.
 
-The earlier [gallery study](backgrounds/gallery-room-v1.png) and [standalone shelf study](backgrounds/display-shelf-v1.png) remain in the source history with their original prompts. They are no longer the app's scenery. All generated scenery is offered under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) to the extent rights are held; credit Console Shelf / Iswebro and note the AI-assisted generation.
+The earlier [gallery study](backgrounds/gallery-room-v1.png) and [standalone shelf study](backgrounds/display-shelf-v1.png) remain in the source history with their original prompts. They are no longer the app's scenery. All generated scenery is offered under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) to the extent rights are held; credit isShelf / Iswebro (formerly Console Shelf) and note the AI-assisted generation.
 
 ## Hardware references
 
@@ -57,4 +57,8 @@ The 33 other expansion icons were prompted from general hardware features and an
 
 The first 18 reference URLs and local research file hashes are in [source-manifest.json](source-manifest.json); those local photographs are omitted from the public repository. Generated icon hashes and reference types are in [3d-icons/manifest.json](3d-icons/manifest.json).
 
-The original static launch composition in `launch-background-source.png` is rendered by Shelf's native `launch-art` scene using its own app icon and the licensed Poppins fonts. It contains no external photograph or personal library data. The composition is offered under CC BY 4.0 to the extent rights are held. The matching PS5 DDS files and the verified, host-only Microsoft DirectXTex encoder are identified in `native/ps5/presentation-assets.json`; the encoder is not redistributed.
+The PS5 home tile uses the [isShelf vector icon master](branding/isshelf-home-icon.svg), rendered to a square PNG for the package. It reuses the prepared S mark on a dark background. The transparent vector mark is the default inside the app; the original Gaming, Classic mint and Jade artwork remains selectable. The vector master and exported tile follow the same CC BY 4.0 artwork terms.
+
+The earlier [static launch composition](backgrounds/shelf-ps5-home-v1.png) was rendered by Shelf's native `launch-art` scene using its own app icon and the licensed Poppins fonts. It is retained as a background alternative.
+
+The new [Glass and Light PS5 home-screen artwork](backgrounds/shelf-ps5-home-v2.png) was created on 26 October 2026. The glass-and-light plate was generated with OpenAI's built-in image tool at 1672 × 941, then composed at 3840 × 2160 with a [transparent vector redraw](branding/shelf-gaming-mark.svg) of isShelf's approved gaming logo. The logo contains SVG paths, rectangles and gradients, with no embedded bitmap or square icon background. [Prompt and composition notes](backgrounds/shelf-ps5-home-v2.prompt.txt) and the self-contained [composition SVG](backgrounds/shelf-ps5-home-v2.svg) are included. It contains no external photograph or personal library data. The composition, plate and vector redraw follow the project's existing CC BY 4.0 artwork terms to the extent rights are held; credit isShelf / Iswebro (formerly Console Shelf) and note the AI-assisted background generation. The matching PS5 DDS files and the verified, host-only Microsoft DirectXTex encoder are identified in `native/ps5/presentation-assets.json`; the encoder is not redistributed.

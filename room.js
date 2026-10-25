@@ -68,7 +68,7 @@ window.ShelfRoom = class {
       });
       const previous = this.images.get(key); if (previous) URL.revokeObjectURL(previous);
       this.images.set(key, URL.createObjectURL(file)); this.render(true);
-      this.toast('Picture saved in this browser preview. The PS5 uses your own Shelf data folder.');
+      this.toast('Picture saved in this browser preview. The PS5 uses your own isShelf data folder.');
     } catch (error) { this.toast(error.message || 'The picture could not be saved on this device.'); }
     finally { input.value = ''; }
   }
@@ -172,7 +172,7 @@ window.ShelfRoom = class {
       video.onerror = () => {
         if (++fallback > 2) return;
         video.src = fallback === 1 ? `assets/room/intros/${system.id}.mp4` : 'assets/room/shelf-intro.mp4';
-        if (fallback === 2) text('Shelf demo · add your own console intro', 'small', 'tv-video-caption');
+        if (fallback === 2) text('isShelf demo · add your own console intro', 'small', 'tv-video-caption');
         if (!reduced) video.play().catch(() => {});
       };
       if (reduced) video.addEventListener('loadeddata', () => video.pause(), { once: true });
@@ -187,7 +187,7 @@ window.ShelfRoom = class {
     } else if (mode === 'favorites') {
       image(favorite ? favorite.system.image : this.icon(), favorite ? '' : 'tv-logo');
       text(favorite ? favorite.game : 'Your favourite games');
-      text(favorite ? 'FROM YOUR FAVOURITES' : 'Mark games with a star in Shelf’s game library', 'small');
+      text(favorite ? 'FROM YOUR FAVOURITES' : 'Mark games with a star in isShelf’s game library', 'small');
     } else if (mode === 'intro' && !eligible) { image(this.icon(), 'tv-logo'); text('Your play room'); }
     else {
       image(system.image); text(system.name);

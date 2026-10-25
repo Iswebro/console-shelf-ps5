@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "revision": "UI-22",
+  "programSourceCommit": "dde972c01e0ab0cb8378eedb411de18d9ceb8fdc",
+  "selfSHA256": "33722d8b88eca1ea3fe4e2dfdd03ab654617011556af860aedd57b3a454949cc",
+  "packageManifestSHA256": "71ad30d7ebac56e2947cedc0f207a02289ab4bf5f943034f2eabb029265a0127",
+  "basis": "Owner reports after opening the verified installed build",
+  "accepted": {
+    "ui_navigation": true,
+    "ui_settings": true,
+    "circle_close": true,
+    "settings_persist": true,
+    "psxs5_menu": true,
+    "ps5sx2_menu": true,
+    "ps5sx3_menu": true,
+    "restart_reopen": true,
+    "retroarch_n64_game": true
+  },
+  "newRouteChecks": {
+    "retroarch_ps1_game": true
+  },
+  "preLaunchPanel": "Owner confirms it is readable before launch and preference survives reopen",
+  "knownContentIssue": "A PAL PS1 game was refused by SwanStation because its dump lacked required subchannel metadata. Matching sidecars were added separately with full readback verification; the owner subsequently confirmed that game now starts. Other repaired titles were not all gameplay-tested.",
+  "normalConsoleRestart": "Passed by owner report on 26 October 2026, including saved emulator preference, Grid/Swipe/Shelf and direct Mario Party 3 launch",
+  "publicBinaryRelease": "not published"
+}

@@ -24,7 +24,7 @@ def verify_dds(raw):
             "Invalid 2D DDS capability/header flags")
 
 
-def verify_png(raw):
+def verify_png(raw, expected_size=(1920, 1080)):
     require(raw[:8] == b"\x89PNG\r\n\x1a\n", "Invalid source PNG")
     offset = 8
     first, ended = True, False
@@ -36,8 +36,8 @@ def verify_png(raw):
         kind = raw[offset + 4:offset + 8]
         require(zlib.crc32(raw[offset + 4:end - 4]) == struct.unpack_from(">I", raw, end - 4)[0], "PNG CRC mismatch")
         if first:
-            require(kind == b"IHDR" and size == 13 and struct.unpack_from(">II", raw, offset + 8) == (1920, 1080),
-                    "Unexpected original Shelf artwork dimensions")
+            require(kind == b"IHDR" and size == 13 and struct.unpack_from(">II", raw, offset + 8) == expected_size,
+                    "Unexpected Shelf artwork source dimensions")
             first = False
         if kind == b"IEND":
             require(size == 0 and end == len(raw), "Invalid PNG termination")
@@ -48,6 +48,9 @@ def verify_png(raw):
 
 def verify(root=ROOT):
     manifest = json.loads((root / "native/ps5/presentation-assets.json").read_text())
+    source = manifest.get("sourceImage", {"width": 1920, "height": 1080})
+    source_size = (source["width"], source["height"])
+    require(source_size in ((1920, 1080), (3840, 2160)), "Unsupported Shelf artwork source geometry")
     expected = {"assets/launch-background-source.png", "native/ps5/sce_sys/pic0.dds", "native/ps5/sce_sys/pic1.dds"}
     files = manifest["files"]
     require(len(files) == 3 and {item["path"] for item in files} == expected, "Unexpected presentation file set")
@@ -55,7 +58,22 @@ def verify(root=ROOT):
         raw = (root / item["path"]).read_bytes()
         require(len(raw) == item["bytes"] and hashlib.sha256(raw).hexdigest() == item["sha256"],
                 "Presentation asset changed: " + item["path"])
-        verify_dds(raw) if item["path"].endswith(".dds") else verify_png(raw)
+        verify_dds(raw) if item["path"].endswith(".dds") else verify_png(raw, source_size)
+    icon = manifest.get("icon")
+    if icon:
+        require(icon.get("source") == "assets/branding/isshelf-home-icon.png" and
+                (icon.get("width"), icon.get("height")) == (1024, 1024), "Unexpected home icon source")
+        raw = (root / icon["source"]).read_bytes()
+        require(len(raw) == icon["bytes"] and hashlib.sha256(raw).hexdigest() == icon["sha256"],
+                "Home icon source changed")
+        verify_png(raw, (1024, 1024))
+        for key, expected_path in (("vectorSource", "assets/branding/isshelf-home-icon.svg"),
+                                   ("markSource", "assets/branding/shelf-gaming-mark.svg")):
+            record = icon[key]
+            require(record.get("path") == expected_path, "Unexpected vector icon master")
+            raw = (root / expected_path).read_bytes()
+            require(len(raw) == record["bytes"] and hashlib.sha256(raw).hexdigest() == record["sha256"],
+                    "Vector icon master changed")
     return manifest
 
 

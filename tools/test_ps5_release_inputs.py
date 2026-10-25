@@ -1,14 +1,23 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Small in-memory packaging fixtures. No console, hardware claims or release ZIPs."""
 import copy
+import json
 import posixpath
 import re
 import unittest
-from prepare_ps5_release import (digest, public_guides, public_source_documents, verify_asset_sources,
+from prepare_ps5_release import (digest, packaged_icon_source, public_guides, public_source_documents, verify_asset_sources,
                                  verify_console_manifest, verify_source_members)
 
 
 class ReleaseInputTests(unittest.TestCase):
+    def test_home_icon_master_follows_source_kit_without_breaking_legacy_kits(self):
+        key = "native/ps5/presentation-assets.json"
+        self.assertEqual(packaged_icon_source({key: b'{}'}), "assets/shelf-icon.png")
+        source = "assets/branding/isshelf-home-icon.png"
+        self.assertEqual(packaged_icon_source({key: json.dumps({"icon": {"source": source}}).encode()}), source)
+        with self.assertRaisesRegex(ValueError, "Unexpected packaged icon"):
+            packaged_icon_source({key: b'{"icon":{"source":"../../outside.png"}}'})
+
     def setUp(self):
         self.raw = {"fixture.bin": b"fixture program", "credits.txt": b"fixture notice"}
         self.files = {name: {"path": name, **digest(raw)} for name, raw in self.raw.items()}
@@ -100,6 +109,9 @@ class ReleaseInputTests(unittest.TestCase):
             self.assertEqual(published[name], before[name])
         manifest = {"files": [{"path": name, **digest(raw)} for name, raw in published.items()]}
         verify_source_members({**published, "SOURCE-KIT-MANIFEST.json": b"fixture metadata"}, manifest)
+        current = public_source_documents({**original, "README.md": b"# Shelf\nNative intro video is supported.\n"}, "v0.1.0-alpha.1")
+        self.assertIn(b"Native intro video is supported.", current["README.md"])
+        self.assertNotIn(b"stale no-video", current["SOURCE-KIT.txt"])
         with self.assertRaisesRegex(ValueError, "publication notice"):
             public_source_documents({**original, "SOURCE-KIT.txt": b"already published or unexpected"}, "v0.1.0-alpha.1")
 

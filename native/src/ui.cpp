@@ -67,7 +67,8 @@ void cycle(UiState& state, int direction) {
         if (state.settings_focus == 1 && p.layout == Layout::grid)
             p.grid_look = p.grid_look == GridLook::icons ? GridLook::cards : GridLook::icons;
         if (state.settings_focus == 2)
-            p.icon = static_cast<AppIcon>((static_cast<int>(p.icon) + direction + 3) % 3);
+            p.icon = static_cast<AppIcon>((static_cast<int>(p.icon) + direction + static_cast<int>(AppIcon::count)) %
+                                          static_cast<int>(AppIcon::count));
         if (state.settings_focus == 3)
             p.monochrome_missing = !p.monochrome_missing;
         if (state.settings_focus == 4)

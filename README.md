@@ -1,6 +1,8 @@
-# Console Shelf
+# isShelf
 
-A console-first library project for PS5 homebrew. This repository contains a **browser design preview**, a **native C++/SDL development build for PC**, and a cross-compiled PS5 executable. The installable PS5 prototype is still in development. Open [index.html](index.html) for the design preview, or follow the [native build instructions](native/README.md). Both default to offline use. [Read-only PS5 library discovery](docs/DISCOVERY.md) and four initial launch routes were checked on the owner's firmware 12.20 console. The owner accepted the room, clock persistence, smaller handhelds and native video capability across earlier revisions. UI-21 adds original intro media for all 52 systems, personal overrides, a quieter menu backboard and fine-grain static. The owner confirmed its [distinct PS1/PS2/N64 intros and improved menu/static visuals](docs/verification/ui21-owner-room-checks-2026-10-25.json), plus [controls, three-second closure, saved choices and direct N64 launch](docs/verification/ui21-owner-controls-checks-2026-10-25.json). PC checks, raw console readbacks, exact source relinking and a clean source rebuild pass. The owner also confirmed the three standalone emulator menus and direct Final Fantasy Tactics through RetroArch. UI-22 adds persistent pre-launch explanations and fixes saved RetroArch choices; its PC checks pass. Installation and current-build console checks, including a normal restart, remain before the public prototype download.
+**isShelf** is the official product name, created by **Iswebro** and previously called Console Shelf. Use **isShelf by Iswebro** in project listings and credits. Iswebro's PS5 app family uses a lowercase `is` prefix followed by a capitalized product name. The vector S logo is the default, with Gaming, Classic mint and Jade selectable in Settings. Existing app IDs, data folders and saved preferences retain their stable identifiers across the display-name change.
+
+A console-first library for PS5 homebrew, with a native C++/SDL app and a [browser design preview](index.html). Browse 52 system categories using Grid, Swipe or the Shelf play room; discover existing libraries and choose an installed emulator. Hardware visibility does not imply emulator availability. The owner completed UI-22's controls, saved settings, normal restart, three PlayStation emulator menus and RetroArch direct-game checks on firmware **12.20**. The UI-23 candidate adds isShelf branding, the vector home tile and four selectable in-app logos. Its PC checks pass; its final PS5 check and first public prototype download are pending. See the [prototype plan](docs/PROTOTYPE-PLAN.md), [tested launch behavior](docs/INTEGRATION.md), [build instructions](native/README.md) and [credits](THIRD_PARTY.md).
 
 ![Shelf's integrated gaming room, deep console counters and personal TV](previews/display-shelf-desktop.png)
 
@@ -34,6 +36,12 @@ The next main milestone is a [native PS5 prototype and its first verified downlo
 The native C++ renderer running on PC:
 
 ![Native development build](previews/native-home.png)
+
+## PS5 home-screen artwork
+
+[Glass and Light](assets/backgrounds/shelf-ps5-home-v2.png) is the new 3840 × 2160 selection background. A much larger Shelf mark sits directly over sculptural dark glass and restrained mint/cyan lighting, with a quiet left side and upper strip for the PS5 interface. The [logo is real SVG geometry with no background](assets/branding/shelf-gaming-mark.svg); a [transparent PNG](assets/branding/shelf-gaming-mark.png) is also included. The original square app icon and its three variants are unchanged.
+
+The previous [static composition](assets/backgrounds/shelf-ps5-home-v1.png) is retained. The [prompt and composition notes](assets/backgrounds/shelf-ps5-home-v2.prompt.txt) record built-in image generation for the 1672 × 941 glass plate and direct 4K vector composition. Run `node tools/build-home-art.js` to reproduce the composition with Playwright and an available browser. The PS5-format `pic0.dds` and `pic1.dds` are prepared locally; this artwork revision has not been installed or visually checked on the PS5.
 
 ## Development check
 

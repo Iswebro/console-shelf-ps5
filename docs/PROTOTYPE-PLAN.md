@@ -1,6 +1,6 @@
 # Main goal: first native PS5 prototype
 
-Build Console Shelf as a native PS5 app and publish the first downloadable prototype in this repository once its package and core behaviour have been verified. The initial hardware target is firmware **12.20** with the existing itsPLK/Payload Manager setup. A successful PC test or cross-compile alone will not be labelled PS5 compatibility.
+Build isShelf as a native PS5 app and publish the first downloadable prototype in this repository once its package and core behaviour have been verified. The initial hardware target is firmware **12.20** with the existing itsPLK/Payload Manager setup. A successful PC test or cross-compile alone will not be labelled PS5 compatibility.
 
 ## Current progress
 
@@ -17,7 +17,8 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Native C++/SDL renderer, navigation model and settings persistence exercised on PC.
 - [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
 - [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
-- [ ] Complete the final candidate checks on firmware 12.20. UI-21 has owner confirmation for room/intros, all three layouts, settings, closure, app-reopen persistence, all three standalone emulator foreground menus, and direct N64/PS1 games through RetroArch. UI-22 adds a persistent pre-launch explanation and fixes validation of saved `retroarch:<core>` preferences. Its model, browser, 66 native-renderer captures and PS5 structure checks pass; its installation and physical tests remain pending. The normal console restart remains deferred by the owner.
+- [x] UI-22 owner acceptance on firmware 12.20: controls, saved choices, normal console restart, foreground PSXS5/PS5SX2/PS5SX3 menus and direct N64/PS1 RetroArch launch. The owner also confirmed Quick Menu and playlist switching after a Shelf-forwarded PS1 game.
+- [ ] UI-23 isShelf branding candidate: vector home tile, Glass and Light background, Vector/Gaming/Classic mint/Jade choices and final exact-package console checks. The existing launcher helper remains unchanged.
 - [x] Read-only emulator/core and game discovery in configured existing library locations, checked from PC against the owner's console.
 - [x] The same configured discovery inside the PS5 app sandbox, with complete scan evidence.
 - [ ] Further dedicated-emulator and library-layout adapters.
