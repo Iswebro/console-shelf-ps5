@@ -1,0 +1,32 @@
+{
+  "scope": "Artifact input audit only; physical hardware checks were not evaluated",
+  "sourceCommit": "abd18e000a13ff5a675ba098bb7127bf589087d2",
+  "applicationSelf": {
+    "bytes": 2770001,
+    "sha256": "c83ab301d92bb4d9c4efe6731b32bfb9cb9cb948f3aa87f35df2c8ecfca945c4"
+  },
+  "consoleReadbackMembers": 84,
+  "sourceAssets": {
+    "filesCompared": 79,
+    "byteExactFiles": 78,
+    "lineEndingOnlyNotices": [
+      {
+        "path": "LICENSE",
+        "difference": "CRLF versus LF only; content unchanged",
+        "packaged": {
+          "bytes": 35823,
+          "sha256": "230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809"
+        },
+        "source": {
+          "bytes": 35149,
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+        }
+      }
+    ]
+  },
+  "sourceArchiveMembers": 312,
+  "generatedIconReproduced": true,
+  "releaseAssetsWritten": false,
+  "consoleContacted": false,
+  "publicationAuthorizedByThisAudit": false
+}
