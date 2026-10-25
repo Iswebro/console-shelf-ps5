@@ -88,7 +88,10 @@ The bundled original helper is embedded in eboot.bin and sent only to the consol
 loopback ELF loader when you select a launch action. It waits for Shelf's explicit commitment
 and cooperative closure; it never kills another app or writes emulator settings.
 {permission_notice}
-The helper waits through a monitored idle second after Shelf closes before its one launch call.
+The helper waits through a monitored idle second after Shelf closes before its one cold launch.
+Once the selected app is observed running, it monitors that same instance for six seconds,
+then makes one guarded running-title foreground request with no repeated game arguments.
+This request is not proof of visible foreground; that result needs the owner's console test.
 It expects the console's existing ftpsrv on 127.0.0.1:2121; no PC DNS host is needed for discovery.
 The app writes only its own preferences, launch request/status and diagnostics under /data/console-shelf.
 
@@ -102,7 +105,8 @@ First test: open Shelf; check the picture, D-pad/stick, Cross/Circle and Options
 The selection background is confirmed; opening still shows black before the grid.
 Check Nintendo 64's library and the PS1/PS2/PS3 counts, then save a layout/visibility choice.
 Close and reopen Shelf to check persistence. Report any blank screen, crash or incorrect input.
-Test PS2 -> Test emulator launch first. It should close Shelf with a fade and open PS5SX2's shelf.
+Test PS2 -> Test emulator launch first. Allow up to ten seconds after Shelf fades out.
+Check that PS5SX2 appears on the TV, rather than remaining behind the PS5 home screen.
 PS1/PS3 and other detected standalone emulators currently open their own libraries.
 For N64 using RetroArch, a selected game uses the external --rom/--core forwarder contract.
 All launch routes remain experimental until their console result is recorded. These checks and

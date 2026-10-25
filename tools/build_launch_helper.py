@@ -131,7 +131,7 @@ def main(standard_runtime=False):
               "permissionChanges": standard_runtime,
               "crtPatchHook": ("Unmodified pinned SDK startup; targets helper process capabilities and syscall bounds"
                                if standard_runtime else "verified return 0; SDK patch.c excluded; kernel write routines absent"),
-              "policy": "cooperative Shelf closure; one launch attempt; no process kill or emulator-file writes",
+              "policy": "cooperative Shelf closure; one cold launch and one verified running-title foreground request; no process kill or emulator-file writes",
               "approvalForStandardRuntime": "required before console use" if standard_runtime else "not applicable"}
     (output / "build.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))

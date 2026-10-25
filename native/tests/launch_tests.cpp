@@ -22,7 +22,8 @@ shelf::LaunchRequest request() {
 }
 struct FakeHandoff {
     unsigned checks = 0, launches = 0, waits = 0, ready_calls = 0, idle_checks = 0;
-    int scenario = 0, launch_result = 1;
+    unsigned foregrounds = 0, target_checks = 0, launched_at = 0;
+    int scenario = 0, launch_result = 1, foreground_result = static_cast<int>(0x8094000cu);
     std::uint64_t clock = 1000;
     static int current(void* raw, char (&title)[10]) {
         auto& f = *static_cast<FakeHandoff*>(raw);
@@ -42,6 +43,15 @@ struct FakeHandoff {
             return 1;
         }
         if (f.launches && f.scenario != 5) {
+            ++f.target_checks;
+            if (f.target_checks >= 3 && f.scenario == 12) {
+                std::strcpy(title, "CUSA00001");
+                return 1;
+            }
+            if (f.target_checks >= 3 && f.scenario == 13)
+                return -1;
+            if (f.target_checks >= 3 && f.scenario == 14)
+                return 0;
             std::strcpy(title, "PPSA99203");
             return 1;
         }
@@ -58,12 +68,13 @@ struct FakeHandoff {
         auto& f = *static_cast<FakeHandoff*>(raw);
         check(milliseconds == 250, "handoff polling stays bounded");
         ++f.waits;
-        if (f.scenario == 7)
+        if (f.scenario == 7 || (f.scenario == 16 && f.launches))
             f.clock += 31;
     }
     static int launch(void* raw, const shelf::LaunchRequest& r) {
         auto& f = *static_cast<FakeHandoff*>(raw);
         ++f.launches;
+        f.launched_at = f.waits;
         check(f.idle_checks >= 5, "the shell settles for a full monitored second before launching");
         check(std::strcmp(r.title, "PPSA99203") == 0, "only the requested target is launched");
         return f.launch_result;
@@ -75,12 +86,21 @@ struct FakeHandoff {
         auto& f = *static_cast<FakeHandoff*>(raw);
         if (f.scenario == 8)
             return shelf::HandoffConsent::pending;
-        if (f.scenario == 9 || (f.scenario == 10 && f.waits >= 2))
+        if (f.scenario == 9 || (f.scenario == 10 && f.waits >= 2) ||
+            (f.scenario == 15 && f.launches && f.target_checks >= 3))
             return shelf::HandoffConsent::cancelled;
         return shelf::HandoffConsent::committed;
     }
+    static int foreground(void* raw, const shelf::LaunchRequest& r) {
+        auto& f = *static_cast<FakeHandoff*>(raw);
+        ++f.foregrounds;
+        check(f.launches == 1 && f.foregrounds == 1, "only one running-title foreground request follows one cold launch");
+        check((f.waits - f.launched_at) * 250 >= 6000, "the observed running title gets its settling interval");
+        check(std::strcmp(r.title, "PPSA99203") == 0, "foregrounding stays bound to the selected title");
+        return f.foreground_result;
+    }
     shelf::HandoffOps ops() {
-        return {this, current, ready, wait, launch, now, consent};
+        return {this, current, ready, wait, launch, now, consent, foreground};
     }
 };
 } // namespace
@@ -163,6 +183,12 @@ void test_launch() {
     check(!parse_launch_status(std::string(encoded_status) + "state=committed\n", 1000, decoded_status) &&
               !parse_launch_status(encoded_status, 1031, decoded_status),
           "duplicate and stale replies are rejected");
+    response.stage = LaunchStage::foreground_requested;
+    response.code = 0x8094000c;
+    check(encode_launch_status(response, encoded_status, sizeof(encoded_status)) &&
+              parse_launch_status(encoded_status, 1000, decoded_status) &&
+              decoded_status.stage == LaunchStage::foreground_requested && decoded_status.code == 0x8094000c,
+          "an accepted foreground request is distinct from confirmed on-screen visibility");
     LaunchRequest parsed;
     check(parse_launch_request(original, 1000, parsed) && std::strcmp(parsed.id, r.id) == 0 &&
               std::strcmp(parsed.title, r.title) == 0 && parsed.mode == r.mode,
@@ -208,33 +234,48 @@ void test_launch() {
     check(!launch_request_valid(r, 1000), "nonterminated fields are bounded before string operations");
     r = request();
     FakeHandoff f;
-    check(cooperative_handoff(r, f.ops()) == HandoffResult::started && f.launches == 1 && f.ready_calls == 1,
-          "cooperative closure leads to one observed launch");
+    check(cooperative_handoff(r, f.ops()) == HandoffResult::foreground_requested && f.launches == 1 &&
+              f.foregrounds == 1 && f.ready_calls == 1,
+          "cooperative closure and an observed target permit one guarded foreground request");
     for (int scenario : {1, 2, 3, 4, 6, 8, 9, 10, 11}) {
         FakeHandoff refused;
         refused.scenario = scenario;
         const auto result = cooperative_handoff(r, refused.ops());
-        check(result != HandoffResult::started && result != HandoffResult::unconfirmed && refused.launches == 0,
+        check(result != HandoffResult::foreground_requested && result != HandoffResult::unconfirmed && refused.launches == 0 &&
+                  refused.foregrounds == 0,
               "busy/unknown foreground, failed acknowledgement and closure timeout never launch");
     }
     FakeHandoff accepted;
     accepted.scenario = 5;
     check(cooperative_handoff(r, accepted.ops()) == HandoffResult::unconfirmed && accepted.launches == 1 &&
-              accepted.waits < 100,
+              accepted.waits < 100 && accepted.foregrounds == 0,
           "an accepted but unobserved launch is not called successful or retried");
     FakeHandoff denied;
     denied.scenario = 5;
     denied.launch_result = -1;
-    check(cooperative_handoff(r, denied.ops()) == HandoffResult::refused && denied.launches == 1,
+    check(cooperative_handoff(r, denied.ops()) == HandoffResult::refused && denied.launches == 1 && denied.foregrounds == 0,
           "a refused launch has no alternate call or retry");
     FakeHandoff appearing;
     appearing.launch_result = -1;
-    check(cooperative_handoff(r, appearing.ops()) == HandoffResult::started && appearing.launches == 1,
-          "an observed target wins over a negative return without a second launch");
+    check(cooperative_handoff(r, appearing.ops()) == HandoffResult::foreground_requested && appearing.launches == 1 &&
+              appearing.foregrounds == 1,
+          "an observed target can be foregrounded after a negative cold return without a cold retry");
     FakeHandoff expired;
     expired.scenario = 7;
     check(cooperative_handoff(r, expired.ops()) == HandoffResult::invalid && expired.launches == 0,
           "a request expiring during closure cannot launch later");
+    for (int scenario : {12, 13, 14, 15, 16}) {
+        FakeHandoff changed;
+        changed.scenario = scenario;
+        const auto result = cooperative_handoff(r, changed.ops());
+        check(result != HandoffResult::foreground_requested && changed.launches == 1 && changed.foregrounds == 0,
+              "a changed, unknown, closed, cancelled or expired target is never foregrounded");
+    }
+    FakeHandoff focus_denied;
+    focus_denied.foreground_result = static_cast<int>(0x8094000fu);
+    check(cooperative_handoff(r, focus_denied.ops()) == HandoffResult::unconfirmed && focus_denied.launches == 1 &&
+              focus_denied.foregrounds == 1,
+          "a refused foreground request is unconfirmed and never retried");
     std::puts("PASS: bounded launch protocol, stale/injected request refusal, exact RetroArch argv and cooperative "
-              "one-attempt handoff mocks. No console launch performed.");
+              "cold-launch and guarded foreground mocks. No console launch performed.");
 }

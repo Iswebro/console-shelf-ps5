@@ -34,10 +34,11 @@ constexpr char status_path[] = "/data/console-shelf/launch-status.txt";
 constexpr char status_temporary[] = "/data/console-shelf/launch-status.tmp";
 struct Context {
     const shelf::LaunchRequest* request = nullptr;
-    int origin_app = 0;
+    int origin_app = 0, target_app = 0;
     std::uint32_t user = 0;
     int launch_status = 0;
     int probe_status = 0;
+    int foreground_status = 0;
     FILE* journal = nullptr;
     ~Context() {
         if (journal)
@@ -56,6 +57,18 @@ bool status(const shelf::LaunchRequest& request, shelf::LaunchStage state, int c
     reply.code = static_cast<std::uint32_t>(code);
     char message[256];
     if (!shelf::encode_launch_status(reply, message, sizeof(message)))
+        return false;
+    // Never replace a newer request's reply, even if this helper finishes late.
+    FILE* prior = std::fopen(status_path, "rb");
+    if (!prior)
+        return false;
+    char existing[256];
+    const auto count = std::fread(existing, 1, sizeof(existing), prior);
+    const bool bad = std::ferror(prior) != 0;
+    std::fclose(prior);
+    shelf::LaunchStatus owner;
+    if (bad || !shelf::parse_launch_status({existing, count}, now(nullptr), owner) ||
+        std::strcmp(owner.id, request.id) != 0 || owner.issued != request.issued)
         return false;
     FILE* file = std::fopen(status_temporary, "wb");
     if (!file)
@@ -101,6 +114,11 @@ int current(void* raw, char (&title)[10]) {
             return -1;
         context.origin_app = id;
     }
+    if (context.request && std::strcmp(value, context.request->title) == 0) {
+        if (context.target_app && context.target_app != id)
+            return -1;
+        context.target_app = id;
+    }
     std::memcpy(title, value, 10);
     return 1;
 }
@@ -142,7 +160,33 @@ int launch(void* raw, const shelf::LaunchRequest& request) {
     // installed title; the helper has no update/reboot/install functionality.
     params.check_flags = 2;
     context.launch_status = sceLncUtilLaunchApp(request.title, args[0] ? args.data() : nullptr, &params);
+    if (context.journal) {
+        std::fprintf(context.journal, "cold launch: 0x%08x\n", static_cast<unsigned>(context.launch_status));
+        std::fflush(context.journal);
+    }
     return context.launch_status;
+}
+int foreground(void* raw, const shelf::LaunchRequest& request) {
+    auto& context = *static_cast<Context*>(raw);
+    char title[10]{};
+    std::uint32_t user = 0;
+    if (!context.target_app || current(raw, title) != 1 || std::strcmp(title, request.title) != 0 ||
+        sceUserServiceGetForegroundUser(&user) != 0 || user != context.user ||
+        !shelf::launch_request_valid(request, now(nullptr)) || consent(raw) != shelf::HandoffConsent::committed)
+        return -1;
+    LncParams params{};
+    params.size = sizeof(params);
+    params.user = static_cast<std::int32_t>(user);
+    params.check_flags = 2;
+    // Resume the verified running instance as its home-screen tile does. Null
+    // argv avoids replaying a ROM request. No SetAppFocus, kill or cold retry.
+    context.foreground_status = sceLncUtilLaunchApp(request.title, nullptr, &params);
+    if (context.journal) {
+        std::fprintf(context.journal, "running-title foreground request: 0x%08x\n",
+                     static_cast<unsigned>(context.foreground_status));
+        std::fflush(context.journal);
+    }
+    return context.foreground_status;
 }
 shelf::LaunchStage result_stage(shelf::HandoffResult result) {
     switch (result) {
@@ -162,6 +206,8 @@ shelf::LaunchStage result_stage(shelf::HandoffResult result) {
         return shelf::LaunchStage::refused;
     case shelf::HandoffResult::cancelled:
         return shelf::LaunchStage::cancelled;
+    case shelf::HandoffResult::foreground_requested:
+        return shelf::LaunchStage::foreground_requested;
     }
     return shelf::LaunchStage::invalid;
 }
@@ -190,9 +236,9 @@ int main() {
     if (context.journal) {
         std::fprintf(context.journal,
 #ifdef SHELF_STANDARD_SDK_RUNTIME
-                     "ui-13 standard SDK helper; init: 0x%08x; user query: 0x%08x\n",
+                     "ui-14 standard SDK helper; init: 0x%08x; user query: 0x%08x\n",
 #else
-                     "ui-13 restricted helper; init: 0x%08x; user query: 0x%08x\n",
+                     "ui-14 restricted helper; init: 0x%08x; user query: 0x%08x\n",
 #endif
                      static_cast<unsigned>(initialized), static_cast<unsigned>(user_status));
         std::fflush(context.journal);
@@ -201,8 +247,9 @@ int main() {
         status(request, shelf::LaunchStage::service_unavailable, user_status ? user_status : initialized);
         return 1;
     }
-    const auto result = shelf::cooperative_handoff(request, {&context, current, ready, wait, launch, now, consent});
+    const auto result = shelf::cooperative_handoff(request, {&context, current, ready, wait, launch, now, consent, foreground});
     status(request, result_stage(result),
-           result == shelf::HandoffResult::foreground_changed ? context.probe_status : context.launch_status);
-    return result == shelf::HandoffResult::started ? 0 : 1;
+           result == shelf::HandoffResult::foreground_changed ? context.probe_status
+           : result == shelf::HandoffResult::foreground_requested ? context.foreground_status : context.launch_status);
+    return result == shelf::HandoffResult::foreground_requested ? 0 : 1;
 }
