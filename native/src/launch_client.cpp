@@ -288,7 +288,9 @@ int LaunchClient::run(void* raw) {
                 return 0;
             }
             if (reply.stage != LaunchStage::sending) {
-                client.failed("The launcher could not prepare the handoff. Reopen Shelf and try again.");
+                client.failed(reply.stage == LaunchStage::foreground_changed
+                                  ? "The launcher could not confirm Shelf is the active app. Diagnostic details were saved."
+                                  : "The launcher could not prepare the handoff. Diagnostic details were saved.");
                 return 1;
             }
         }

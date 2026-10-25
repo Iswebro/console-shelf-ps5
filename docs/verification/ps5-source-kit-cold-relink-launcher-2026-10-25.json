@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "sourceCommit": "c41b3ed2c8913e5fbb15c29d7cc84f3ffdff3164",
+  "archiveBytes": 101266300,
+  "archiveSHA256": "0d49e3664a7761600a42289afd7bba0c76733115c99fecdb649a71cffabf9ede",
+  "members": 261,
+  "completeSourceComponents": [
+    "SDL2",
+    "libiconv",
+    "libsamplerate",
+    "PS5 Payload SDK CRT/libc"
+  ],
+  "freshCompilerPrefix": true,
+  "converterRebuilt": true,
+  "applicationRecompiled": false,
+  "reusedHashPinnedDownloads": 21,
+  "exitCode": 0,
+  "exactReferenceMatch": true,
+  "elf": {
+    "bytes": 2770516,
+    "sha256": "f3d29673167c830d84fd4ae2b9e856ccbe78b536309437dfaba1cb393b2f8142",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2656881,
+    "sha256": "ef9365b1bd4a14e8be3af881416f33fab1e4453d1c6af5b628cb947145faf9a7"
+  },
+  "hardwareResult": "The active-app guard refused the launch; visible foreground handoff remains unverified",
+  "consoleOrSettingsChangedByRelink": false,
+  "publicBinaryReleased": false
+}

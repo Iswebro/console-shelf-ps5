@@ -37,6 +37,12 @@ struct Context {
     int origin_app = 0;
     std::uint32_t user = 0;
     int launch_status = 0;
+    int probe_status = 0;
+    FILE* journal = nullptr;
+    ~Context() {
+        if (journal)
+            std::fclose(journal);
+    }
 };
 std::uint64_t now(void*) {
     const auto value = std::time(nullptr);
@@ -65,14 +71,26 @@ bool status(const shelf::LaunchRequest& request, shelf::LaunchStage state, int c
 int current(void* raw, char (&title)[10]) {
     auto& context = *static_cast<Context*>(raw);
     const int id = sceSystemServiceGetAppIdOfRunningBigApp();
+    if (context.journal) {
+        std::fprintf(context.journal, "current app: 0x%08x\n", static_cast<unsigned>(id));
+        std::fflush(context.journal);
+    }
     // -1 and zero are the no-app values used by the reference helper. Other
     // errors must not become permission to launch over an unknown application.
     if (id == 0 || id == -1)
         return 0;
-    if (id < 0)
+    if (id < 0) {
+        context.probe_status = id;
         return -1;
+    }
     char value[32]{};
-    if (sceSystemServiceGetAppTitleId(id, value) != 0 || !std::memchr(value, 0, sizeof(value)) ||
+    const int title_status = sceSystemServiceGetAppTitleId(id, value);
+    context.probe_status = title_status;
+    if (context.journal) {
+        std::fprintf(context.journal, "title query: 0x%08x; title: %.31s\n", static_cast<unsigned>(title_status), value);
+        std::fflush(context.journal);
+    }
+    if (title_status != 0 || !std::memchr(value, 0, sizeof(value)) ||
         std::strlen(value) != 9)
         return -1;
     for (unsigned i = 0; i < 9; ++i)
@@ -165,14 +183,21 @@ int main() {
         return 1;
     Context context;
     context.request = &request;
+    context.journal = std::fopen("/data/console-shelf/launch-helper.log", "wb");
     sceUserServiceInitialize(nullptr);
     const int initialized = sceLncUtilInitialize();
     const int user_status = sceUserServiceGetForegroundUser(&context.user);
+    if (context.journal) {
+        std::fprintf(context.journal, "ui-12 permission-preserving helper; init: 0x%08x; user query: 0x%08x\n",
+                     static_cast<unsigned>(initialized), static_cast<unsigned>(user_status));
+        std::fflush(context.journal);
+    }
     if (initialized < 0 || user_status != 0 || context.user > 0x7fffffffu) {
         status(request, shelf::LaunchStage::service_unavailable, user_status ? user_status : initialized);
         return 1;
     }
     const auto result = shelf::cooperative_handoff(request, {&context, current, ready, wait, launch, now, consent});
-    status(request, result_stage(result), context.launch_status);
+    status(request, result_stage(result),
+           result == shelf::HandoffResult::foreground_changed ? context.probe_status : context.launch_status);
     return result == shelf::HandoffResult::started ? 0 : 1;
 }

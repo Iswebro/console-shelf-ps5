@@ -311,7 +311,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-11 permission-preserving launcher; monitored shell settling");
+    startup("main entered", "ui-12 launcher title-query diagnostics; permissions preserved");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
