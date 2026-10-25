@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "sourceCommit": "dc748886268cea97a52c5a9d9c6df35debb72b3b",
+  "change": "PS2 base under/behind the controller corrected to matte black; blue lettering and coloured buttons retained",
+  "asset": {
+    "asset": "assets/3d-icons/ps2.png",
+    "edit": "Replace saturated blue base under/behind controller with matte black; retain PS2 lettering, controller colours and transparent background",
+    "tool": "OpenAI built-in image_gen",
+    "prompt": "ps2-base-edit.prompt.txt",
+    "originalSHA256": "f42e7d0e3dd8435fd4f994abe48b4a8fb22427cb1956c31dcca36cd38987c1cf",
+    "sha256": "42aa391cb0f4f245595aacdd540fbb907aeb46762ab98c4e8ffd03b393b8df5a",
+    "bytes": 1083168,
+    "width": 1254,
+    "height": 1254,
+    "sourcePNGUnmodifiedAfterGeneration": true
+  },
+  "runtimeFilesChanged": [
+    "START-HERE.md",
+    "assets/3d-icons/ps2.png",
+    "assets/CREDITS.md"
+  ],
+  "checks": {
+    "visual": "generated icon and native PC Shelf render inspected",
+    "browser": "existing preview checks passed; 52 icon hashes/load and layout geometry verified",
+    "console": "80 full raw readbacks verified; prior program backed up",
+    "executableUnchanged": true,
+    "preferencesUnchanged": true,
+    "helperExecuted": false
+  },
+  "selfSHA256": "6df59689ca8945910813379ca475c2d8de5a8f4793e8c9fce27f1b89e97a4853",
+  "ownerPrecondition": "Initial attempt stopped before any console write because an app was open. Owner confirmed all apps closed before the successful update.",
+  "hardwareVisualAcceptance": "pending owner reopen",
+  "publicBinary": "not published"
+}
