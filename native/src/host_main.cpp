@@ -294,7 +294,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-6 loading transition and Circle hold");
+    startup("main entered", "ui-8 foreground-gated opening; three-second Circle hold");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -520,6 +520,14 @@ int main(int argc, char** argv) {
     bool first_frame = true;
     bool scan_started = false;
     const auto opened_at = scripting ? 0u : SDL_GetTicks();
+    const bool automatic_intro = !scripting && state.presentation.loading;
+    shelf::OpeningGate opening_gate;
+    bool intro_started = !automatic_intro, previous_visible = false;
+    bool visibility_sampled = false, frame_acknowledged = false, opening_logged = false;
+    int last_visibility_status = 0;
+    unsigned last_visibility_flags = 0, visibility_notes = 0;
+    unsigned visible_time = 0, last_visibility_at = opened_at;
+    unsigned intro_frames = 0, reveal_frames = 0;
     unsigned reveal_at = 0;
     bool reveal_pending = false;
     unsigned measured_frames = 0, max_render_ms = 0, max_present_ms = 0;
@@ -553,7 +561,48 @@ int main(int argc, char** argv) {
             redraw = true;
         }
         const unsigned now = scripting ? script_time : SDL_GetTicks();
-        if (scan.ready() && now - opened_at >= 1100) {
+        if (automatic_intro && (state.presentation.loading || state.presentation.reveal < 1)) {
+            unsigned flags = 0;
+            int visibility_status = 0;
+            bool rendered_frame = !first_frame;
+#ifdef SHELF_PS5
+            visibility_status = gs_app_visibility(&flags);
+            rendered_frame = gs_vout_has_frame() != 0;
+#endif
+            opening_gate.sample(now, visibility_status, flags);
+            if (visibility_notes < 8 && (!visibility_sampled || visibility_status != last_visibility_status ||
+                                         flags != last_visibility_flags)) {
+                char info[120];
+                std::snprintf(info, sizeof(info), "%u ms; result 0x%08x; overlay %u; background %u", now - opened_at,
+                              static_cast<unsigned>(visibility_status), flags & 1, (flags >> 1) & 1);
+                startup("opening visibility", info);
+                ++visibility_notes;
+            }
+            visibility_sampled = true;
+            last_visibility_status = visibility_status;
+            last_visibility_flags = flags;
+            if (rendered_frame && !frame_acknowledged) {
+                frame_acknowledged = true;
+                char info[64];
+                std::snprintf(info, sizeof(info), "%u ms after graphics ready", now - opened_at);
+                startup("first rendered flip acknowledged", info);
+            }
+            const bool visible = rendered_frame && opening_gate.ready(now);
+            if (visible && previous_visible)
+                visible_time += now - last_visibility_at;
+            previous_visible = visible;
+            last_visibility_at = now;
+            if (visible && !intro_started) {
+                intro_started = true;
+                char info[120];
+                std::snprintf(info, sizeof(info), "%u ms; status %s", now - opened_at,
+                              opening_gate.used_fallback() ? "unavailable; timed fallback" : "foreground; no overlay");
+                startup("opening entrance started", info);
+            }
+        }
+        const unsigned visual_now = automatic_intro ? visible_time : now;
+        const unsigned visual_start = automatic_intro ? 0 : opened_at;
+        if (scan.ready() && intro_started && visual_now - visual_start >= 1100) {
             scan.stop();
             accept_library(state, *library.value, ftp, false);
             state.presentation.loading = false;
@@ -672,11 +721,11 @@ int main(int argc, char** argv) {
         if (close_gesture.finished(now))
             state.exit_requested = true;
         if (state.presentation.loading) {
-            const float progress = std::min(1.0f, (now - opened_at) / 600.0f);
+            const float progress = intro_started ? std::min(1.0f, (visual_now - visual_start) / 600.0f) : 0;
             state.presentation.appear = progress * progress * (3 - 2 * progress);
         }
         if (!state.presentation.loading && state.presentation.reveal < 1 && !reveal_pending) {
-            const float progress = std::min(1.0f, (now - reveal_at) / 1000.0f);
+            const float progress = std::min(1.0f, (visual_now - reveal_at) / 1000.0f);
             state.presentation.reveal = progress * progress * (3 - 2 * progress);
         }
         shelf::Action repeated{};
@@ -732,9 +781,21 @@ int main(int argc, char** argv) {
                 startup("first frame submitted");
                 first_frame = false;
             }
+            if (state.presentation.loading && intro_started)
+                ++intro_frames;
+            if (!state.presentation.loading && state.presentation.reveal < 1)
+                ++reveal_frames;
+            if (automatic_intro && !opening_logged && !state.presentation.loading && state.presentation.reveal >= 1) {
+                char info[150];
+                std::snprintf(info, sizeof(info),
+                              "%u ms wall; %u ms foreground clock; %u entrance frames; %u reveal frames",
+                              SDL_GetTicks() - opened_at, visible_time, intro_frames, reveal_frames);
+                startup("opening animation submitted", info);
+                opening_logged = true;
+            }
             if (state.presentation.loading && scan.library && !scan_started) {
                 scan_started = true;
-                startup("library scan starting", "background after first visible frame");
+                startup("library scan starting", "background after first submitted frame");
                 if (!scan.start()) {
                     startup("library worker unavailable", SDL_GetError());
                     library.value->scan.complete = false;
@@ -746,7 +807,9 @@ int main(int argc, char** argv) {
             }
             if (covered_reveal) {
                 // Image decoding and texture preparation must not consume the reveal's time.
-                reveal_at = scripting ? script_time : SDL_GetTicks();
+                reveal_at = automatic_intro ? visible_time : scripting ? script_time : SDL_GetTicks();
+                // Exclude this covered frame's image decoding from the foreground animation clock too.
+                last_visibility_at = SDL_GetTicks();
                 reveal_pending = false;
                 startup("opening reveal ready", "prepared frame; 1000 ms blend");
             }

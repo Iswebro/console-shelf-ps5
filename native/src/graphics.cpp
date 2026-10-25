@@ -425,7 +425,9 @@ void splash(float opacity, unsigned time_ms, bool loading, float appearance = 1)
             rounded(931 + static_cast<int>(dot) * 24, 639, 9, 9, 4,
                     {194, 177, 255, static_cast<Uint8>(ink / (distance + 1))});
         }
-        centered("Hold Circle for 4 seconds to close", 960, 984, 19, {140, 140, 165, alpha});
+        char hint[80];
+        std::snprintf(hint, sizeof(hint), "Hold Circle for %u seconds to close", close_hold_ms / 1000);
+        centered(hint, 960, 984, 19, {140, 140, 165, alpha});
     }
 }
 std::string_view availability(const UiState& state, std::size_t id) {

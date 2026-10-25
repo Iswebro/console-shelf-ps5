@@ -104,7 +104,7 @@ async function cancelledGreeting() {
   try {
     const start=Date.now();
     const result=await run(['--library-ftp','127.0.0.1','--library-port',String(server.address().port),'--background-scan',
-      '--script','shot:cancel-loading.png,wait:150,circle-down,frame:2000,frame:2000,frame:400']);
+      '--script','shot:cancel-loading.png,wait:150,circle-down,frame:1500,frame:1500,frame:400,unknown-action']);
     assert.equal(result.code,0,result.stderr);
     assert.ok(accepted>0,'the cancellation test reached a real socket waiting for its greeting');
     assert.ok(Date.now()-start<2500,'Circle closure cancels a pending greeting before its 3-second network timeout');

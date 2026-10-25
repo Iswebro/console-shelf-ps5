@@ -87,12 +87,13 @@ int sceImeDialogTerm(void) {
  * didn't provide shows up as NULL here instead of crashing later. */
 #define GS_IMPORTS(X)                                                                                                  \
     X(sceUserServiceInitialize)                                                                                        \
-    X(sceUserServiceGetForegroundUser) X(sceUserServiceGetLoginUserIdList) X(scePadInit) X(scePadOpen)                 \
-        X(scePadReadState) X(scePadGetHandle) X(sceVideoOutOpen) X(sceVideoOutClose) X(sceVideoOutSetFlipRate)         \
-            X(sceVideoOutSubmitFlip) X(sceVideoOutWaitVblank) X(sceVideoOutRegisterBuffers2)                           \
-                X(sceVideoOutSetBufferAttribute2) X(sceKernelGetDirectMemorySize) X(sceKernelAllocateDirectMemory)     \
-                    X(sceKernelMapDirectMemory) X(sceKernelReleaseDirectMemory) X(sceKernelUsleep)                     \
-                        X(sceSystemServiceHideSplashScreen) X(sceSystemServiceLoadExec)
+    X(sceUserServiceGetForegroundUser)                                                                                 \
+    X(sceUserServiceGetLoginUserIdList) X(scePadInit) X(scePadOpen) X(scePadReadState) X(scePadGetHandle)              \
+        X(sceVideoOutOpen) X(sceVideoOutClose) X(sceVideoOutSetFlipRate) X(sceVideoOutSubmitFlip)                      \
+            X(sceVideoOutWaitVblank) X(sceVideoOutRegisterBuffers2) X(sceVideoOutSetBufferAttribute2)                  \
+                X(sceKernelGetDirectMemorySize) X(sceKernelAllocateDirectMemory) X(sceKernelMapDirectMemory)           \
+                    X(sceKernelReleaseDirectMemory) X(sceKernelUsleep) X(sceSystemServiceHideSplashScreen)             \
+                        X(sceSystemServiceLoadExec) X(sceSystemServiceGetStatus)
 
 #define GS_DECLARE(name) extern int name() __attribute__((weak));
 GS_IMPORTS(GS_DECLARE)

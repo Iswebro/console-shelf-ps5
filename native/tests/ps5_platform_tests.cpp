@@ -21,8 +21,10 @@ void* gs_calloc(std::size_t, std::size_t);
 void gs_free(void*);
 const char* gs_vout_init();
 void gs_vout_present(const void*, int);
+int gs_vout_has_frame();
 void gs_vout_shutdown();
 int gs_request_close();
+int gs_app_visibility(unsigned*);
 [[noreturn]] void gs_wait_for_close();
 }
 
@@ -43,6 +45,8 @@ void* registered[2]{};
 std::jmp_buf shell_replaced;
 bool closing_probe = false;
 int close_calls = 0, close_status = 0, close_waits = 0;
+int visibility_status = 0;
+unsigned char overlay = 0, background_execution = 0;
 } // namespace
 
 extern "C" {
@@ -107,6 +111,13 @@ int sceSystemServiceLoadExec(const char* path, const char* const* args) {
     ++close_calls;
     return close_status;
 }
+int sceSystemServiceGetStatus(void* output) {
+    assert(reinterpret_cast<std::uintptr_t>(output) % 16 == 0);
+    auto* bytes = static_cast<unsigned char*>(output);
+    bytes[4] = overlay;
+    bytes[5] = background_execution;
+    return visibility_status;
+}
 int sceSystemServiceHideSplashScreen() {
     assert(flips >= 2); // Never reveal the initial cleared screen or failed startup.
     ++splash_hides;
@@ -155,6 +166,21 @@ int sceVideoOutWaitVblank(std::int32_t) {
 }
 
 int main() {
+    unsigned visibility = 99;
+    assert(gs_app_visibility(&visibility) == 0 && visibility == 0);
+    overlay = 1;
+    assert(gs_app_visibility(&visibility) == 0 && visibility == 1);
+    background_execution = 1;
+    assert(gs_app_visibility(&visibility) == 0 && visibility == 3);
+    overlay = 0;
+    assert(gs_app_visibility(&visibility) == 0 && visibility == 2);
+    visibility_status = -7;
+    assert(gs_app_visibility(&visibility) == -7 && visibility == 2);
+    visibility_status = 0;
+    overlay = 4;
+    assert(gs_app_visibility(&visibility) == -2 && visibility == 2);
+    assert(gs_app_visibility(nullptr) == -1);
+    overlay = background_execution = 0;
     assert(!gs_malloc(std::numeric_limits<std::size_t>::max()));
     assert(!gs_calloc(std::numeric_limits<std::size_t>::max(), 2));
     auto* small = static_cast<unsigned char*>(gs_malloc(32));
@@ -180,7 +206,8 @@ int main() {
     fail = 0;
     flips = 0;
     assert(!gs_vout_init());
-    assert(gs_vout_init()); // Cannot initialise the same display twice.
+    assert(gs_vout_has_frame() == 0); // The cleared buffer is not a rendered picture.
+    assert(gs_vout_init());           // Cannot initialise the same display twice.
     assert(splash_hides == 0);
     auto* pixels = static_cast<std::uint32_t*>(std::calloc(1920 * 1080, sizeof(std::uint32_t)));
     assert(pixels);
@@ -190,6 +217,7 @@ int main() {
     expect_pixels = true;
     gs_vout_present(pixels, 1920 * 4);
     gs_vout_shutdown(); // Must join the worker before freeing its frame memory.
+    assert(gs_vout_has_frame() == 1);
     assert(flips == 2 && indices[0] == 0 && indices[1] == 1);
     assert(splash_hides == 1);
     assert(outstanding == 0 && mappings == 0 && opens == 0);
@@ -197,6 +225,7 @@ int main() {
     expect_pixels = false;
     flips = 0;
     assert(!gs_vout_init());
+    assert(gs_vout_has_frame() == 0); // Reinitialisation cannot inherit the previous frame's acknowledgement.
     fail = 6;
     gs_vout_shutdown();
     assert(outstanding == 1 && mappings == 1 && opens == 1); // Never unmap an active display.
@@ -212,5 +241,6 @@ int main() {
     close_status = -1;
     assert(gs_request_close() == -1 && close_calls == 2); // No implicit second launch or raw-exit fallback.
     std::puts("PASS: PS5 platform host mocks: allocator overflow/preservation, five display failure paths, first "
-              "back-buffer selection, joined cleanup, failed-close memory retention and asynchronous shell exit.");
+              "back-buffer selection, rendered-frame acknowledgement, read-only visibility flags, joined cleanup, "
+              "failed-close memory retention and asynchronous shell exit.");
 }

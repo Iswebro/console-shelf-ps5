@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-10-25",
+  "scope": "UI-8 three-second Circle hold and foreground-gated opening diagnosis",
+  "titleId": "PPSA99541",
+  "contentVersion": "00.100.007",
+  "elf": {
+    "bytes": 2655252,
+    "sha256": "938751b3b688f25ba0f057d773d1286e9ce4d6f0f3bac5a6dc7305b2cb61a37c"
+  },
+  "self": {
+    "bytes": 2549697,
+    "sha256": "96c81bfcdc383727839320aeffbbbf5262ef0c45b3854bcf7a039223a00fbbb1"
+  },
+  "ownerFeedbackOnUI7": {
+    "settingsNavigation": "working",
+    "opening": "black screen followed by grid; animation not observed"
+  },
+  "changes": [
+    "Hold Circle for 3000 ms instead of 4000 ms; preserve the accepted 360 ms closing fade and ordinary short Back taps",
+    "Wait for an acknowledged rendered flip and a stable foreground/no-overlay status before advancing the opening clock",
+    "Pause the opening clock while the status reports a system overlay or background execution",
+    "Use a bounded fallback after continuous status-call errors; a valid background status cancels the fallback",
+    "Exclude covered image/texture preparation from the animation clock",
+    "Log bounded status transitions, opening timing and submitted frame counts, without account values or game paths"
+  ],
+  "checks": {
+    "nativeModelSettingsUiGestures": "passed, including exact three-second boundary, cancellation and foreground-gate timer wrap",
+    "renderer": "23 captures passed; three-second hold midpoint visually inspected",
+    "readOnlyFtpAndBackgroundCancellation": "passed",
+    "platformMocks": "passed, including rendered-flip acknowledgement and read-only status flag/error handling",
+    "executableStructure": "passed, including strong SystemService lifecycle and visibility imports",
+    "negativeExecutableFixtures": "14 rejected"
+  },
+  "hardwareTest": "UI-8 not yet tested; submitted frames and host checks alone do not prove TV visibility",
+  "firmware12_20": "full UI-8 acceptance pending",
+  "launches": "not implemented; no launch helper installed",
+  "sourceKit": "UI-6 cold relink evidence retained; refresh required for the final release candidate",
+  "publicRelease": false
+}

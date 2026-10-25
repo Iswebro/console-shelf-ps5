@@ -52,7 +52,7 @@ run('shot:reveal-reference.png',introData);
 assert.notEqual(digest('loading.png'),digest('loading-motion.png'),'loading has visible motion');
 assert.notEqual(digest('reveal-start.png'),digest('reveal-middle.png'),'opening blends into the shelf');
 assert.equal(digest('reveal-end.png'),digest('reveal-reference.png'),'opening settles on the unaltered shelf');
-run('circle-down,frame:2000,shot:hold-middle.png,circle-up,shot:hold-cancelled.png,report:hold-cancelled.json,circle-down,frame:2000,frame:2000,shot:close-start.png,frame:180,shot:close-middle.png,frame:180',introData,0,true);
+run('circle-down,frame:1500,shot:hold-middle.png,circle-up,shot:hold-cancelled.png,report:hold-cancelled.json,circle-down,frame:1500,frame:1500,shot:close-start.png,frame:180,shot:close-middle.png,frame:180,unknown-action',introData,0,true);
 assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'hold-cancelled.json'))).page,0,'releasing a long hold keeps the current page');
 assert.equal(digest('hold-cancelled.png'),digest('reveal-reference.png'),'a cancelled hold restores the shelf');
 assert.notEqual(digest('close-start.png'),digest('close-middle.png'),'closing draws a separate fade before exit');

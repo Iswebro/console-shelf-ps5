@@ -4,7 +4,7 @@ import struct
 import shutil
 import uuid
 from ps5_common import CACHE
-from verify_ps5_build import verify, verify_recorded_hashes
+from verify_ps5_build import verify, verify_recorded_hashes, public_nid
 
 build = CACHE / "build"
 elf = build / "eboot.elf"
@@ -53,6 +53,11 @@ reject("required-shell-import-missing", lambda b: b.__setitem__(shell_name, ord(
 shell_end = original.index(b"\0", shell_name)
 reject("required-shell-import-wrong-provider", lambda b: b.__setitem__(shell_end - 1, ord("H")))
 reject("required-shell-import-wrong-library", lambda b: b.__setitem__(shell_end - 3, ord("G")))
+visibility_name = original.index((public_nid("sceSystemServiceGetStatus") + "#").encode(), strings, strings + tags[10])
+visibility_symbol = next(symbols + offset for offset in range(0, tags[0x6100003f], 24)
+                         if struct.unpack_from("<I", original, symbols + offset)[0] == visibility_name - strings)
+reject("required-visibility-import-weak", lambda b: b.__setitem__(visibility_symbol + 4, 0x22))
+reject("required-visibility-import-missing", lambda b: b.__setitem__(visibility_name, ord("X")))
 bad_self = folder / "bad-wrapper.bin"
 bad_self.write_bytes(b"BAD!" + self_file.read_bytes()[4:])
 try:
@@ -75,4 +80,4 @@ except ValueError:
     pass
 else:
     raise RuntimeError("Verifier accepted a SELF changed after container validation")
-print("PASS: PS5 verifier rejects twelve damaged/foreign fixtures, including weak/missing/misbound required shell imports, without modifying the original executable.")
+print("PASS: PS5 verifier rejects fourteen damaged/foreign fixtures, including weak/missing/misbound lifecycle and visibility imports, without modifying the original executable.")

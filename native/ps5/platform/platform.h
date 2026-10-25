@@ -6,10 +6,13 @@ extern "C" {
 #endif
 const char* gs_vout_init(void);
 void gs_vout_present(const void* pixels, int pitch);
+int gs_vout_has_frame(void);
 void gs_vout_shutdown(void);
 int gs_missing_imports(char* output, size_t capacity);
 void gs_notify(const char* text);
 int gs_request_close(void);
+// Read-only application status: bit 0 = system overlay, bit 1 = background.
+int gs_app_visibility(unsigned* flags);
 void gs_wait_for_close(void) __attribute__((noreturn));
 // Required native lifecycle import. A weak-only reference remains null in the
 // tested retail app loader even though the system module is present.

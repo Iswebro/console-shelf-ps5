@@ -2,7 +2,7 @@
   "repository": "https://github.com/SkaRift/JewelCase",
   "revision": "765297d2decd1be6c8076261f484e36724250bd7",
   "license": "GPL-3.0-or-later; used under GPL-3.0",
-  "additions": [{"localPath":"lifecycle.c","origin":"Original Shelf glue following the asynchronous LoadExec exit policy in the pinned Jewel Case src/gs/main.c"}],
+  "additions": [{"localPath":"lifecycle.c","origin":"Original Shelf glue following the asynchronous LoadExec exit policy in the pinned Jewel Case src/gs/main.c; read-only overlay/background ABI referenced from shadPS4 systemservice.h at 62813c0106f4602a1b1fac9e40e827e344434931 (GPL-2.0-or-later), no implementation copied"}],
   "files": [
     {
       "localPath": "alloc.c",

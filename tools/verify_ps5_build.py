@@ -89,22 +89,25 @@ def verify(elf_path, self_path):
             destination = modules if tag == 0x61000045 else libraries
             require(alphabet[module_id] not in destination, "Duplicate native module/library identity")
             destination[alphabet[module_id]] = string_at(value & 0xffffffff)
-    required = "sceSystemServiceLoadExec"
-    prefix = public_nid(required) + "#"
-    matches = []
-    for offset in range(0, symbol_bytes, 24):
-        name, info, other, section, value, size = struct.unpack_from("<IBBHQQ", raw, symbol_start + offset)
-        label = string_at(name)
-        if label.startswith(prefix):
-            matches.append((label, info, section))
-    require(len(matches) == 1, "Required shell lifecycle import is missing or duplicated")
-    label, info, section = matches[0]
-    require(info >> 4 == 1 and info & 15 == 2 and section == 0,
-            "Required shell lifecycle import must be a strong undefined function")
-    parts = label.split("#")
-    require(len(parts) == 3 and modules.get(parts[2]) == "libSceSystemService" and
-            libraries.get(parts[1]) == "libSceSystemService",
-            "Shell lifecycle import is bound to the wrong system module")
+    required_imports = []
+    for required in ("sceSystemServiceLoadExec", "sceSystemServiceGetStatus"):
+        prefix = public_nid(required) + "#"
+        matches = []
+        for offset in range(0, symbol_bytes, 24):
+            name, info, other, section, value, size = struct.unpack_from("<IBBHQQ", raw, symbol_start + offset)
+            label = string_at(name)
+            if label.startswith(prefix):
+                matches.append((label, info, section))
+        require(len(matches) == 1, required + " import is missing or duplicated")
+        label, info, section = matches[0]
+        require(info >> 4 == 1 and info & 15 == 2 and section == 0,
+                required + " import must be a strong undefined function")
+        parts = label.split("#")
+        require(len(parts) == 3 and modules.get(parts[2]) == "libSceSystemService" and
+                libraries.get(parts[1]) == "libSceSystemService",
+                required + " import is bound to the wrong system module")
+        required_imports.append({"name": required, "binding": "global", "provider": modules[parts[2]],
+                                 "library": libraries[parts[1]]})
     needed = []
     for tag, offset in tags:
         if tag == 1:
@@ -121,8 +124,7 @@ def verify(elf_path, self_path):
     return {"structuralCheck": "passed", "hardwareTest": "not run", "firmware12_20": "unverified",
             "elf": {"bytes": len(raw), "sha256": sha256(elf_path), "programHeaders": phcount,
                     "loadSegments": len(loads), "neededModules": needed,
-                    "requiredShellImport": {"name": required, "binding": "global", "provider": modules[parts[2]],
-                                            "library": libraries[parts[1]]}},
+                    "requiredShellImport": required_imports[0], "requiredVisibilityImport": required_imports[1]},
             "self": {"bytes": len(signed), "sha256": sha256(self_path)}}
 
 

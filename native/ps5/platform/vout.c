@@ -70,6 +70,7 @@ static int g_video = -1;
 static uint8_t* g_frames[2];
 static int64_t g_frame_no = 0;
 static int g_splash_hidden;
+static int g_presented;
 static int64_t g_physical = -1;
 static void* g_mapping;
 /* tiled address = block(x,y) + (ypart ^ xpart); precomputed per row / column */
@@ -102,6 +103,7 @@ const char* gs_vout_init(void) {
     g_stopping = 0;
     g_frame_no = 0;
     g_splash_hidden = 0;
+    __atomic_store_n(&g_presented, 0, __ATOMIC_RELEASE);
     const uint32_t blocks_per_row = (FRAME_W + 127u) >> 7;
     for (uint32_t x = 0; x < FRAME_W; x++) {
         g_xpart[x] =
@@ -178,6 +180,12 @@ static void flip_frame(const void* pixels, int pitch) {
      * system splash until an actual rendered frame has been submitted. */
     if (submitted >= 0 && !g_splash_hidden && sceSystemServiceHideSplashScreen() == 0)
         g_splash_hidden = 1;
+    if (submitted >= 0)
+        __atomic_store_n(&g_presented, 1, __ATOMIC_RELEASE);
+}
+
+int gs_vout_has_frame(void) {
+    return __atomic_load_n(&g_presented, __ATOMIC_ACQUIRE);
 }
 
 static void* flip_thread(void* arg) {
