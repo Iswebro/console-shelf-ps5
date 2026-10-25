@@ -23,7 +23,7 @@ Keep firmware 12.20 and decline any system software update prompt.
 3. Close games, emulators and downloads on the PS5. Start your existing FTP service and connect using your established local FTP client.
 4. Check both `/data/homebrew/PPSA99541` and `/user/app/PPSA99541` for an existing title. This is an unofficial ID, not a globally reserved one. If it belongs to another app or you cannot identify it, stop. For an existing Shelf installation, use the upgrade steps below.
 5. Copy the complete `PPSA99541` folder into `/data/homebrew/`. Compare the copied files with the included size/SHA-256 manifest. For a raw readback of `eboot.bin`, first send `SELF` and confirm the FTP reply explicitly says conversion is **disabled**; otherwise the server can transform the downloaded file. Do not open Shelf during the transfer.
-6. Let your existing ShadowMountPlus workflow discover the folder. If necessary, run ShadowMountPlus once through your usual Payload Manager dashboard and wait for its library-synchronised message. Open **isShelf (UI test)**.
+6. Let your existing ShadowMountPlus workflow discover the folder. If necessary, run ShadowMountPlus once through your usual Payload Manager dashboard and wait for its library-synchronised message. Open **isShelf**.
 
 Shelf itself needs no PC host afterward; it uses the services on the console. A console illustration in All consoles does not mean an emulator exists for it; installed routes and real game counts come from discovery.
 

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "revision": "UI-24",
+  "dateBrisbane": "2026-10-26",
+  "firmware": "12.20",
+  "sourceCommit": "5c34e67aba3e51ca209d56215f97b586ff58c1e5",
+  "selfSHA256": "9834451dc2ca0f59f6fe487900ebe3ab55f08b23f53fb9aabf16faaac2eda88e",
+  "packageManifestSHA256": "baedb6e622ba571e3d5ff9f12cbcd34707aec9744d3f612226f5a055ecc1621b",
+  "basis": "Owner confirmed the final restart, settings, three layouts, foreground PSXS5/PS5SX2/PS5SX3 menus and direct RetroArch Nintendo 64 test. UI-24 close timing is additionally confirmed by its own startup log; logo switching is visible in the separately reviewed owner recording.",
+  "ownerReply": "Yes, all of those passed",
+  "checks": {
+    "ui_navigation": true,
+    "ui_settings": true,
+    "circle_close": true,
+    "settings_persist": true,
+    "restart_reopen": true,
+    "psxs5_menu": true,
+    "ps5sx2_menu": true,
+    "ps5sx3_menu": true,
+    "retroarch_n64_game": true
+  },
+  "ui24CloseTimingMilliseconds": [
+    { "holdCommitted": 3032, "fadeCompleted": 3421 },
+    { "holdCommitted": 3017, "fadeCompleted": 3398 }
+  ],
+  "branding": {
+    "homeNameIconAndBackground": true,
+    "allFourHeaderAndTvLogos": true
+  },
+  "freshRawInstalledProgramMatches": true,
+  "testedScope": "Firmware 12.20 on the owner's existing loader setup; standalone emulator menus and the selected RetroArch Nintendo 64 route",
+  "privateLogsOrCapturesPublished": false,
+  "publicBinaryReleaseAtThisRecord": "not published"
+}
