@@ -146,10 +146,18 @@ h2 { margin: 5px 0 0; font-size: 28px; letter-spacing: -.035em; }
 .room-shelf { height: 100dvh; overflow: hidden; background-image: linear-gradient(90deg, #070a0c22, #070a0c0a), url('assets/backgrounds/gamer-lounge-deep-v1.png'); }
 .room-shelf .app { max-width: none; height: 100dvh; padding: 0 4.17vw; }
 .room-shelf .site-header { height: 9.26vh; position: relative; z-index: 3; }
+.room-shelf .icon-button { background: #14201cf5; border-color: #a1b39b55; color: #e1eadd; }
+.room-shelf .icon-button:focus-visible { outline-color: #a2ddc2; }
+.room-hud { position: fixed; z-index: 1; pointer-events: none; border: 1px solid #c3b29140; border-radius: 20px; background: linear-gradient(115deg, #0d1715f5, #111d18f0); box-shadow: inset 0 1px #e1dfbd1a, 0 10px 28px #0004; backdrop-filter: blur(12px); }
+.room-shelf .welcome .eyebrow { color: #b0d7be; }
 .room-shelf .welcome { position: fixed; z-index: 3; top: 11.2vh; left: 4.17vw; padding: 0; }
 .room-shelf .welcome h1 { margin: 14px 0 0; font-size: clamp(25px, min(4.7vh, 4.8vw), 50px); line-height: 1.1; letter-spacing: -.045em; white-space: nowrap; }
 .room-shelf .welcome .intro { display: none; }
-.room-shelf .browse-panel { position: fixed; z-index: 3; top: 22.59vh; left: 4.17vw; right: var(--room-controls-right, 40vw); padding: 10px 14px; background: #121819c9; backdrop-filter: blur(8px); }
+.room-shelf .browse-panel { position: fixed; z-index: 3; top: 22.59vh; left: 4.17vw; right: var(--room-controls-right, 40vw); max-width: 980px; padding: 10px 14px; background: transparent; border-color: transparent; box-shadow: none; }
+.room-shelf .search-wrap, .room-shelf .layout-toggle { background: #14201bf5; border-color: #536459; color: #e5ede5; }
+.room-shelf .search-wrap:focus-within, .room-shelf .layout-toggle:focus-visible { border-color: #a2ddc2; outline-color: #a2ddc2; }
+.room-shelf .search-wrap input::placeholder { color: #b9cdc1; }
+.room-shelf .browse-summary, .room-shelf #shelfFocusStatus { color: #becdc4; }
 .room-shelf .search-wrap { max-width: none; }
 .room-shelf .browse-summary { font-size: 11px; margin-top: 9px; }
 .room-shelf #shelfFocusStatus { flex: 1; text-align: right; color: #d0caba; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -169,7 +177,7 @@ h2 { margin: 5px 0 0; font-size: 28px; letter-spacing: -.035em; }
 .room-details .library-heading, .room-details .notice { background: #0b1515df; padding: 14px; border-radius: 12px; }
 .tv-content > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .tv-content .tv-video-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: .4em; background: #04100fe6; font-size: .8em; }
-.tv-static { width: 100%; height: 100%; image-rendering: pixelated; }
+.tv-static { width: 100%; height: 100%; image-rendering: auto; }
 .room-tv::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(116deg, #d7e9df0d 0%, #d7e9df03 38%, transparent 38.2%), linear-gradient(#c4e6d912, transparent 10%, transparent 85%, #0004); box-shadow: inset 0 0 9px 2px #0007; }
 .tv-content { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .48em; padding: 1.2em 1.4em; text-align: center; opacity: .9; text-shadow: 0 0 8px #bbebd529; }
 .tv-content > img { max-width: 60%; width: auto; height: 58%; min-height: 0; object-fit: contain; }

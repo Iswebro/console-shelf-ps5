@@ -8,6 +8,55 @@
 #include <cstring>
 
 namespace shelf {
+namespace {
+bool bounded_headers(std::uint8_t* bytes, std::size_t size, int& width, int& height) {
+    // Sequence headers can straddle PES packets. Validate the reassembled video
+    // payload before creating a video decoder or allocating its frame surfaces.
+    auto* buffer = plm_buffer_create_with_memory(bytes, size, 0);
+    if (!buffer) return false;
+    auto* demux = plm_demux_create(buffer, 1);
+    if (!demux) { plm_buffer_destroy(buffer); return false; }
+    bool okay = plm_demux_has_headers(demux) != 0;
+    unsigned headers = 0, pending = 0, used = 0;
+    int kind = 0, rate = 0;
+    std::uint8_t fields[4]{};
+    std::uint32_t prefix = ~0u;
+    const auto base = reinterpret_cast<std::uintptr_t>(bytes);
+    std::uintptr_t previous = 0;
+    while (okay) {
+        auto* packet = plm_demux_decode(demux);
+        if (!packet) break;
+        if (packet->type != PLM_DEMUX_PACKET_VIDEO_1) continue;
+        const auto address = reinterpret_cast<std::uintptr_t>(packet->data);
+        if (address < base || address - base > size || packet->length > size - (address - base) || address <= previous) {
+            okay = false; break;
+        }
+        previous = address;
+        for (std::size_t i = 0; i < packet->length && okay; ++i) {
+            const auto byte = packet->data[i];
+            prefix = (prefix << 8) | byte;
+            if (pending) {
+                fields[used++] = byte;
+                if (used == pending) {
+                    if (kind == 0xb5) okay = (fields[0] >> 4) != 1; // MPEG-2 sequence extension.
+                    else {
+                        const int w = (fields[0] << 4) | (fields[1] >> 4), h = ((fields[1] & 15) << 8) | fields[2], r = fields[3] & 15;
+                        okay = w >= 16 && h >= 16 && w <= 640 && h <= 368 && !(w % 2) && !(h % 2) && r >= 1 && r <= 5 &&
+                               (!headers || (w == width && h == height && r == rate));
+                        if (okay) { width = w; height = h; rate = r; ++headers; }
+                    }
+                    pending = used = 0;
+                }
+            }
+            if (prefix == 0x000001b3 || prefix == 0x000001b5) {
+                kind = static_cast<int>(prefix & 255); pending = kind == 0xb3 ? 4 : 1; used = 0;
+            }
+        }
+    }
+    plm_demux_destroy(demux);
+    return okay && headers && !pending;
+}
+} // namespace
 void Movie::close() {
     if (decoder_) plm_destroy(decoder_);
     release(bytes_); release(rgba_);
@@ -27,18 +76,7 @@ bool Movie::open(const char* path, unsigned now) {
     const bool read = bytes_ && std::fread(bytes_, 1, static_cast<std::size_t>(size), file) == static_cast<std::size_t>(size) && !std::ferror(file);
     std::fclose(file);
     if (!read || std::memcmp(bytes_, "\0\0\1\xba", 4) != 0) { close(); return false; }
-    int headers = 0, rate = 0;
-    for (long i = 0; i + 7 < size; ++i) {
-        const auto* b = bytes_ + i;
-        if (b[0] || b[1] || b[2] != 1) continue;
-        if (b[3] == 0xb5 && (b[4] >> 4) == 1) { close(); return false; } // MPEG-2 sequence extension.
-        if (b[3] != 0xb3) continue;
-        const int w = (b[4] << 4) | (b[5] >> 4), h = ((b[5] & 15) << 8) | b[6], r = b[7] & 15;
-        if (w < 16 || h < 16 || w > 640 || h > 368 || w % 2 || h % 2 || r < 1 || r > 5 ||
-            (headers && (w != width_ || h != height_ || r != rate))) { close(); return false; }
-        width_ = w; height_ = h; rate = r; ++headers;
-    }
-    if (!headers) { close(); return false; }
+    if (!bounded_headers(bytes_, static_cast<std::size_t>(size), width_, height_)) { close(); return false; }
     decoder_ = plm_create_with_memory(bytes_, static_cast<std::size_t>(size), 0);
     if (!decoder_) { close(); return false; }
     plm_set_audio_enabled(decoder_, 0);

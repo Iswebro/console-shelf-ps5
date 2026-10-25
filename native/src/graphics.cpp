@@ -57,6 +57,8 @@ bool tv_motion = false;
 Movie tv_movie;
 SDL_Texture* movie_texture = nullptr;
 SDL_Texture* noise_texture = nullptr;
+Uint32* noise_pixels = nullptr;
+int noise_width = 0, noise_height = 0;
 std::size_t movie_selected = system_count;
 bool movie_demo = false;
 void stop_movie() {
@@ -110,6 +112,18 @@ void box(int x, int y, int w, int h, bool selected, SDL_Color fill = panel) {
     rounded(x, y, w, h, 20, selected ? purple : SDL_Color{53, 59, 83, 255});
     const int edge = selected ? 3 : 1;
     rounded(x + edge, y + edge, w - edge * 2, h - edge * 2, 20 - edge, fill);
+}
+void room_wall_panel() {
+    // A quiet smoked-glass backboard on the left wall, clear of both furniture and TV.
+    rounded(56, 105, 1028, 277, 22, {4, 9, 8, 72});
+    rounded(60, 103, 1020, 275, 20, {167, 153, 124, 62});
+    rounded(61, 104, 1018, 273, 19, {13, 23, 21, 239});
+    line(83, 105, 1054, 105, {206, 207, 181, 40});
+}
+void room_control(int x, int y, int w, int h, bool selected) {
+    rounded(x, y, w, h, 14, selected ? SDL_Color{162, 221, 194, 255} : SDL_Color{83, 100, 89, 255});
+    const int edge = selected ? 3 : 1;
+    rounded(x + edge, y + edge, w - edge * 2, h - edge * 2, 14 - edge, {20, 31, 27, 255});
 }
 void settings_button(bool selected) {
     auto*& texture = settings_buttons[selected ? 1 : 0];
@@ -550,21 +564,28 @@ void tv_lines(std::string_view value, int x, int y, int w, int size, SDL_Color t
 }
 void tv_static(const SDL_Rect& target, bool still) {
     static unsigned last_phase = ~0u;
-    const unsigned phase = still ? 0 : render_time / 100;
-    if (!noise_texture) {
-        noise_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, 96, 54);
+    const unsigned phase = still ? 0 : render_time / 50;
+    const int w = std::min(960, std::max(1, target.w)), h = std::min(540, std::max(1, target.h));
+    if (noise_width != w || noise_height != h) {
+        if (noise_texture) SDL_DestroyTexture(noise_texture);
+        release(noise_pixels);
+        noise_pixels = static_cast<Uint32*>(allocate(static_cast<std::size_t>(w) * h * 4));
+        noise_texture = noise_pixels ? SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, w, h) : nullptr;
+        noise_width = w; noise_height = h;
         last_phase = ~0u;
     }
-    if (!noise_texture) return;
+    if (!noise_texture || !noise_pixels) return;
     if (phase != last_phase) {
-        std::array<Uint32, 96 * 54> pixels{};
         unsigned random = phase + 4711;
-        for (auto& pixel : pixels) {
-            random ^= random << 13; random ^= random >> 17; random ^= random << 5;
-            const Uint32 level = 62 + random % 83;
-            pixel = 0xff000000u | level | (level << 8) | (level << 16);
+        for (int row = 0; row < h; ++row) {
+            const int shade = ((static_cast<unsigned>(row) + phase * 2) % 216 < 24 ? 5 : 0) + (row % 2 ? 3 : 0);
+            for (int col = 0; col < w; ++col) {
+                random ^= random << 13; random ^= random >> 17; random ^= random << 5;
+                const Uint32 level = 62 + ((random & 255) + ((random >> 8) & 255)) * 82 / 510 - shade;
+                noise_pixels[row * w + col] = 0xff000000u | level | (level << 8) | (level << 16);
+            }
         }
-        SDL_UpdateTexture(noise_texture, nullptr, pixels.data(), 96 * 4);
+        SDL_UpdateTexture(noise_texture, nullptr, noise_pixels, w * 4);
         last_phase = phase;
     }
     SDL_RenderCopy(renderer, noise_texture, nullptr, &target);
@@ -576,6 +597,10 @@ bool tv_video(const SystemDefinition& system, std::size_t id, const SDL_Rect& ta
         char path[4096];
         std::snprintf(path, sizeof(path), "%s/intros/%.*s.mpg", room_data, static_cast<int>(system.id.size()), system.id.data());
         bool loaded = room_data[0] && tv_movie.open(path, render_time);
+        if (!loaded) {
+            std::snprintf(path, sizeof(path), "%s/assets/room/intros/%.*s.mpg", root, static_cast<int>(system.id.size()), system.id.data());
+            loaded = tv_movie.open(path, render_time);
+        }
         if (!loaded) {
             std::snprintf(path, sizeof(path), "%s/assets/room/shelf-intro.mpg", root);
             loaded = tv_movie.open(path, render_time); movie_demo = true;
@@ -626,6 +651,10 @@ void room_tv(const UiState& state) {
     if (!noise && (p.tv_mode == TvMode::picture || p.tv_mode == TvMode::intro)) {
         char intro[96]; std::snprintf(intro, sizeof(intro), "@intro/%.*s", static_cast<int>(system.id.size()), system.id.data());
         auto* custom = (p.tv_mode == TvMode::picture || eligible) ? image(p.tv_mode == TvMode::picture ? std::string_view("@room") : std::string_view(intro)) : nullptr;
+        if (p.tv_mode == TvMode::intro && eligible && (!custom || !custom->texture)) {
+            std::snprintf(intro, sizeof(intro), "assets/room/intros/%.*s.png", static_cast<int>(system.id.size()), system.id.data());
+            custom = image(intro);
+        }
         if (custom && custom->texture) {
             SDL_Rect source{0, 0, custom->w, custom->h};
             const float fit = std::max(static_cast<float>(w) / custom->w, static_cast<float>(h) / custom->h);
@@ -703,8 +732,9 @@ void room_tv(const UiState& state) {
 void home(const UiState& state) {
     const auto shown = shown_systems(state);
     const auto& p = state.settings.preferences;
-    text("ONE HOME FOR YOUR SYSTEMS", 80, 119, 19, purple, true);
     const bool room = p.layout == Layout::shelf;
+    if (room) room_wall_panel();
+    text("ONE HOME FOR YOUR SYSTEMS", 80, 119, 19, room ? SDL_Color{176, 215, 190, 255} : purple, true);
     if (room)
         text("Your console collection", 80, 154, 50, white, true);
     else {
@@ -712,19 +742,21 @@ void home(const UiState& state) {
         text("to play today?", 80, 218, 59, purple, true);
     }
     const int tool_y = room ? 244 : 314, summary_y = room ? 316 : 391;
-    box(80, tool_y, room ? 780 : 1560, 66, state.tools && state.tool == 0);
-    icon(0, 111, tool_y + 32, muted);
+    if (room) room_control(80, tool_y, 780, 66, state.tools && state.tool == 0);
+    else box(80, tool_y, 1560, 66, state.tools && state.tool == 0);
+    icon(0, 111, tool_y + 32, room ? SDL_Color{185, 205, 193, 255} : muted);
     text(state.query[0] ? state.query : "Find a console, brand or core...", 143, tool_y + 16, 24,
-         state.query[0] ? white : muted, false, room ? 690 : 1420);
+         state.query[0] ? white : room ? SDL_Color{185, 205, 193, 255} : muted, false, room ? 690 : 1420);
     const int layout_x = room ? 880 : 1664;
-    box(layout_x, tool_y, 180, 66, state.tools && state.tool == 1);
+    if (room) room_control(layout_x, tool_y, 180, 66, state.tools && state.tool == 1);
+    else box(layout_x, tool_y, 180, 66, state.tools && state.tool == 1);
     icon(p.layout == Layout::grid ? 4 : 2, layout_x + 32, tool_y + 33);
     text(layout_labels[static_cast<std::size_t>(next_layout(p.layout))], layout_x + 58, tool_y + 17, 24, white, true);
     char summary[160];
     std::snprintf(summary, sizeof(summary), "%s  /  %.*s  /  %zu systems", layout_labels[static_cast<std::size_t>(p.layout)].data(),
                   static_cast<int>(sorts[static_cast<std::size_t>(p.sort)].size()),
                   sorts[static_cast<std::size_t>(p.sort)].data(), shown.count);
-    text(summary, 84, summary_y, 20, muted);
+    text(summary, 84, summary_y, 20, room ? SDL_Color{190, 205, 196, 255} : muted);
     if (!shown.count) {
         centered("Your shelf is ready for your choices", 960, 620, 42, white, true);
         centered(p.layout == Layout::shelf && p.shelf_single ? "Choose up to 8 consoles in Settings > Consoles." :
@@ -799,8 +831,8 @@ void home(const UiState& state) {
         char position[64];
         std::snprintf(position, sizeof(position), "%d-%d / %zu", first + 1,
                       std::min(first + 8, static_cast<int>(shown.count)), shown.count);
-        text(availability(state, state.selected_system), 84, summary_y + 29, 19, muted, false, 500);
-        text(position, 912, summary_y, 19, muted);
+        text(availability(state, state.selected_system), 84, summary_y + 29, 19, {190, 205, 196, 255}, false, 500);
+        text(position, 912, summary_y, 19, {190, 205, 196, 255});
         char pages[96];
         std::snprintf(pages, sizeof(pages), "%s  %d / %d  %s", state.focus >= 8 ? "L1  <" : "",
                       state.focus / 8 + 1, (static_cast<int>(shown.count) + 7) / 8,
@@ -964,7 +996,7 @@ void settings(const UiState& state) {
         label(394, 673, "Console intros", p.intro_all ? "All consoles" : "Installed emulators and built-in systems", state.settings_focus == 3);
         label(394, 757, "TV static for missing content", noise_labels[static_cast<std::size_t>(p.tv_noise)], state.settings_focus == 4);
         text("Own intros: /data/console-shelf/intros/<console-id>.png or .mpg", 400, 854, 20, muted);
-        text("Silent MPEG-1 clips. Use the PC intro preparation tool; Shelf demo if absent.", 400, 882, 19, muted);
+        text("Shelf originals included. Your personal PNG or MPEG-1 clip takes priority.", 400, 882, 19, muted);
     } else {
         label(394, 330, "Show on my shelf", p.scope == Scope::all ? "All consoles" :
               p.scope == Scope::available ? "Emulator or games" : "Favourites only",
@@ -1227,6 +1259,7 @@ void graphics_shutdown() {
     stop_movie();
     if (noise_texture) SDL_DestroyTexture(noise_texture);
     noise_texture = nullptr;
+    release(noise_pixels); noise_pixels = nullptr; noise_width = noise_height = 0;
     for (auto*& texture : settings_buttons) {
         if (texture)
             SDL_DestroyTexture(texture);

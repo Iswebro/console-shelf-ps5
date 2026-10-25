@@ -141,6 +141,7 @@ function renderSettings() {
     $('heroSymbol').hidden = showImage;
   }
   roomTv.render();
+  placeRoomHud();
 }
 
 function inScope(system) {
@@ -410,6 +411,7 @@ function updateRoomView() {
   if (active) $('homeHeading').textContent = 'Your console collection';
   else $('homeHeading').innerHTML = 'What do you want<br><em>to play today?</em>';
   roomTv.render();
+  placeRoomHud();
 }
 
 function showShelfPage() {
@@ -495,6 +497,17 @@ function shelfColumnCount() {
   return width < 560 ? 2 : width < 950 ? 3 : 4;
 }
 
+function placeRoomHud() {
+  const hud = $('roomHud');
+  hud.hidden = settings.layout !== 'shelf' || $('home').hidden;
+  if (hud.hidden) return;
+  const title = document.querySelector('.welcome').getBoundingClientRect();
+  const controls = document.querySelector('.browse-panel').getBoundingClientRect();
+  const pad = innerWidth < 600 ? 12 : 20;
+  Object.assign(hud.style, { left: `${controls.left - pad}px`, top: `${title.top - 14}px`,
+    width: `${controls.width + pad * 2}px`, height: `${controls.bottom + 16 - (title.top - 14)}px` });
+}
+
 function placeRoomConsole() {
   if (settings.layout !== 'shelf' || !selected || $('roomConsole').hidden) return;
   const art = shelfArtLayout[selected.id];
@@ -510,6 +523,7 @@ function placeRoomConsole() {
 function placeShelfIcons() {
   if (settings.layout !== 'shelf' || $('home').hidden) return;
   roomTv.place();
+  placeRoomHud();
   const scale = Math.max(innerWidth / roomScene.width, innerHeight / roomScene.height);
   const ox = (innerWidth - roomScene.width * scale) / 2, oy = (innerHeight - roomScene.height * scale) / 2;
   const left = Math.max(innerWidth * .0417, ox + roomScene.left * scale);
@@ -519,7 +533,7 @@ function placeShelfIcons() {
   $('systems').querySelectorAll('.display-tier').forEach(tier => {
     const row = roomScene.rows[Number(tier.dataset.roomTier || 0)];
     const feet = oy + row.feet * scale;
-    const ceiling = document.querySelector('.browse-panel').getBoundingClientRect().bottom;
+    const ceiling = $('roomHud').getBoundingClientRect().bottom;
     const artHeight = Math.max(32, Math.min(row.artHeight * scale, innerHeight * .16, feet - ceiling - 14));
     const top = feet - artHeight - 8;
     tier.style.setProperty('--tier-top', `${top}px`);
@@ -866,7 +880,7 @@ window.addEventListener('pointerup', endDrag);
 window.addEventListener('pointercancel', endDrag);
 window.addEventListener('resize', () => {
   updateCarouselPosition();
-  roomTv.place(); placeRoomConsole();
+  roomTv.place(); placeRoomConsole(); placeRoomHud();
   if (settings.layout !== 'shelf' || $('home').hidden) return;
   const focused = document.activeElement.closest('.card')?.dataset.system;
   if (shelfColumnCount() !== shelfColumns) {

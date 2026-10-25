@@ -5,7 +5,7 @@
 struct plm_t;
 namespace shelf {
 // One local, silent MPEG-1 intro. No network, audio device or emulator access.
-// Files are bounded and all sequence headers are checked before decoder allocation.
+// Files are bounded and reassembled sequence headers are checked before video-frame allocation.
 class Movie {
   public:
     Movie() = default;

@@ -15,4 +15,16 @@ if (process.platform === 'win32') {
   const command = `call ${quote(path.join(result.stdout.trim(), 'Common7/Tools/VsDevCmd.bat'))} -no_logo -arch=x64 -host_arch=x64 >nul && cl.exe /nologo /std:c++17 /O2 /EHsc /utf-8 /D_CRT_SECURE_NO_WARNINGS /W4 /WX ${includes.map(p => '/I' + quote(p)).join(' ')} ${sources.map(quote).join(' ')} /Fe:${quote(output)}`;
   run(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', '"' + command + '"'], { windowsVerbatimArguments: true });
 } else run('c++', ['-std=c++17', '-O2', ...includes.flatMap(p => ['-I', p]), ...sources, '-o', output]);
-run(output, [path.join(root, 'assets/room/shelf-intro.mpg'), path.join(build, 'invalid.mpg')]);
+const originals = JSON.parse(fs.readFileSync(path.join(root, 'assets/room/intros/manifest.json')));
+const systems = require('../systems-data.js');
+if (originals.consoles.length !== systems.length || new Set(originals.consoles.map(c => c.id)).size !== systems.length) throw new Error('Original intro catalogue is incomplete.');
+const crypto = require('node:crypto');
+for (const console of originals.consoles) {
+  if (!systems.some(s => s.id === console.id)) throw new Error('Unknown original intro identity.');
+  for (const file of console.assets) {
+    if (![console.id + '.mpg', console.id + '.mp4', console.id + '.png'].includes(file.file)) throw new Error('Invalid intro filename.');
+    const raw = fs.readFileSync(path.join(root, 'assets/room/intros', file.file));
+    if (raw.length !== file.bytes || crypto.createHash('sha256').update(raw).digest('hex') !== file.sha256) throw new Error('Original intro digest mismatch.');
+  }
+}
+run(output, [path.join(root, 'assets/room/shelf-intro.mpg'), path.join(build, 'invalid.mpg'), ...originals.consoles.map(c => path.join(root, 'assets/room/intros', c.id + '.mpg'))]);

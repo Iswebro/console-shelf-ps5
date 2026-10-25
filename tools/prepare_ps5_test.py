@@ -84,6 +84,23 @@ def main():
         require(source.stat().st_size == item["bytes"] and sha256(source) == item["sha256"], "Room demo hash mismatch")
         copy(source, item["local"])
     copy(ROOT / "assets/room/manifest.json", "assets/room/manifest.json")
+    intro_root = ROOT / "assets/room/intros"
+    intro_manifest = json.loads((intro_root / "manifest.json").read_text(encoding="utf-8"))
+    require(intro_manifest.get("officialConsoleIntros") is False and intro_manifest.get("silent") is True,
+            "Expected original silent per-console intros")
+    require(len(intro_manifest["consoles"]) == len(images) and
+            {item["id"] for item in intro_manifest["consoles"]} == {image.stem for image in images},
+            "Original intro catalogue is incomplete")
+    for console in intro_manifest["consoles"]:
+        ident = console["id"]
+        require({item["file"] for item in console["assets"]} == {ident + ext for ext in (".png", ".mpg", ".mp4")},
+                "Unexpected intro media names")
+        require(len(console["assets"]) == 3, "Duplicate intro media entry")
+        for item in console["assets"]:
+            source = intro_root / item["file"]
+            require(source.stat().st_size == item["bytes"] and sha256(source) == item["sha256"], "Original intro digest mismatch")
+            copy(source, "assets/room/intros/" + item["file"])
+    copy(intro_root / "manifest.json", "assets/room/intros/manifest.json")
     copy(ROOT / "assets/CREDITS.md", "assets/CREDITS.md")
     copy(build / "build-source.json", "build-source.json")
 
@@ -129,11 +146,14 @@ Sort & filter -> Shelf pages also offers one curated display of up to eight cons
 chosen in Consoles. Appearance -> Motion offers Reduced motion.
 Play room customises the TV: console artwork, personal text or PNG, clock, rotating
 favourite games, intro pictures/videos (installed emulators or all consoles), or screen off.
+All 52 consoles include original Shelf stills and silent animations. Your own PNG/MPEG
+in the Shelf data folder takes priority. These are Shelf originals, not manufacturer boot videos.
 Triangle stars games in Shelf's library. Personal PNGs stay in /data/console-shelf:
 tv-image.png or intros/<console-id>.png, up to 2048 x 2048. Silent intro videos use
 intros/<console-id>.mpg (MPEG-1); the PC preparation tool makes compatible copies.
 The TV stays visible in console details and libraries. Static for missing emulators/games
 is optional in Play room; reduced motion freezes it and videos on a still frame.
+Static is drawn with fine screen-resolution grain. The room menu has its own quiet dark backboard.
 Up/Down stays on the current Shelf page; Up from its top row reaches the toolbar.
 Sort, visibility and favourite settings apply to all three views.
 Appearance -> Missing emulator artwork chooses Black & white (default) or Full colour.

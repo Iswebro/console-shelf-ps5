@@ -1,0 +1,1317 @@
+{
+  "schema": 1,
+  "creator": "Console Shelf project",
+  "license": "GPL-3.0-only",
+  "officialConsoleIntros": false,
+  "silent": true,
+  "width": 640,
+  "height": 336,
+  "fps": 25,
+  "frames": 110,
+  "seconds": 4.4,
+  "posterSeconds": 1.6,
+  "generator": "tools/build-console-intros.py",
+  "encoderSha256": "3256173f3f8bffd7df12227c68adf68025edb1832273a9530688a7bb1ed8edec",
+  "consoles": [
+    {
+      "id": "ps5",
+      "name": "PlayStation 5",
+      "artwork": {
+        "path": "assets/3d-icons/ps5.png",
+        "sha256": "061fb1dea8c7d15974a6ba5dbcee6ae0a8bf4c73ffbb45b19dcc677aaad02c99"
+      },
+      "assets": [
+        {
+          "file": "ps5.png",
+          "bytes": 54965,
+          "sha256": "cbec1dec037f8c05f951cc719295af7590c09cf45cc0f5645cc264adc2376653"
+        },
+        {
+          "file": "ps5.mpg",
+          "bytes": 215040,
+          "sha256": "303a76c761993861d81cf8d46a953c5b10faef01c4e4900fbf7c646ceb41f40a"
+        },
+        {
+          "file": "ps5.mp4",
+          "bytes": 25874,
+          "sha256": "f12b901ff589fe61f2859effe739423204116cd2c83d8ee76516376e1c525ab6"
+        }
+      ]
+    },
+    {
+      "id": "ps4",
+      "name": "PlayStation 4",
+      "artwork": {
+        "path": "assets/3d-icons/ps4.png",
+        "sha256": "f89d161cbc4eb8ee479dc7c147a3c820a754dd023b8d10852444c4ab9f508cd6"
+      },
+      "assets": [
+        {
+          "file": "ps4.png",
+          "bytes": 62951,
+          "sha256": "70fd5d8c9d5c9a1dd4c15f3c5d78a08a76e531c744a3d2d3e1ec3dc949a3cc02"
+        },
+        {
+          "file": "ps4.mpg",
+          "bytes": 206848,
+          "sha256": "8c68af0eb3238e482033f5a7176324335c63ff06713aa94b358f7a503492d2fb"
+        },
+        {
+          "file": "ps4.mp4",
+          "bytes": 28980,
+          "sha256": "fbfc4c1a62e67eba7a28a7adfb62732b8ed0e5d042d518fb9e31ddc2ba0f65f9"
+        }
+      ]
+    },
+    {
+      "id": "ps3",
+      "name": "PlayStation 3",
+      "artwork": {
+        "path": "assets/3d-icons/ps3.png",
+        "sha256": "bbe609c4805fd13d0401a5b715ece80c2a4c0f289fc628a9687e20f394f8d817"
+      },
+      "assets": [
+        {
+          "file": "ps3.png",
+          "bytes": 61458,
+          "sha256": "49add02af43bd490c8e5e064762d54d35f0917ac5f4d79b0dc3d1b23e991ecb8"
+        },
+        {
+          "file": "ps3.mpg",
+          "bytes": 223232,
+          "sha256": "41acbbb7ba38ed9c106eca83f74c115abc498f33002fb7d7dc42689f92d3c78f"
+        },
+        {
+          "file": "ps3.mp4",
+          "bytes": 28882,
+          "sha256": "ea5ee2e067e31ff77bdf96cfa275fe75f64a1217b43d601df01bd870418e538b"
+        }
+      ]
+    },
+    {
+      "id": "ps2",
+      "name": "PlayStation 2",
+      "artwork": {
+        "path": "assets/3d-icons/ps2.png",
+        "sha256": "42aa391cb0f4f245595aacdd540fbb907aeb46762ab98c4e8ffd03b393b8df5a"
+      },
+      "assets": [
+        {
+          "file": "ps2.png",
+          "bytes": 60046,
+          "sha256": "7af196e8b785267b542a13ef7407011f1437155b7b0ace3d8dda2b7732194682"
+        },
+        {
+          "file": "ps2.mpg",
+          "bytes": 212992,
+          "sha256": "7cffddd174c546c33bb7b83d7efa76fdb619eafe63d915cb3dbde1070d98b721"
+        },
+        {
+          "file": "ps2.mp4",
+          "bytes": 28542,
+          "sha256": "16ae76503b7181693ca6e5fe7c444c9ed505a444df93389927487bd306920a56"
+        }
+      ]
+    },
+    {
+      "id": "ps1",
+      "name": "PlayStation 1",
+      "artwork": {
+        "path": "assets/3d-icons/ps1.png",
+        "sha256": "63262e6e37d154e180e43ecd4262426fbe48d956e70bd7e1534d7d5d2ac1107d"
+      },
+      "assets": [
+        {
+          "file": "ps1.png",
+          "bytes": 78129,
+          "sha256": "f4fa297a53697b78bfe5e6dd0bba3be98fe15670d1bd8c6cc3bf40ab71ac6be5"
+        },
+        {
+          "file": "ps1.mpg",
+          "bytes": 290816,
+          "sha256": "a1a170d12fdf34c7b8b476191e469dbec3ded774d748da9dae5683c411aa9ca9"
+        },
+        {
+          "file": "ps1.mp4",
+          "bytes": 39101,
+          "sha256": "65f9ce7d0d959e54113967b068622fa6e57eb67ee6adb0f3802aa87871ef4420"
+        }
+      ]
+    },
+    {
+      "id": "psp",
+      "name": "PSP",
+      "artwork": {
+        "path": "assets/3d-icons/psp.png",
+        "sha256": "cfb65a17da77b71e79a6366eb1b92f7718392acc5d1902dae0ed31b2c4765a49"
+      },
+      "assets": [
+        {
+          "file": "psp.png",
+          "bytes": 82472,
+          "sha256": "874e0e75c221c5b669c83d68e2930b7bc3a6e02e1be721cb387da9680821e265"
+        },
+        {
+          "file": "psp.mpg",
+          "bytes": 258048,
+          "sha256": "fc704c0ab1d0eea154febaed04575a61a218879498e843cc129c4eb7d5bc5a42"
+        },
+        {
+          "file": "psp.mp4",
+          "bytes": 40071,
+          "sha256": "52996808db342b4b05f0e16e63eea69769859a4f261a790c2f28afa36d98149f"
+        }
+      ]
+    },
+    {
+      "id": "switch2",
+      "name": "Nintendo Switch 2",
+      "artwork": {
+        "path": "assets/3d-icons/switch2.png",
+        "sha256": "ed81c062746a3a7f8119d44810192251ba8730f0b867d90786a4e68a0863ac72"
+      },
+      "assets": [
+        {
+          "file": "switch2.png",
+          "bytes": 69892,
+          "sha256": "93d665967b4f249fb9c849b2a8e05d8b1ac00ffdae9b9cba325758fdeba4ebf0"
+        },
+        {
+          "file": "switch2.mpg",
+          "bytes": 256000,
+          "sha256": "1710ee4625fb168d10009dc81bc529c19a0a6be9445e0461588263a6951d824f"
+        },
+        {
+          "file": "switch2.mp4",
+          "bytes": 35092,
+          "sha256": "8cd27f0b69d97f805ac28dac5cfecc07fcc832f878462ee0ba571843c709fb0b"
+        }
+      ]
+    },
+    {
+      "id": "switch",
+      "name": "Nintendo Switch",
+      "artwork": {
+        "path": "assets/3d-icons/switch.png",
+        "sha256": "287ee30c661351329bc60e83cbd9eaa7e407c412bc2842131082f33a14a63300"
+      },
+      "assets": [
+        {
+          "file": "switch.png",
+          "bytes": 80817,
+          "sha256": "2b25d5ec825d721a0ed187fc90fa5520bf796a75a3ffdf033cebe775291637f4"
+        },
+        {
+          "file": "switch.mpg",
+          "bytes": 294912,
+          "sha256": "49660b5ebbd69435d457c8cd0b69cb4bc24a6529a56c5cc092e4612ffedceb8c"
+        },
+        {
+          "file": "switch.mp4",
+          "bytes": 42509,
+          "sha256": "46e7e73620be1ab0e57ed2c7f2cdb016a496709e1b93a6ebec3bcbad9b617c19"
+        }
+      ]
+    },
+    {
+      "id": "wiiu",
+      "name": "Wii U",
+      "artwork": {
+        "path": "assets/3d-icons/wiiu.png",
+        "sha256": "8f28be59f37a70e498625ab4562fc8c98375a513b8a3ef50325712f6e3a9bf77"
+      },
+      "assets": [
+        {
+          "file": "wiiu.png",
+          "bytes": 65963,
+          "sha256": "cba5da6eaf17157130a161830b91da1e441072a6a0e412307c3eece88ba5b6ad"
+        },
+        {
+          "file": "wiiu.mpg",
+          "bytes": 219136,
+          "sha256": "6cd970bda8d7f3fae0c73b0bc06b0b2019e8add9d5dc1af002804b2360b0de70"
+        },
+        {
+          "file": "wiiu.mp4",
+          "bytes": 29980,
+          "sha256": "bd583187d2965bd6e085787bcd7ac39c5d12f8589054c33790ebd48738b4dd8e"
+        }
+      ]
+    },
+    {
+      "id": "wii",
+      "name": "Wii",
+      "artwork": {
+        "path": "assets/3d-icons/wii.png",
+        "sha256": "479b31ffd9cd825141e4940ef1e975bca8105fad38fd66391115936a5ac108f1"
+      },
+      "assets": [
+        {
+          "file": "wii.png",
+          "bytes": 66245,
+          "sha256": "53f77bea7cec3169f5ec683c7ab22b11fd0c5d8c92d3d7a5905d5ff5ad66edba"
+        },
+        {
+          "file": "wii.mpg",
+          "bytes": 208896,
+          "sha256": "b402de6f5f93913a7dc6090966997fd0846cd0af5b1d6e45245134a617853dce"
+        },
+        {
+          "file": "wii.mp4",
+          "bytes": 33109,
+          "sha256": "c21cef04d9578043abc095a2f720dc63428ef54e30de2a07f9535d44b8331569"
+        }
+      ]
+    },
+    {
+      "id": "gamecube",
+      "name": "GameCube",
+      "artwork": {
+        "path": "assets/3d-icons/gamecube.png",
+        "sha256": "4782049b6f1de1c7afd50c513dc9c46030a31a37a4fb822a6df08131b7113a1b"
+      },
+      "assets": [
+        {
+          "file": "gamecube.png",
+          "bytes": 91664,
+          "sha256": "f4904e6cd92796b3e23f56a19810e60d2166ea2df9a546a17920839692fabdb9"
+        },
+        {
+          "file": "gamecube.mpg",
+          "bytes": 321536,
+          "sha256": "9af624b09025945116790990afd8e723a4b0c4cb6e650b43367b5da5e1e9b184"
+        },
+        {
+          "file": "gamecube.mp4",
+          "bytes": 49215,
+          "sha256": "6e16dd72a7a9a40cb0048fa223b2ca0f5a0dd6d4e5d4fd0e2ac47a26b6b827e4"
+        }
+      ]
+    },
+    {
+      "id": "n64",
+      "name": "Nintendo 64",
+      "artwork": {
+        "path": "assets/3d-icons/n64.png",
+        "sha256": "13ca39711d4fdbb43cb89fea73d5d11a4757b9510f20d46b02d4ae06d9c36af4"
+      },
+      "assets": [
+        {
+          "file": "n64.png",
+          "bytes": 82678,
+          "sha256": "759403c37e70c23867144845c53b98404cb883c80e96673776d465a64aa7c115"
+        },
+        {
+          "file": "n64.mpg",
+          "bytes": 294912,
+          "sha256": "195a1e718c1019bc1f6c8a8b788ea910a100c2926bdb8e785aef396978a53e78"
+        },
+        {
+          "file": "n64.mp4",
+          "bytes": 39611,
+          "sha256": "a61bcfe0b4ccf217411181605c2d192e8133422edd312cf26f3d697093b3a9d8"
+        }
+      ]
+    },
+    {
+      "id": "3ds",
+      "name": "Nintendo 3DS",
+      "artwork": {
+        "path": "assets/3d-icons/3ds.png",
+        "sha256": "ec9e8acd133e09545f6e76f6efec5e528d6bacb86d0add9bacb0e95233ecd4e8"
+      },
+      "assets": [
+        {
+          "file": "3ds.png",
+          "bytes": 82608,
+          "sha256": "23d3166d6a9bd5d405b14ea21b092f8b6764622364748140e5dea0134dcb4d5c"
+        },
+        {
+          "file": "3ds.mpg",
+          "bytes": 313344,
+          "sha256": "3dbbc2d2951d3a8610a9c8423917915fb813dc915f1257a1774acaae9fc69c8f"
+        },
+        {
+          "file": "3ds.mp4",
+          "bytes": 46765,
+          "sha256": "073579ae273f2ce6f5d8a476341f48a3820cadbd5b59b8b56afa4d9acffd2483"
+        }
+      ]
+    },
+    {
+      "id": "ds",
+      "name": "Nintendo DS",
+      "artwork": {
+        "path": "assets/3d-icons/ds.png",
+        "sha256": "fcf280d186b3eeafb478caf2d56215e9db34b40a98826c25790d076b1bd19811"
+      },
+      "assets": [
+        {
+          "file": "ds.png",
+          "bytes": 86530,
+          "sha256": "c120c3130fcc61ee9510c975dedb569105d8366ba80b38dcd76144be02b07a4e"
+        },
+        {
+          "file": "ds.mpg",
+          "bytes": 313344,
+          "sha256": "18a1e371b8a9a7308593f3e68d9d5b176ec517400bb36b457a006dabd6b04204"
+        },
+        {
+          "file": "ds.mp4",
+          "bytes": 47809,
+          "sha256": "6a0eb666417ea24eac4bd1189dd7c964b3656af9bf624bf6588b5427ee70c6e5"
+        }
+      ]
+    },
+    {
+      "id": "gba",
+      "name": "Game Boy Advance",
+      "artwork": {
+        "path": "assets/3d-icons/gba.png",
+        "sha256": "af238110af83e85d13b294133588a6afe7b11aac757e5b25047f34e1a73724ae"
+      },
+      "assets": [
+        {
+          "file": "gba.png",
+          "bytes": 95925,
+          "sha256": "5c6a698be02b014f73714d49d1a9c604be16b5916bb909a60611a154063cfc2e"
+        },
+        {
+          "file": "gba.mpg",
+          "bytes": 325632,
+          "sha256": "574a532ae06cc92255bb6b0f47729a5b1b094f44649f9b3822bc184645dc3802"
+        },
+        {
+          "file": "gba.mp4",
+          "bytes": 44625,
+          "sha256": "5ef68a9971b6ad968953c9477bc3eb4e9d738add20e6b13996bfe312574fbb38"
+        }
+      ]
+    },
+    {
+      "id": "gbc",
+      "name": "Game Boy Color",
+      "artwork": {
+        "path": "assets/3d-icons/gbc.png",
+        "sha256": "e2ec49401e2ee6d5f4a69779b5630e3ddeee8cc0a6cec9c0eeca897595880dfc"
+      },
+      "assets": [
+        {
+          "file": "gbc.png",
+          "bytes": 88360,
+          "sha256": "e0f42ff3a88e4256fa6f7a4cb1f15a7daf1d0b69ee4ec74c431967b370f2de73"
+        },
+        {
+          "file": "gbc.mpg",
+          "bytes": 317440,
+          "sha256": "df763a281444f9382ee63a03f9895bd4fb182fdc23508b6e257792cca2412dfc"
+        },
+        {
+          "file": "gbc.mp4",
+          "bytes": 48369,
+          "sha256": "60993275d26e8fbcedd396a0d08a57771ce4b32f82165e40ab1674dc1d4642be"
+        }
+      ]
+    },
+    {
+      "id": "gb",
+      "name": "Game Boy",
+      "artwork": {
+        "path": "assets/3d-icons/gb.png",
+        "sha256": "23af81f39e38834830d16d63d6aa1f337b6a96bbf7869fa2b7b5426d82b3988a"
+      },
+      "assets": [
+        {
+          "file": "gb.png",
+          "bytes": 74785,
+          "sha256": "36559ea31e41add51488adb3982b692dd06c0f9babd89a6bde1ea4e433fb2025"
+        },
+        {
+          "file": "gb.mpg",
+          "bytes": 249856,
+          "sha256": "16bb7717c4c5580190c07bd4e2f0d296d52a152ddcad006a2961a4677d98dcbc"
+        },
+        {
+          "file": "gb.mp4",
+          "bytes": 36133,
+          "sha256": "2aaf41b43dfc299641162e126fe282153ac646190e81e70c1affe7fc3b4140a2"
+        }
+      ]
+    },
+    {
+      "id": "snes",
+      "name": "Super Nintendo",
+      "artwork": {
+        "path": "assets/3d-icons/snes.png",
+        "sha256": "b2ff77e305d5298a13ddbc5f8406098d505086441ffdbc83b457e5624095ee17"
+      },
+      "assets": [
+        {
+          "file": "snes.png",
+          "bytes": 78892,
+          "sha256": "b3cc1a9cff713b7b8f4fb34333edb91adf75bdcf3acec1be4ec6bff50efc7ebf"
+        },
+        {
+          "file": "snes.mpg",
+          "bytes": 294912,
+          "sha256": "a2dba1b195ef352b29065ae9391e42819f42bf461fc23e5db51bdcc5ab1682e6"
+        },
+        {
+          "file": "snes.mp4",
+          "bytes": 41812,
+          "sha256": "7b1db311c31eaaded7b3b6c50ca8b51edd0b74a0c44f08072b37528e14723c2e"
+        }
+      ]
+    },
+    {
+      "id": "nes",
+      "name": "NES",
+      "artwork": {
+        "path": "assets/3d-icons/nes.png",
+        "sha256": "b81b43a328f746e9f36210b4142e2c0a3aef0167017bb707b4e5bc9936c05f77"
+      },
+      "assets": [
+        {
+          "file": "nes.png",
+          "bytes": 80589,
+          "sha256": "97c6b7a4e5e40eafed9b0d29715eec872574cdff637656962c2590e0e1116674"
+        },
+        {
+          "file": "nes.mpg",
+          "bytes": 266240,
+          "sha256": "7d2d1a03f888f02f258cfeed2216f4d208c093d3a565dea9c079aba4820b9593"
+        },
+        {
+          "file": "nes.mp4",
+          "bytes": 41676,
+          "sha256": "eefe702167cf526b3dfea0c4e024e503676302532fd5831224ba56c1ec61a841"
+        }
+      ]
+    },
+    {
+      "id": "fds",
+      "name": "Famicom Disk System",
+      "artwork": {
+        "path": "assets/3d-icons/fds.png",
+        "sha256": "d144ed05db3fd0d649728551c4e183bc2ac961c2e2e4bc8b963c13b9ab97a28a"
+      },
+      "assets": [
+        {
+          "file": "fds.png",
+          "bytes": 105003,
+          "sha256": "c60976eb4018ddd8486154ed8ef7b74d4ff0ff0e04f0512121453cd0480e8ce3"
+        },
+        {
+          "file": "fds.mpg",
+          "bytes": 419840,
+          "sha256": "713e6299f57090d536e94d989b1a0ff79d01a073e44c9532afce9b265cd3129a"
+        },
+        {
+          "file": "fds.mp4",
+          "bytes": 58131,
+          "sha256": "58c53f6d70b25cd721ee914742f2cbf6224734ed5d5102b6dde0663b7fbbe0b7"
+        }
+      ]
+    },
+    {
+      "id": "virtualboy",
+      "name": "Virtual Boy",
+      "artwork": {
+        "path": "assets/3d-icons/virtualboy.png",
+        "sha256": "85fdc3d40e59ab848f563e9b0da85e801f182ca0b76a9fec7b11801b707bdccb"
+      },
+      "assets": [
+        {
+          "file": "virtualboy.png",
+          "bytes": 70833,
+          "sha256": "66beb978cb0fc543e61144e45cc2d67675471fc4e3e9852c24fbd1b0c250d59a"
+        },
+        {
+          "file": "virtualboy.mpg",
+          "bytes": 245760,
+          "sha256": "af0aa743de6eb2bd9c6f5717fcf84b57f5b8a418a94f375949a15048f9289ff3"
+        },
+        {
+          "file": "virtualboy.mp4",
+          "bytes": 35968,
+          "sha256": "face46f1b3da82ff277e17a1f6e71092c9948b9d4d9373239b42281a81fe31b0"
+        }
+      ]
+    },
+    {
+      "id": "pokemonmini",
+      "name": "Pok\u00e9mon mini",
+      "artwork": {
+        "path": "assets/3d-icons/pokemonmini.png",
+        "sha256": "d8abb318d72cbafce787d974f0c49541c545de263bbeef8ca20268ff033379ba"
+      },
+      "assets": [
+        {
+          "file": "pokemonmini.png",
+          "bytes": 94566,
+          "sha256": "3b32fa6a6f672d93753f97f1d2ad6885622c8e6556c81a319573010921db5aae"
+        },
+        {
+          "file": "pokemonmini.mpg",
+          "bytes": 337920,
+          "sha256": "f20cc8c81955a5bf2e3b499c75af6faa955e4eb9ef2ebc3575ab1e1c41e07406"
+        },
+        {
+          "file": "pokemonmini.mp4",
+          "bytes": 50691,
+          "sha256": "0aa95e22e7d38659fb54c478e696151c63b44fdac92ef1a620d7864962257864"
+        }
+      ]
+    },
+    {
+      "id": "dreamcast",
+      "name": "Dreamcast",
+      "artwork": {
+        "path": "assets/3d-icons/dreamcast.png",
+        "sha256": "195d4dde5a5141e36d36dcf4ffddfcdfb7bef45650497ad41028dce43b3f2520"
+      },
+      "assets": [
+        {
+          "file": "dreamcast.png",
+          "bytes": 78987,
+          "sha256": "d30261566806eb1d92ca44c52db6bc0a4675d00076200c0e93f0c17d66e480f9"
+        },
+        {
+          "file": "dreamcast.mpg",
+          "bytes": 288768,
+          "sha256": "85cbe048a456eaf3f5b720625135bc8fbb9c210060638bcee5dd0f34d26a7f2e"
+        },
+        {
+          "file": "dreamcast.mp4",
+          "bytes": 42314,
+          "sha256": "b7d1f473133abacf9dec2aa37a58b8bde564a75f590cce5f24da41caf8314017"
+        }
+      ]
+    },
+    {
+      "id": "saturn",
+      "name": "Sega Saturn",
+      "artwork": {
+        "path": "assets/3d-icons/saturn.png",
+        "sha256": "583b9c105673a348f49137b88fcc3ad3164b26c7a1b05a78347951fec3529be2"
+      },
+      "assets": [
+        {
+          "file": "saturn.png",
+          "bytes": 86760,
+          "sha256": "27385010549a28df25055df9ff23cc03a0cbdc36e06607e11c655503fa21cb1d"
+        },
+        {
+          "file": "saturn.mpg",
+          "bytes": 288768,
+          "sha256": "f0027220e6e75d945ec42780d080590b3baa7f21c6a86a85397bb2c4d42bb489"
+        },
+        {
+          "file": "saturn.mp4",
+          "bytes": 40207,
+          "sha256": "a5bc3f59395264619e268ffb830071be2ce7f4397eae435e974c7ab463050384"
+        }
+      ]
+    },
+    {
+      "id": "naomi",
+      "name": "Sega NAOMI",
+      "artwork": {
+        "path": "assets/3d-icons/naomi.png",
+        "sha256": "5588dd55cffe1c195a51001a7d5a2a7064d79d4732b6f9b5ca2cb18b55fd3b19"
+      },
+      "assets": [
+        {
+          "file": "naomi.png",
+          "bytes": 96661,
+          "sha256": "3c384e99c4f96d77bdf78d52d691d8e5005a7ff2b7d0e04cbfca658a44c17c0a"
+        },
+        {
+          "file": "naomi.mpg",
+          "bytes": 376832,
+          "sha256": "fdeb617d5732e7d8d80ab3064beb61198f5d5c0dc6782e2e11bf2d49c9363b11"
+        },
+        {
+          "file": "naomi.mp4",
+          "bytes": 51416,
+          "sha256": "886966ea789c48d66ab6bb0e50b566baf8b60072bcb7d2fbc163677e401d5d2c"
+        }
+      ]
+    },
+    {
+      "id": "genesis",
+      "name": "Mega Drive / Genesis",
+      "artwork": {
+        "path": "assets/3d-icons/genesis.png",
+        "sha256": "238c385a2c883b0a49cf3588d92ab091692739537e380a28d1079115570a55c8"
+      },
+      "assets": [
+        {
+          "file": "genesis.png",
+          "bytes": 99362,
+          "sha256": "7af0ff271d7a11caabe3e76ed12418bdcbdf4a2efb227c35cedd3c864ece7b10"
+        },
+        {
+          "file": "genesis.mpg",
+          "bytes": 354304,
+          "sha256": "2c8991d20df294e12121859e6568db3735a4c08e7c38da1db4166a7ce6a94e9b"
+        },
+        {
+          "file": "genesis.mp4",
+          "bytes": 46604,
+          "sha256": "b569a6d5be7004d938f8cb76c5da5d6cf7184243663c37ce01ec4c34189d9934"
+        }
+      ]
+    },
+    {
+      "id": "segacd",
+      "name": "Sega CD / Mega-CD",
+      "artwork": {
+        "path": "assets/3d-icons/segacd.png",
+        "sha256": "b0391ac821341b4fe7eed0226275dfd6258e7e18f96d46a7c7dde8d60a01e924"
+      },
+      "assets": [
+        {
+          "file": "segacd.png",
+          "bytes": 99339,
+          "sha256": "27d692ceb6d63b30c7d7e715e28c093b9347d247f5bc52f908e412f20a5a1b2e"
+        },
+        {
+          "file": "segacd.mpg",
+          "bytes": 339968,
+          "sha256": "bb4bfb2994226758eefefbc467dce12fc5ac2a11fb54375270886e47f74516d9"
+        },
+        {
+          "file": "segacd.mp4",
+          "bytes": 46482,
+          "sha256": "1a442ef0cb0008f03bf31a94d7cee03044f752b43285d6984b3be318661b7c19"
+        }
+      ]
+    },
+    {
+      "id": "sega32x",
+      "name": "Sega 32X",
+      "artwork": {
+        "path": "assets/3d-icons/sega32x.png",
+        "sha256": "1aaaaa46fe892168a3e1b9a7bcef0893612df81f1909983471c450eb6f9ff605"
+      },
+      "assets": [
+        {
+          "file": "sega32x.png",
+          "bytes": 93086,
+          "sha256": "ace840fad89cab8cdc7c0fbbe4251b4bd3f8d6ad1799760bfcdaacfc0f3f2f44"
+        },
+        {
+          "file": "sega32x.mpg",
+          "bytes": 296960,
+          "sha256": "159bfb67a5ed627b06a4840d6ef6f382daacbda449767072c872d042e80df510"
+        },
+        {
+          "file": "sega32x.mp4",
+          "bytes": 43967,
+          "sha256": "0bf02574e2423112c339258762861bf944ca1f2f7f5b8037152507b56b76014a"
+        }
+      ]
+    },
+    {
+      "id": "mastersystem",
+      "name": "Master System",
+      "artwork": {
+        "path": "assets/3d-icons/mastersystem.png",
+        "sha256": "9808d187876b91b7d57fe92790970e84ac374f16058ad16e8a09a5d810efe806"
+      },
+      "assets": [
+        {
+          "file": "mastersystem.png",
+          "bytes": 98238,
+          "sha256": "b8b8abe2b00c09e6358d4dd9e0451b6816cd9611984d91ca2c55d8863f017cfe"
+        },
+        {
+          "file": "mastersystem.mpg",
+          "bytes": 311296,
+          "sha256": "60f7a0e695180ea8430acb092bdd5a348ead3380d933085221667fd881b09261"
+        },
+        {
+          "file": "mastersystem.mp4",
+          "bytes": 48297,
+          "sha256": "fec4c39ea9ebadf86f6b0b4048b8470b61fa5d134b5443f36839122d20a16da3"
+        }
+      ]
+    },
+    {
+      "id": "gamegear",
+      "name": "Game Gear",
+      "artwork": {
+        "path": "assets/3d-icons/gamegear.png",
+        "sha256": "d71dbe0569a7944fb33f1e5b15384c766ad5f6334e1fe7499e0542e065fb7475"
+      },
+      "assets": [
+        {
+          "file": "gamegear.png",
+          "bytes": 89467,
+          "sha256": "60e4499d8ecf6faf539280f70bc8b854f9d6b3036c8b0c540716df0686c2698f"
+        },
+        {
+          "file": "gamegear.mpg",
+          "bytes": 262144,
+          "sha256": "22038bea161ad880322d0034d2e96d6b11d984d1568a69b28ab9ca383fecce48"
+        },
+        {
+          "file": "gamegear.mp4",
+          "bytes": 38789,
+          "sha256": "44c5b91f907eeb513bccd94a96de402b3226d799a4e530ab08fb251094c40530"
+        }
+      ]
+    },
+    {
+      "id": "sg1000",
+      "name": "SG-1000",
+      "artwork": {
+        "path": "assets/3d-icons/sg1000.png",
+        "sha256": "d2c27b2fc27c4b45d39812e39f41e3374630e280e03611269e59ae9958927deb"
+      },
+      "assets": [
+        {
+          "file": "sg1000.png",
+          "bytes": 92572,
+          "sha256": "17a8d4da104b3a66b1d46f4da747dc45452e731487d352d6a3c32fafb4618a3a"
+        },
+        {
+          "file": "sg1000.mpg",
+          "bytes": 327680,
+          "sha256": "f9ff8c9f215fa1b889e8fa5bdff4447860006f59700eae4ff1d45f21dcb7f2a5"
+        },
+        {
+          "file": "sg1000.mp4",
+          "bytes": 44210,
+          "sha256": "820fe0983a3d70e8166222ab91d1e23922756c864ecf72b096ef461045527a79"
+        }
+      ]
+    },
+    {
+      "id": "atomiswave",
+      "name": "Atomiswave",
+      "artwork": {
+        "path": "assets/3d-icons/atomiswave.png",
+        "sha256": "867dbd639fd812a796a7e77f74eac54ce483e3fbfa45217b6e934b4609429251"
+      },
+      "assets": [
+        {
+          "file": "atomiswave.png",
+          "bytes": 98620,
+          "sha256": "19d80348f223f3933d6846bddb23e735858d33b6029df8a1dc5ccf6f8482fd4b"
+        },
+        {
+          "file": "atomiswave.mpg",
+          "bytes": 360448,
+          "sha256": "0d27ae32d01aad1e11c422f098d909f2207bf3e5c0c5a874979e155cdcc1d7b8"
+        },
+        {
+          "file": "atomiswave.mp4",
+          "bytes": 55001,
+          "sha256": "dfe29025fe6b5ffe2c1c2a06d5ee31766daa50c012751f7d58d55062056c1b7b"
+        }
+      ]
+    },
+    {
+      "id": "atarijaguar",
+      "name": "Atari Jaguar",
+      "artwork": {
+        "path": "assets/3d-icons/atarijaguar.png",
+        "sha256": "f6e94d91d8267eec1234db0881f1beb5d4f886e2ead06da49e16b54d5d45176f"
+      },
+      "assets": [
+        {
+          "file": "atarijaguar.png",
+          "bytes": 77256,
+          "sha256": "f3de612d015206621e71207adfc00defc9a3010cf4bb33490b912aeb1dfa5174"
+        },
+        {
+          "file": "atarijaguar.mpg",
+          "bytes": 249856,
+          "sha256": "e2ea42d39cab3cb040aabd8d180455830e2ea726d8b5b14d3c0b782db3c49231"
+        },
+        {
+          "file": "atarijaguar.mp4",
+          "bytes": 35748,
+          "sha256": "f53a5fe7b992b96ce16f0dfee39e13f150e97fb335d6a7bd7488168091d932e1"
+        }
+      ]
+    },
+    {
+      "id": "atarilynx",
+      "name": "Atari Lynx",
+      "artwork": {
+        "path": "assets/3d-icons/atarilynx.png",
+        "sha256": "c0372f67c0a93fb187aadd47b2d97ba7544549a9d49208fd4e224d61f9ec30ce"
+      },
+      "assets": [
+        {
+          "file": "atarilynx.png",
+          "bytes": 72969,
+          "sha256": "4b006f5af6d1b624e3ff04ad596b7371200204d4e4c559dc39cefbf280f8f740"
+        },
+        {
+          "file": "atarilynx.mpg",
+          "bytes": 235520,
+          "sha256": "cd4661f0f48bb31d51333a102ad78e596ca81b0daba47f71beaf3942f5c75828"
+        },
+        {
+          "file": "atarilynx.mp4",
+          "bytes": 34050,
+          "sha256": "55e550156a5ac3304aef1c7d333e7a85008f80ec66b2411d1962001162d66408"
+        }
+      ]
+    },
+    {
+      "id": "atari7800",
+      "name": "Atari 7800",
+      "artwork": {
+        "path": "assets/3d-icons/atari7800.png",
+        "sha256": "0498ada4b19dea061bc37c7c77fabb2fdc0a37f9b53de218805b8cc616a8e39f"
+      },
+      "assets": [
+        {
+          "file": "atari7800.png",
+          "bytes": 82644,
+          "sha256": "1fb681958431a5ac7899b6d7e4a95342646b68f2d1ca2e8f08bfa178bb8a5147"
+        },
+        {
+          "file": "atari7800.mpg",
+          "bytes": 262144,
+          "sha256": "cf9598f4b9f59262073664f8dc50b5a100acd8d2391f4ad23f9c7dcdf41c28d8"
+        },
+        {
+          "file": "atari7800.mp4",
+          "bytes": 37374,
+          "sha256": "14e59d0fba05847aaec3d6907a9326b2e85192e85cf60991a4f991c289dfdcca"
+        }
+      ]
+    },
+    {
+      "id": "atari5200",
+      "name": "Atari 5200",
+      "artwork": {
+        "path": "assets/3d-icons/atari5200.png",
+        "sha256": "c9286f20626a69f463836f3cae4fe09d46fa9e14acead5aed654381d8a60ee70"
+      },
+      "assets": [
+        {
+          "file": "atari5200.png",
+          "bytes": 95103,
+          "sha256": "11033b34f1d4bef9d6fb4ac20c68a63cd09097343713c82307fe37cc20ba91f5"
+        },
+        {
+          "file": "atari5200.mpg",
+          "bytes": 288768,
+          "sha256": "b9692f6f5cca978729d0856e9907c614048e4e67db4c5baea222a597b2f87910"
+        },
+        {
+          "file": "atari5200.mp4",
+          "bytes": 42803,
+          "sha256": "7758f48fe6a5f143927790c5712ee88ea97c6b7d0cf9abf76f436a9d4e49c5d1"
+        }
+      ]
+    },
+    {
+      "id": "atari2600",
+      "name": "Atari 2600",
+      "artwork": {
+        "path": "assets/3d-icons/atari2600.png",
+        "sha256": "d197290f5a0aa9a9873d8bacc49525476ce5648b45bc2e7b03f3f5f22a1c225c"
+      },
+      "assets": [
+        {
+          "file": "atari2600.png",
+          "bytes": 108194,
+          "sha256": "36a058116af00e7bb74e9c3d79d1e0a7eba226a4950470dfff9466f9a0317fc2"
+        },
+        {
+          "file": "atari2600.mpg",
+          "bytes": 360448,
+          "sha256": "4d10542513d45a68d3e331c64d9843d051be38eb35a8b47ad65214985bd35776"
+        },
+        {
+          "file": "atari2600.mp4",
+          "bytes": 55138,
+          "sha256": "dd907e8c0105f6a6d0145c9537fdc0f4a68d13bea15b9e98a44fde36363916f6"
+        }
+      ]
+    },
+    {
+      "id": "pcengine",
+      "name": "PC Engine / TurboGrafx-16",
+      "artwork": {
+        "path": "assets/3d-icons/pcengine.png",
+        "sha256": "24f5d3bd03aaeae8f294f59fabbe08e0b0903bc2596cb730a0f189b73f0e7eda"
+      },
+      "assets": [
+        {
+          "file": "pcengine.png",
+          "bytes": 94753,
+          "sha256": "bde53f8a410cc10205ff084b4d405e182c39b6da31f9643d06773b7cc77a21d1"
+        },
+        {
+          "file": "pcengine.mpg",
+          "bytes": 370688,
+          "sha256": "20b9edeea3692803c7c803dee1b58c0d9ccc52f8fab65d27e0a32d2a19297a79"
+        },
+        {
+          "file": "pcengine.mp4",
+          "bytes": 45714,
+          "sha256": "529017b4c222349ef890e46e4fe3e1ace26495ef0e69a2c0152f9a6ef8895754"
+        }
+      ]
+    },
+    {
+      "id": "supergrafx",
+      "name": "SuperGrafx",
+      "artwork": {
+        "path": "assets/3d-icons/supergrafx.png",
+        "sha256": "3e891fbaf135ab01426ab8c2db4e915c3d0f71bb479917acf64dcbe137b02c4a"
+      },
+      "assets": [
+        {
+          "file": "supergrafx.png",
+          "bytes": 112210,
+          "sha256": "6f7dae6bfaefda56d464af9eaebd9e920747efc5854a4738a5f99e96abdd3b57"
+        },
+        {
+          "file": "supergrafx.mpg",
+          "bytes": 354304,
+          "sha256": "02209ce9634b3c817df8903023b6b448928d214cbc35fbc0adf08b1c03bafc7a"
+        },
+        {
+          "file": "supergrafx.mp4",
+          "bytes": 49557,
+          "sha256": "a128afae939a7d44fda69028fbcd0b0aa596866cda8d7f7718f3b6cbfab02447"
+        }
+      ]
+    },
+    {
+      "id": "pcfx",
+      "name": "PC-FX",
+      "artwork": {
+        "path": "assets/3d-icons/pcfx.png",
+        "sha256": "2d6f984d78ff5a778b58caed46d9a4bdcb6235815a8276b1fec820584b3028a7"
+      },
+      "assets": [
+        {
+          "file": "pcfx.png",
+          "bytes": 69047,
+          "sha256": "a89251234b55cfbc6932cf044aa2f255de79377efa708f2fd0ab2da08e897e6d"
+        },
+        {
+          "file": "pcfx.mpg",
+          "bytes": 233472,
+          "sha256": "5424fc9bb6ca8a48b09eeb95b69305256201903a7cccd266399e59cd946335b3"
+        },
+        {
+          "file": "pcfx.mp4",
+          "bytes": 34265,
+          "sha256": "d97422e0bdf647e24f68e46fa1228b2b2ff55b36efe9ff85a6399ab02afb3bb1"
+        }
+      ]
+    },
+    {
+      "id": "neogeocd",
+      "name": "Neo Geo CD",
+      "artwork": {
+        "path": "assets/3d-icons/neogeocd.png",
+        "sha256": "ff951637bbcd3587b4103e4cfde55d63259eface8d7560549f7652d4634c169c"
+      },
+      "assets": [
+        {
+          "file": "neogeocd.png",
+          "bytes": 84284,
+          "sha256": "174d39309b326db6836316820adf5f7f4c0ab0f32bcb9b14b67e78703c1a426c"
+        },
+        {
+          "file": "neogeocd.mpg",
+          "bytes": 262144,
+          "sha256": "e5a405f2a764e2c142d41bccedff8359814fb8fd9b579fc69476f00eb6752069"
+        },
+        {
+          "file": "neogeocd.mp4",
+          "bytes": 37159,
+          "sha256": "b58bda69ee7eff83250f8405a686fcf484a82c2cce5e3d227dae6fb0453df128"
+        }
+      ]
+    },
+    {
+      "id": "neogeopocketcolor",
+      "name": "Neo Geo Pocket Color",
+      "artwork": {
+        "path": "assets/3d-icons/neogeopocketcolor.png",
+        "sha256": "f4301cb4cb6304b6d947d336e0d8f18098d7e753dbde9a6364998503b6c7c941"
+      },
+      "assets": [
+        {
+          "file": "neogeopocketcolor.png",
+          "bytes": 115188,
+          "sha256": "0181f08ff45531fc828fd6f6bc43ba3fa7a59de3b17d7cfb33d2d06283c9e57f"
+        },
+        {
+          "file": "neogeopocketcolor.mpg",
+          "bytes": 407552,
+          "sha256": "899677a1d8bad1c8de8cccfd6169439e6482e4c9e2d27666f6f8395e130b2b91"
+        },
+        {
+          "file": "neogeopocketcolor.mp4",
+          "bytes": 66841,
+          "sha256": "63d31a72ca2c94aed8b27d05158f8038e5bfb8a804347a000dd1cb27e0ca70f0"
+        }
+      ]
+    },
+    {
+      "id": "neogeopocket",
+      "name": "Neo Geo Pocket",
+      "artwork": {
+        "path": "assets/3d-icons/neogeopocket.png",
+        "sha256": "ba2774276ea1946f82d0b3cb2dc7308f9ccaa49e2658ece8799695e7fe9eb468"
+      },
+      "assets": [
+        {
+          "file": "neogeopocket.png",
+          "bytes": 82753,
+          "sha256": "8a745e5d9150ea56ccf2ba451416229055e7b1cf18e8462dab16da7c63cded4e"
+        },
+        {
+          "file": "neogeopocket.mpg",
+          "bytes": 260096,
+          "sha256": "081e5b3ba7e41004cb1b32f03d148bcec81c1b46fc16e82b8be59762f3ab077f"
+        },
+        {
+          "file": "neogeopocket.mp4",
+          "bytes": 37627,
+          "sha256": "231fedd2fca9a1c14be3484bd5b811347e96306370eeb867a86b5163863727ec"
+        }
+      ]
+    },
+    {
+      "id": "wonderswancolor",
+      "name": "WonderSwan Color",
+      "artwork": {
+        "path": "assets/3d-icons/wonderswancolor.png",
+        "sha256": "26e4fefd955f65d8eb004fb484cf0ff2aa0cc3fff8628e335aba08bd47ae8410"
+      },
+      "assets": [
+        {
+          "file": "wonderswancolor.png",
+          "bytes": 105815,
+          "sha256": "e3cad0d75142d94a852740a648f9e172a7ead76cae86fa838c7cebc01809ea36"
+        },
+        {
+          "file": "wonderswancolor.mpg",
+          "bytes": 391168,
+          "sha256": "0da9b1cc5b89b7c131abb4fb7928b50d237b0432dabb0b6850f74602879e4012"
+        },
+        {
+          "file": "wonderswancolor.mp4",
+          "bytes": 57802,
+          "sha256": "226b2b3b5a52a4f604d98b22094d290dad8294fe3f07b613a16e7e7accc8903e"
+        }
+      ]
+    },
+    {
+      "id": "wonderswan",
+      "name": "WonderSwan",
+      "artwork": {
+        "path": "assets/3d-icons/wonderswan.png",
+        "sha256": "cdffaa2083a7290aaa3f1b0d3298b26f7df8a0127c18d261531c97e5b7a74ecb"
+      },
+      "assets": [
+        {
+          "file": "wonderswan.png",
+          "bytes": 95221,
+          "sha256": "aadafd8688205b6cb68e8f1a89772894d7a849d3afa17a06b978d37da126afae"
+        },
+        {
+          "file": "wonderswan.mpg",
+          "bytes": 288768,
+          "sha256": "d90eee3570638e6f0efa72497e57fc4535a1d462d8eeaad5be4a323f92b9547b"
+        },
+        {
+          "file": "wonderswan.mp4",
+          "bytes": 42664,
+          "sha256": "bc2f354ec34aa74870e40e8f12bf0f38e8b041d8ed5d76048b7fb881ff7d0513"
+        }
+      ]
+    },
+    {
+      "id": "threedo",
+      "name": "3DO Interactive Multiplayer",
+      "artwork": {
+        "path": "assets/3d-icons/threedo.png",
+        "sha256": "3b828fad47c0a006cd657c48f8068328debdd60dcbc273d93b4137d2e7448fd4"
+      },
+      "assets": [
+        {
+          "file": "threedo.png",
+          "bytes": 92505,
+          "sha256": "2191628a4196f4cc9c58495b81383a52a76303e8abcd265ceaffb03fa39923a6"
+        },
+        {
+          "file": "threedo.mpg",
+          "bytes": 307200,
+          "sha256": "5216c6f489a9717d8cbe1fd268704d615a3a4459a1a922b8947b774f77e84359"
+        },
+        {
+          "file": "threedo.mp4",
+          "bytes": 40840,
+          "sha256": "c6a130f42be944354cf210812cc595c67c6812fd0f4e56157c7f7737cf72275a"
+        }
+      ]
+    },
+    {
+      "id": "arcadefbneo",
+      "name": "Arcade \u00b7 FinalBurn Neo",
+      "artwork": {
+        "path": "assets/3d-icons/arcadefbneo.png",
+        "sha256": "d2e37c907f07f4c30f01c0f593bc8959bc07c202a1d5187b6da6111de2a55b41"
+      },
+      "assets": [
+        {
+          "file": "arcadefbneo.png",
+          "bytes": 73138,
+          "sha256": "58746ca87c25f8e5a74c66a8fca92436f48becfa4050cb9a0c60059d9f396fbe"
+        },
+        {
+          "file": "arcadefbneo.mpg",
+          "bytes": 296960,
+          "sha256": "8fc1b1beb40dda8d6bed182910a94300a6499659f8446117000ac23cba69ffc1"
+        },
+        {
+          "file": "arcadefbneo.mp4",
+          "bytes": 40240,
+          "sha256": "f9c59900df2f524b5f2fdcd86d27ea10e48ecfa9b11b280d3760f4f4582c4de8"
+        }
+      ]
+    },
+    {
+      "id": "arcademame",
+      "name": "Arcade \u00b7 MAME",
+      "artwork": {
+        "path": "assets/3d-icons/arcademame.png",
+        "sha256": "123a69ce6835e99f51f1c77fecc88c3d6cbad4065689e931bae8080d41eb775f"
+      },
+      "assets": [
+        {
+          "file": "arcademame.png",
+          "bytes": 63844,
+          "sha256": "7e68b928ba5eea585eb1dfa1a5a101701ec12f5eb15e3609a793ae4c14de80d9"
+        },
+        {
+          "file": "arcademame.mpg",
+          "bytes": 227328,
+          "sha256": "be95c21866ab855d23016251e4047dfdf797b4f94e35839c0cd62073f87f0732"
+        },
+        {
+          "file": "arcademame.mp4",
+          "bytes": 31242,
+          "sha256": "5a0c67d08776503c8c85021c4f3a69de9cbdc4b5bd292737afdae7e9e6e83695"
+        }
+      ]
+    },
+    {
+      "id": "amiga",
+      "name": "Amiga",
+      "artwork": {
+        "path": "assets/3d-icons/amiga.png",
+        "sha256": "d9fa4e7ff52fe036a2f9143420d88de3fa9dd888cebc99848608839effe0d439"
+      },
+      "assets": [
+        {
+          "file": "amiga.png",
+          "bytes": 94451,
+          "sha256": "7b06d2511406190cd9607fae0729e604d2acf17038073099e60ee73911911819"
+        },
+        {
+          "file": "amiga.mpg",
+          "bytes": 323584,
+          "sha256": "ef2ab54848fca32bbd38ef3e165f03a69af449b8a784deeb347f8ecc9131004c"
+        },
+        {
+          "file": "amiga.mp4",
+          "bytes": 49668,
+          "sha256": "512fcc9ba702d5ab70e4fa9aa3d26d6184cb80d7726f87f2915443ae9fc65790"
+        }
+      ]
+    },
+    {
+      "id": "c64",
+      "name": "Commodore 64",
+      "artwork": {
+        "path": "assets/3d-icons/c64.png",
+        "sha256": "a45cce66a9a2b388aa751db1624411c6765c581c55e57238a4bfd15f78e17f02"
+      },
+      "assets": [
+        {
+          "file": "c64.png",
+          "bytes": 112080,
+          "sha256": "083e96c1317a30f9643a150fb33ba923fe542210870c49c3dba2e0d6646bc61a"
+        },
+        {
+          "file": "c64.mpg",
+          "bytes": 391168,
+          "sha256": "893a9695a967db7bacf3d27d2467697b73253eea7e3d88818c5091cf661439b8"
+        },
+        {
+          "file": "c64.mp4",
+          "bytes": 54110,
+          "sha256": "2eee34093037ed5deba3166fdaa08181ca20eef3a4d9cf8b4401b8144d93a010"
+        }
+      ]
+    },
+    {
+      "id": "dos",
+      "name": "DOS PC games",
+      "artwork": {
+        "path": "assets/3d-icons/dos.png",
+        "sha256": "69e2be57630309da299b29d92d54852246ec88c9f8d1f68a09d0ae875907de1d"
+      },
+      "assets": [
+        {
+          "file": "dos.png",
+          "bytes": 89870,
+          "sha256": "e371e124873e369955c32c99fd394590424a95465f448a788c41452e20c36933"
+        },
+        {
+          "file": "dos.mpg",
+          "bytes": 311296,
+          "sha256": "3dbb46c5976dd1e5ce09498d09dd881aba7c06d687946fdf01e4712f86684895"
+        },
+        {
+          "file": "dos.mp4",
+          "bytes": 44440,
+          "sha256": "485dcec25a966ae3b1cce6a1ff5bf6364546c49376d234a136bc879ff69d6a68"
+        }
+      ]
+    },
+    {
+      "id": "scummvm",
+      "name": "ScummVM adventures",
+      "artwork": {
+        "path": "assets/3d-icons/scummvm.png",
+        "sha256": "4b32aa1ea0d130e4d26e334abab4f3752006774e3b89f4017fa711b19e55c759"
+      },
+      "assets": [
+        {
+          "file": "scummvm.png",
+          "bytes": 98680,
+          "sha256": "b61bea7412c9fcd5d509dfee3bc530acb7ec69b77b2c0cbc287dfbd63a1acc63"
+        },
+        {
+          "file": "scummvm.mpg",
+          "bytes": 391168,
+          "sha256": "839b07c180156b4969eed3ac621db18c27cf39359a1f37be9565ef7bbbfd64bf"
+        },
+        {
+          "file": "scummvm.mp4",
+          "bytes": 51957,
+          "sha256": "e4faa30b460954132a82360f216e82d48d9f2707d6b3fc47a88f3ad36806fbe2"
+        }
+      ]
+    }
+  ]
+}

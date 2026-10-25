@@ -22,17 +22,17 @@ In **Settings → Sort & filter → Shelf pages**, choose:
 | Display | Content |
 | --- | --- |
 | Selected console | Its illustration, name and discovered game/emulator counts |
-| Console intro picture | Your per-console still, fading in on selection; otherwise the console illustration |
-| Console intro video | Your local, silent clip plays once when the selected console changes; a labelled original Shelf demo plays if the clip is missing or invalid |
+| Console intro picture | The original Shelf still for that console, or your own PNG override, fading in on selection |
+| Console intro video | The original Shelf animation for that console, or your own silent movie override; plays once when the selected console changes |
 | My picture | Your personal PNG, cropped to fill the TV screen |
 | Clock & Shelf logo | The device's local time/date and your personal message |
 | My message | Your name or short message with the selected Shelf logo |
 | Favourite games | Names and console illustrations for games starred in Shelf's library, rotating every 10, 20, 30 or 60 seconds |
 | Screen off | The room's original unlit TV |
 
-Console intros can apply to **installed emulators and built-in systems**, or **all consoles**. Missing emulators remain unavailable to launch. No official console boot animations or audio are bundled. Favourite-game rotation uses the games discovered by Shelf; it does not import another emulator's favourites or download covers. The TV and its saved display stay visible when opening a console's details or game library. Entering the same console does not restart its intro.
+Console intros can apply to **installed emulators and built-in systems**, or **all consoles**. Matching original stills and silent 4.4-second animations are bundled for all 52 catalogue systems. These use Shelf's own hardware illustrations, names and colours; they are not the manufacturers' startup sequences. Personal media takes priority, and an invalid personal video falls back to the matching Shelf original. The generic Shelf demo remains a last fallback. Missing emulators remain unavailable to launch. Favourite-game rotation uses the games discovered by Shelf; it does not import another emulator's favourites or download covers. The TV and its saved display stay visible when opening a console's details or game library. Entering the same console does not restart its intro.
 
-**TV static for missing content** is optional and starts Off. Choose No emulator installed, No games found, or No emulator or no games. This overrides the chosen content for matching consoles; Screen off still takes priority. Static stays inside the screen and uses low-contrast grain. Reduced motion freezes static and intro videos on a still frame.
+**TV static for missing content** is optional and starts Off. Choose No emulator installed, No games found, or No emulator or no games. This overrides the chosen content for matching consoles; Screen off still takes priority. Static stays inside the screen, with fine-grain noise drawn at the screen's own resolution rather than enlarged blocks. It is generated locally at 20 updates per second, with subtle scan-line shading; it does not need a video file. Reduced motion freezes static and intro videos on a still frame.
 
 Choose **Personal message** and press Cross to edit it on PS5. Up to 95 UTF-8 bytes fit; spaces are available on the keyboard. The text, rotation interval, display mode, static policy, intro scope and favourites save in Shelf's own settings. Game favourites use local stable path identities; moving or renaming the game can require starring it again.
 
@@ -49,7 +49,7 @@ Examples are `intros/ps2.png`, `intros/ps3.png`, `intros/n64.png`, `intros/genes
 
 ## Add your own intro videos
 
-The PS5 uses silent **MPEG-1 video in an MPEG program stream** (`.mpg`), up to 640 × 368 pixels, 30 fps, 60 seconds and 32 MB. Renaming an MP4 to `.mpg` does not convert it. A missing, corrupt or unsupported clip falls back to the original Shelf demo. No PC streaming host is needed.
+The PS5 uses silent **MPEG-1 video in an MPEG program stream** (`.mpg`), up to 640 × 368 pixels, 30 fps, 60 seconds and 32 MB. Renaming an MP4 to `.mpg` does not convert it. A missing, corrupt or unsupported personal clip falls back to that console's bundled Shelf animation. No PC streaming host is needed.
 
 Prepare a copy with Python and a portable [FFmpeg build](https://ffmpeg.org/download.html), keeping your original untouched:
 

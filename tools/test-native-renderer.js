@@ -84,6 +84,21 @@ const noiseData=path.join(directory,'tv-noise-data');fs.mkdirSync(noiseData);
 run('layout,layout,settings,tab,tab,tab,down,down,down,down,confirm,back,shot:tv-static-a.png,frame:200,shot:tv-static-b.png,settings,previous-tab,previous-tab,previous-tab,down,down,down,down,confirm,back,shot:tv-static-reduced-a.png,frame:200,shot:tv-static-reduced-b.png',noiseData,0,true);
 assert.ok(!region(path.join(captures,'tv-static-a.png'),...screen).equals(region(path.join(captures,'tv-static-b.png'),...screen)),'optional TV grain animates inside the screen');
 assert.ok(region(path.join(captures,'tv-static-reduced-a.png'),...screen).equals(region(path.join(captures,'tv-static-reduced-b.png'),...screen)),'reduced motion keeps the static screen still');
+const fineGrain=region(path.join(captures,'tv-static-a.png'),1300,160,100,100);
+let grainChanges=0;
+for(let y=0;y<100;y++)for(let x=1;x<100;x++)if(fineGrain[(y*100+x)*4]!==fineGrain[(y*100+x-1)*4])grainChanges++;
+assert.ok(grainChanges>100*99*.85,'TV static has fine pixel-level grain instead of large repeated blocks');
+const introDefault=path.join(directory,'original-intro-data'), introPersonal=path.join(directory,'personal-intro-data');
+for(const folder of [introDefault,introPersonal]){fs.mkdirSync(folder);fs.copyFileSync(path.join(videoData,'settings.ini'),path.join(folder,'settings.ini'));}
+fs.mkdirSync(path.join(introPersonal,'intros'));fs.copyFileSync(path.join(root,'assets/room/shelf-intro.mpg'),path.join(introPersonal,'intros/ps5.mpg'));
+run('shot:original-intro.png,frame:1000,shot:original-intro-moving.png',introDefault,0,true);
+run('shot:personal-intro.png,frame:1000,shot:personal-intro-moving.png',introPersonal,0,true);
+assert.ok(!region(path.join(captures,'original-intro.png'),...screen).equals(region(path.join(captures,'personal-intro.png'),...screen)),'a valid personal movie takes priority over the bundled console intro');
+fs.writeFileSync(path.join(introPersonal,'intros/ps5.mpg'),'incomplete personal video');
+run('shot:bad-personal-intro-fallback.png',introPersonal,0,true);
+assert.ok(region(path.join(captures,'original-intro.png'),...screen).equals(region(path.join(captures,'bad-personal-intro-fallback.png'),...screen)),'a corrupt personal movie falls back to the matching original console intro');
+const menuPatch=region(path.join(captures,'display-shelf.png'),65,131,8,42);
+assert.ok([...menuPatch].every((value,index)=>index%4===3||value<50),'the room backboard quiets wall texture behind menu text');
 assert.notEqual(digest('orbit-start.png'),digest('orbit-middle.png'),'native motion must draw a new intermediate frame');
 assert.notEqual(digest('orbit-middle.png'),digest('orbit-end.png'),'native motion must continue to its target');
 assert.equal(digest('orbit-end.png'),digest('orbit-reference.png'),'animated motion must settle at the correct console pose');
@@ -108,6 +123,7 @@ const images=['home.png','details.png','appearance.png','browse.png','consoles.p
 images.push('missing-monochrome.png','missing-setting.png','missing-full-colour.png');
 images.push('room-settings.png','room-intro.png','room-picture-fallback.png','room-clock.png','room-message.png','room-favourites.png','room-screen-off.png','shelf-swap-before.png','shelf-swap-start.png','shelf-swap-out.png','shelf-swap-in.png','shelf-swap-end.png','shelf-swap-reference.png');
 images.push('tv-main.png','tv-detail.png','tv-library.png','tv-video-start.png','tv-video-middle.png','tv-video-later.png','tv-static-a.png','tv-static-b.png','tv-static-reduced-a.png','tv-static-reduced-b.png');
+images.push('original-intro.png','original-intro-moving.png','personal-intro.png','personal-intro-moving.png','bad-personal-intro-fallback.png');
 const output=[];
 for(const name of images){const filename=path.join(captures,name),bytes=fs.readFileSync(filename);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1080);assert.ok(bytes.length>(name.startsWith('loading')?1000:40000),name+' should contain its rendered frame');output.push({name,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
 fs.writeFileSync(path.join(root,'.cache/native-render-tests/latest.json'),JSON.stringify({directory,captures,processClosed:true,images:output},null,2)+'\n');

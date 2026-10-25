@@ -134,7 +134,8 @@ window.ShelfRoom = class {
     const noEmulator = system.status === 'reference', noGames = !system.games.length;
     const staticOn = noise === 'emulator' && noEmulator || noise === 'games' && noGames || noise === 'either' && (noEmulator || noGames);
     const clip = this.videos.get('intro:' + system.id);
-    const custom = mode === 'picture' ? this.images.get('picture') : mode === 'intro' && eligible ? this.images.get('intro:' + system.id) : null;
+    const custom = mode === 'picture' ? this.images.get('picture') : mode === 'intro' && eligible ?
+      this.images.get('intro:' + system.id) || `assets/room/intros/${system.id}.png` : null;
     const signature = JSON.stringify([mode, system.id, message, custom, clip, staticOn, reduced, mode === 'clock' ? time : '', mode === 'favorites' ? favorite?.game : '', eligible]);
     if (signature === this.signature) return;
     this.currentVideo?.pause(); this.currentVideo = null; clearInterval(this.staticTimer); this.staticTimer = 0;
@@ -143,23 +144,37 @@ window.ShelfRoom = class {
     const image = (source, className = '') => { const node = document.createElement('img'); node.src = source; node.alt = ''; node.className = className; content.append(node); };
     const text = (value, tag = 'strong', className = '') => { const node = document.createElement(tag); node.textContent = value; node.className = className; content.append(node); };
     if (staticOn) {
-      const canvas = document.createElement('canvas'); canvas.width = 96; canvas.height = 54; canvas.className = 'tv-static';
-      const context = canvas.getContext('2d'), pixels = context.createImageData(96, 54); let random = 4711;
+      const canvas = document.createElement('canvas'), bounds = tv.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.min(960, Math.ceil(bounds.width * devicePixelRatio)));
+      canvas.height = Math.max(1, Math.min(540, Math.ceil(bounds.height * devicePixelRatio))); canvas.className = 'tv-static';
+      const context = canvas.getContext('2d'), pixels = context.createImageData(canvas.width, canvas.height); let phase = 0;
       const paint = () => {
-        for (let i = 0; i < pixels.data.length; i += 4) {
-          random ^= random << 13; random ^= random >>> 17; random ^= random << 5;
-          const level = 62 + (random >>> 0) % 83;
-          pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = level; pixels.data[i + 3] = 255;
+        let random = phase + 4711;
+        for (let row = 0; row < canvas.height; row++) {
+          const shade = ((row + phase * 2) % 216 < 24 ? 5 : 0) + (row % 2 ? 3 : 0);
+          for (let col = 0; col < canvas.width; col++) {
+            random ^= random << 13; random ^= random >>> 17; random ^= random << 5;
+            const level = 62 + Math.floor(((random & 255) + ((random >>> 8) & 255)) * 82 / 510) - shade;
+            const i = (row * canvas.width + col) * 4;
+            pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = level; pixels.data[i + 3] = 255;
+          }
         }
+        phase++;
         context.putImageData(pixels, 0, 0);
       };
-      paint(); if (!reduced) this.staticTimer = setInterval(paint, 100);
+      paint(); if (!reduced) this.staticTimer = setInterval(paint, 50);
       content.style.padding = '0'; content.append(canvas);
     } else if (mode === 'video' && eligible) {
       const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.preload = 'auto';
-      video.src = clip || 'assets/room/shelf-intro.mp4'; video.loop = false;
+      video.src = clip || `assets/room/intros/${system.id}.mp4`; video.loop = false;
       content.append(video); this.currentVideo = video;
-      if (!clip) text('Shelf demo · add your own console intro', 'small', 'tv-video-caption');
+      let fallback = 0;
+      video.onerror = () => {
+        if (++fallback > 2) return;
+        video.src = fallback === 1 ? `assets/room/intros/${system.id}.mp4` : 'assets/room/shelf-intro.mp4';
+        if (fallback === 2) text('Shelf demo · add your own console intro', 'small', 'tv-video-caption');
+        if (!reduced) video.play().catch(() => {});
+      };
       if (reduced) video.addEventListener('loadeddata', () => video.pause(), { once: true });
       else video.play().catch(() => { text('Video unavailable in this browser', 'small', 'tv-video-caption'); });
     } else if (custom) image(custom, 'tv-personal-picture');

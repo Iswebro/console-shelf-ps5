@@ -25,6 +25,11 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
     });
     assert.ok(layout.searchRight < layout.tv.x - 10, 'search ends on the wall before the TV');
     assert.ok(layout.tv.x > 1100 && layout.tv.w > 500, 'TV content uses the actual screen plane');
+    const backboard = await page.evaluate(() => {
+      const b = document.getElementById('roomHud').getBoundingClientRect(), title = document.querySelector('.welcome').getBoundingClientRect(), controls = document.querySelector('.browse-panel').getBoundingClientRect();
+      return { left: b.left, right: b.right, top: b.top, bottom: b.bottom, titleTop: title.top, controlsBottom: controls.bottom };
+    });
+    assert.ok(backboard.top < backboard.titleTop && backboard.bottom > backboard.controlsBottom && backboard.right < layout.tv.x, 'quiet backboard covers the room menu and stays clear of the TV');
     await shot('room-console.png');
     const proportions = await page.evaluate(() => {
       const height = id => {
@@ -73,6 +78,7 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
     const detailsRight = await page.locator('#detail').evaluate(el => el.getBoundingClientRect().right);
     assert.ok(detailsRight < layout.tv.x, 'console controls do not cover the TV');
     await page.click('#showLibrary');
+    assert.equal(await page.locator('#roomHud').isVisible(), false, 'home backboard does not cover console details');
     assert.equal(await page.locator('#roomTv').isVisible(), true, 'TV remains visible in the game library');
     await shot('room-details-clock.png'); await page.click('#back');
     await shot('room-clock.png');
@@ -101,9 +107,10 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
     await page.evaluate(() => selectShelf(shelfCards.findIndex(card => card.dataset.system === 'switch2')));
     assert.match(await page.locator('#roomTv').textContent(), /Your play room/, 'uninstalled console does not trigger an installed-only intro');
     await panel('Room'); await page.selectOption('#introScope', 'all'); await close();
-    assert.match(await page.locator('#roomTv').textContent(), /Nintendo Switch 2/, 'all-consoles intro choice includes references honestly');
+    assert.match(await page.locator('#roomTv img').getAttribute('src'), /intros\/switch2\.png$/, 'all-consoles intro choice includes the original still for reference hardware');
     await panel('Room'); await page.selectOption('#tvNoise', 'emulator'); await close();
     assert.equal(await page.locator('#roomTv canvas').count(), 1, 'missing emulator can show static');
+    assert.ok(await page.locator('#roomTv canvas').evaluate(canvas => canvas.width >= 500 && canvas.height >= 250), 'static uses fine screen-resolution grain instead of enlarged coarse blocks');
     await shot('room-static.png');
     const staticFrame = await page.locator('#roomTv canvas').evaluate(canvas => canvas.toDataURL());
     await page.waitForTimeout(200);
@@ -113,7 +120,7 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
     await page.waitForFunction(() => document.querySelector('#roomTv video')?.readyState >= 2);
     await shot('room-video.png');
     const video = await page.locator('#roomTv video').evaluate(el => ({ source: el.currentSrc, paused: el.paused }));
-    assert.match(video.source, /shelf-intro.mp4$/); assert.equal(video.paused, true, 'reduced motion displays a still video frame');
+    assert.match(video.source, /intros\/ps2.mp4$/); assert.equal(video.paused, true, 'reduced motion displays a still video frame');
     await panel('Appearance'); await page.selectOption('#motionStyle', 'smooth'); await close();
     await page.waitForFunction(() => document.querySelector('#roomTv video')?.currentTime > .2);
     const started = await page.locator('#roomTv video').evaluate(el => el.currentTime);

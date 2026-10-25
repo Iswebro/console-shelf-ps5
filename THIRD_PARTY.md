@@ -46,7 +46,7 @@ commit `c871f2be022ece7ef4f64230b4fb8e1fb9eb6023`. Its unmodified header declare
 the exact source, attribution and file SHA-256 are retained in
 [native/third_party/pl_mpeg](native/third_party/pl_mpeg). Shelf's wrapper bounds clip size, sequence dimensions,
 frame rate and decode work. No official console boot video is included. The bundled Shelf animation is original.
-The optional PC converter invokes the user's FFmpeg installation; FFmpeg executables are not redistributed here.
+The optional PC converter and original-intro generator invoke the user's FFmpeg installation; FFmpeg executables are not redistributed here.
 
 No emulator binaries, payloads, games, BIOS, proprietary firmware/runtime binaries, keys, account data, or complete reference-project source checkouts are bundled in this source repository.
 
