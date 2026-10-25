@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "date": "2026-10-26",
+  "revision": "UI-23",
+  "product": "isShelf",
+  "sourceCommit": "a375c52c6e4e69f56bd6f9aa5a436d41251585a5",
+  "selfSHA256": "d5ff3af66e442e846d31c672ea984f2803b4a566e45cfbaa495f24ab341159fb",
+  "packageManifestSHA256": "0f02ddd8da6c608cc956646d2c18c451bf014fe600068faa6acde8dfd49a64fc",
+  "filesFullyReadBack": 242,
+  "previousProgramBackup": "Complete verified raw program backup retained locally",
+  "updatedFiles": 10,
+  "rawSELFConversionDisabled": true,
+  "helperIdenticalToOwnerTestedUI15": true,
+  "preferencesDuringProgramUpdate": "byte-identical",
+  "subsequentOwnerLogoChoice": {
+    "selected": "vector",
+    "otherSettingsBytesUnchanged": true
+  },
+  "consoleRuntimeTests": "pending"
+}
