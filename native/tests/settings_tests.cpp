@@ -71,6 +71,17 @@ void test_settings() {
     Settings displayed;
     check(load_settings(path, displayed) == SettingsLoad::loaded && displayed.preferences.layout == Layout::shelf &&
               displayed.preferences.favorite[find_system("n64")], "Shelf layout and existing choices survive reopen");
+    displayed.preferences.monochrome_missing = false;
+    check(save_settings(path, displayed) && load_settings(path, read) == SettingsLoad::loaded &&
+              !read.preferences.monochrome_missing, "the full-colour override survives an atomic save and reopen");
+    char legacy[160];
+    std::snprintf(legacy, sizeof(legacy), "%s/legacy.ini", directory);
+    write(legacy, "version=1\nlayout=grid\nlook=icons\nscope=all\nsort=featured\nfilter=all\nicon=gaming\nbrand=\n");
+    Settings old_settings;
+    check(load_settings(legacy, old_settings) == SettingsLoad::loaded && old_settings.preferences.monochrome_missing,
+          "old settings remain valid and receive the default missing-emulator style");
+    write(legacy, "version=1\nlayout=grid\nlook=icons\nscope=all\nsort=featured\nfilter=all\nicon=gaming\nbrand=\nmonochrome_missing=2\n");
+    check(load_settings(legacy, old_settings) == SettingsLoad::invalid, "malformed optional styles are not accepted");
     check(!save_settings("missing-parent/does-not-exist/settings.ini", read), "unwritable save reports failure");
     char invalid[160];
     std::snprintf(invalid, sizeof(invalid), "%s/invalid.ini", directory);

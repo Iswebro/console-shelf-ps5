@@ -35,6 +35,10 @@ std::size_t find_system(std::string_view id) {
 bool is_available(const Availability& evidence) {
     return evidence.built_in || evidence.emulator_count > 0 || evidence.game_count > 0;
 }
+bool use_monochrome(const Preferences& preferences, const Availability& evidence, std::string_view system_id) {
+    return preferences.monochrome_missing && system_id != "ps4" && system_id != "ps5" &&
+           !evidence.built_in && evidence.emulator_count == 0;
+}
 
 BrowseResult browse(const Preferences& preferences, const Inventory& inventory, BrowseRequest request) {
     BrowseResult result;

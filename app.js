@@ -30,7 +30,8 @@ const settings = {
   sort: savedChoice('shelf-sort', ['featured', 'az', 'za', 'newest', 'oldest', 'brand', 'games', 'favorites'], 'featured'),
   family: savedChoice('shelf-family', ['all', 'PlayStation', 'Nintendo', 'Sega', 'Sammy', 'Atari', 'NEC', 'SNK', 'Bandai', '3DO', 'Arcade', 'Commodore', 'Computer'], 'all'),
   availability: savedChoice('shelf-availability', ['all', 'tested', 'native', 'mapped', 'app', 'reference'], 'all'),
-  icon: savedChoice('shelf-icon', Object.keys(appIcons), 'gaming')
+  icon: savedChoice('shelf-icon', Object.keys(appIcons), 'gaming'),
+  missing: savedChoice('shelf-missing', ['mono', 'colour'], 'mono')
 };
 function savedSystemSet(key) {
   try {
@@ -72,6 +73,9 @@ function setChoice(name, value) {
 }
 
 function renderSettings() {
+  document.body.classList.toggle('missing-monochrome', settings.missing === 'mono');
+  $('missingMono').setAttribute('aria-pressed', String(settings.missing === 'mono'));
+  $('missingColour').setAttribute('aria-pressed', String(settings.missing === 'colour'));
   $('lookImages').setAttribute('aria-pressed', String(settings.look === 'images'));
   $('lookCards').setAttribute('aria-pressed', String(settings.look === 'cards'));
   $('layoutGrid').setAttribute('aria-pressed', String(settings.layout === 'grid'));
@@ -158,6 +162,7 @@ function renderConsolePicker() {
       image.src = system.image;
       image.alt = '';
       image.loading = 'lazy';
+      image.classList.toggle('is-missing', system.status === 'reference');
       const copy = document.createElement('span');
       const name = document.createElement('strong');
       name.textContent = system.name;
@@ -240,6 +245,7 @@ function sortedSystems() {
 function makeCard(system) {
   const card = document.createElement('article');
   card.className = 'card ' + (settings.layout !== 'grid' || settings.look === 'images' ? 'icon-card' : 'classic-card');
+  card.classList.toggle('is-missing', system.status === 'reference');
   card.setAttribute('role', 'listitem');
   card.style.setProperty('--glow', system.color);
   card.dataset.symbol = system.symbol;
@@ -467,6 +473,7 @@ function openSystem(id) {
   $('home').hidden = true;
   $('detail').hidden = false;
   $('hero').style.setProperty('--glow', selected.color);
+  $('hero').classList.toggle('is-missing', selected.status === 'reference');
   $('detailFamily').textContent = [selected.family.toUpperCase(), yearText(selected)].filter(Boolean).join(' · ');
   $('detailName').textContent = selected.name;
   $('detailStatus').textContent = statusLabels[selected.status];
@@ -527,6 +534,8 @@ $('lookCards').onclick = () => setChoice('look', 'cards');
 $('layoutGrid').onclick = () => setChoice('layout', 'grid');
 $('layoutCarousel').onclick = () => setChoice('layout', 'carousel');
 $('layoutShelf').onclick = () => setChoice('layout', 'shelf');
+$('missingMono').onclick = () => setChoice('missing', 'mono');
+$('missingColour').onclick = () => setChoice('missing', 'colour');
 $('scopeAll').onclick = () => setChoice('scope', 'all');
 $('scopeAvailable').onclick = () => setChoice('scope', 'available');
 $('sort').onchange = event => setChoice('sort', event.target.value);

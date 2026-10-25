@@ -100,7 +100,7 @@ bool read_file(const char* path, Settings& output) {
     }
     std::rewind(file);
     Settings parsed;
-    std::array<bool, 8 + system_count * 3> seen{};
+    std::array<bool, 9 + system_count * 3> seen{};
     char line[256];
     std::size_t bytes = 0;
     bool okay = true;
@@ -168,6 +168,12 @@ bool read_file(const char* path, Settings& output) {
                 okay = false;
             else
                 parsed.preferences.icon = static_cast<AppIcon>(n);
+        } else if (std::strcmp(line, "monochrome_missing") == 0) {
+            key = static_cast<int>(seen.size()) - 1; // Optional in older schema-1 settings.
+            if (std::strcmp(value, "0") != 0 && std::strcmp(value, "1") != 0)
+                okay = false;
+            else
+                parsed.preferences.monochrome_missing = value[0] == '1';
         } else if (std::strcmp(line, "brand") == 0) {
             key = 7;
             bool found = false;
@@ -288,6 +294,8 @@ bool save_settings(const char* path, const Settings& settings) {
                     scope_names[static_cast<std::size_t>(p.scope)], sort_names[static_cast<std::size_t>(p.sort)],
                     filter_names[static_cast<std::size_t>(p.filter)], icon_names[static_cast<std::size_t>(p.icon)],
                     static_cast<int>(brands[p.brand].size()), brands[p.brand].data()) > 0;
+    if (okay)
+        okay = std::fprintf(file, "monochrome_missing=%d\n", p.monochrome_missing ? 1 : 0) > 0;
     for (std::size_t i = 0; i < system_count && okay; ++i) {
         const auto id = catalog[i].id;
         okay =

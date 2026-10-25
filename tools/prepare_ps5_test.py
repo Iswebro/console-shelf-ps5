@@ -115,6 +115,9 @@ Keep firmware 12.20 and decline system update prompts. This folder contains no f
 First test: open Shelf; check the picture, D-pad/stick, Cross/Circle and Options.
 Square cycles Grid, Swipe and Shelf. Shelf shows eight consoles across two lit display tiers;
 Down moves to the next tier. Sort, visibility and favourite settings apply to all three views.
+Appearance -> Missing emulator artwork chooses Black & white (default) or Full colour.
+Only systems without a detected emulator are desaturated; PS4/PS5 stay in colour.
+The choice is independent of console visibility and survives closing/reopening Shelf.
 The selection background is confirmed; opening still shows black before the grid.
 Check Nintendo 64's library and the PS1/PS2/PS3 counts, then save a layout/visibility choice.
 Close and reopen Shelf to check persistence. Report any blank screen, crash or incorrect input.

@@ -31,6 +31,7 @@ struct Preferences {
     Sort sort = Sort::featured;
     SystemFilter filter = SystemFilter::all;
     AppIcon icon = AppIcon::gaming;
+    bool monochrome_missing = true;
     std::size_t brand = 0;
     // These arrays are in-memory state. Persistence must use stable system IDs.
     std::array<bool, system_count> hidden{};
@@ -49,5 +50,6 @@ struct BrowseResult {
 // Returns system_count when absent. Unknown identities must never alias the first system.
 std::size_t find_system(std::string_view id);
 bool is_available(const Availability& evidence);
+bool use_monochrome(const Preferences& preferences, const Availability& evidence, std::string_view system_id = {});
 BrowseResult browse(const Preferences& preferences, const Inventory& inventory, BrowseRequest request = {});
 } // namespace shelf

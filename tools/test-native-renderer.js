@@ -46,9 +46,15 @@ const displayed=JSON.parse(fs.readFileSync(path.join(captures,'display-shelf.jso
 assert.equal(displayed.layout,'shelf');assert.equal(displayed.shown,52);assert.equal(displayed.selected,catalogue[11].id);
 run('shot:display-shelf-reopened.png,report:display-shelf-reopened.json',shelfData);
 assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'display-shelf-reopened.json'))).layout,'shelf');
+const colourData=path.join(directory,'colour-data');fs.mkdirSync(colourData);
+run('layout,layout,shot:missing-monochrome.png,settings,down,down,down,shot:missing-setting.png,confirm,report:missing-colour.json,back,shot:missing-full-colour.png',colourData);
+assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'missing-colour.json'))).monochromeMissing,false);
+run('report:missing-colour-reopened.json',colourData);
+assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'missing-colour-reopened.json'))).monochromeMissing,false);
 run('settings,confirm,back,right,shot:orbit-start.png,frame:120,shot:orbit-middle.png,frame:400,shot:orbit-end.png',motionData,0,true);
 run('right,shot:orbit-reference.png',motionData);
 const digest=name=>crypto.createHash('sha256').update(fs.readFileSync(path.join(captures,name))).digest('hex');
+assert.notEqual(digest('missing-monochrome.png'),digest('missing-full-colour.png'),'missing-emulator style changes the rendered artwork');
 assert.notEqual(digest('orbit-start.png'),digest('orbit-middle.png'),'native motion must draw a new intermediate frame');
 assert.notEqual(digest('orbit-middle.png'),digest('orbit-end.png'),'native motion must continue to its target');
 assert.equal(digest('orbit-end.png'),digest('orbit-reference.png'),'animated motion must settle at the correct console pose');
@@ -70,7 +76,8 @@ assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'close-hint.json'))).
 assert.notEqual(digest('close-hint.png'),digest('close-hint-fade.png'),'the compact hint fades away');
 assert.equal(digest('close-hint-gone.png'),digest('reveal-reference.png'),'the timed hint leaves no modal or overlay');
 const images=['home.png','details.png','appearance.png','browse.png','consoles.png','swipe.png','megadrive.png','display-shelf.png','display-shelf-page2.png','display-shelf-reopened.png','orbit-start.png','orbit-middle.png','orbit-end.png','orbit-reference.png','loading.png','prepared-cover.png','loading-motion.png','reveal-start.png','reveal-middle.png','reveal-end.png','reveal-reference.png','hold-middle.png','hold-cancelled.png','close-start.png','close-middle.png','settings-focus.png','layout-focus.png','launch-art.png','close-hint.png','close-hint-fade.png','close-hint-gone.png'];
+images.push('missing-monochrome.png','missing-setting.png','missing-full-colour.png');
 const output=[];
 for(const name of images){const filename=path.join(captures,name),bytes=fs.readFileSync(filename);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1080);assert.ok(bytes.length>(name.startsWith('loading')?1000:40000),name+' should contain its rendered frame');output.push({name,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
 fs.writeFileSync(path.join(root,'.cache/native-render-tests/latest.json'),JSON.stringify({directory,captures,processClosed:true,images:output},null,2)+'\n');
-console.log('PASS: native renderer, simulated SDL input, spatial toolbar, three-layout persistence and Shelf pages, 52 images, timed carousel, covered preparation, opening transition, launch artwork and Circle hold/cancel/fade in 31 captures. Full PS5 acceptance remains pending.');
+console.log('PASS: native renderer, simulated SDL input, three layouts, optional monochrome persistence, Shelf pages, 52 images, carousel motion, transitions and Circle hold/cancel/fade in 34 captures. Full PS5 acceptance remains pending.');

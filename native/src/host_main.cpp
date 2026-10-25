@@ -178,9 +178,10 @@ bool report(const char* path, const shelf::UiState& state) {
         }
     std::fprintf(file,
                  "],\"queryLength\":%zu,\"pickerQueryLength\":%zu,\"launchConnected\":%s,\"libraryGames\":%zu,"
-                 "\"libraryRoutes\":%zu}\n",
+                 "\"libraryRoutes\":%zu,\"monochromeMissing\":%s}\n",
                  std::strlen(state.query), std::strlen(state.console_query), state.launch_connected ? "true" : "false",
-                 state.library ? state.library->game_count : 0, state.library ? state.library->route_count : 0);
+                 state.library ? state.library->game_count : 0, state.library ? state.library->route_count : 0,
+                 p.monochrome_missing ? "true" : "false");
     return std::fclose(file) == 0;
 }
 bool mapped_button(Uint8 button, const shelf::UiState& state, shelf::Action& action) {
@@ -311,7 +312,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-17 deeper display Shelf and solid artwork contact; UI-15 SystemService helper unchanged");
+    startup("main entered", "ui-18 optional monochrome for missing emulators; grounded Shelf; UI-15 helper unchanged");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);

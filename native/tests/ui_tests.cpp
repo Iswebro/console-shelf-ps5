@@ -115,6 +115,12 @@ void test_ui() {
     input(display, Action::settings);
     input(display, Action::left);
     check(display.settings.preferences.layout == Layout::shelf, "settings can cycle layouts in reverse");
+    input(display, Action::down);
+    input(display, Action::down);
+    input(display, Action::down);
+    input(display, Action::confirm);
+    check(!display.settings.preferences.monochrome_missing && display.settings_focus == 3,
+          "the fourth Appearance setting allows full-colour missing emulator icons");
     const auto center = orbit_pose(0, 1760), near = orbit_pose(1, 1760), far = orbit_pose(2, 1760);
     check(center.scale > near.scale && near.scale > far.scale && center.z > near.z && near.z > far.z,
           "carousel selection dominates a progressively receding collection");

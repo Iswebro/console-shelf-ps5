@@ -28,6 +28,20 @@ int main() {
     Preferences preferences;
     Inventory inventory{};
     require(system_count == 52, "catalogue size");
+    Availability missing;
+    require(!use_monochrome(preferences, missing, "ps4") && !use_monochrome(preferences, missing, "ps5"),
+            "native systems stay in colour even when their installed game list is empty");
+    require(use_monochrome(preferences, missing), "missing emulators are monochrome by default");
+    missing.game_count = 3;
+    require(use_monochrome(preferences, missing), "game files alone do not imply an installed emulator");
+    missing.emulator_count = 1;
+    require(!use_monochrome(preferences, missing), "an installed emulator keeps its system in colour");
+    missing.emulator_count = 0;
+    missing.built_in = true;
+    require(!use_monochrome(preferences, missing), "built-in PS4/PS5 do not need an emulator");
+    Preferences full_colour;
+    full_colour.monochrome_missing = false;
+    require(!use_monochrome(full_colour, Availability{}), "the full-colour override is independent of installation");
     const auto ps5 = find_system("ps5"), n64 = find_system("n64"), ps3 = find_system("ps3");
     require(ps5 < system_count && n64 < system_count && ps3 < system_count, "known system identities");
     require(find_system("not-a-console") == system_count, "unknown identities stay absent");

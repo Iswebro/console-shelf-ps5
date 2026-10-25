@@ -7,6 +7,7 @@ A console-first library project for PS5 homebrew. This repository contains a **b
 ## What works in the preview
 
 - Browse 52 systems in Grid, a curved card-free Swipe carousel, or a lit display Shelf. Shelf places the console illustrations on walnut ledges, with a subtle selection light and a gallery backdrop. All layouts share sort, visibility and favourite choices. Grid can also use classic text cards.
+- Missing emulators use black-and-white console artwork by default. Appearance → Missing emulator artwork can keep everything in full colour instead. This does not hide systems or change launch support; the browser uses its dated demo inventory, while the native app uses discovery.
 - In Swipe, the selected console sits forward in the centre; neighbours recede in size, depth and angle. Motion eases to a stop in 420 ms and retargets immediately when direction changes.
 - Loop through Swipe using the stick/D-pad on a standard-mapped controller, keyboard arrows, mouse dragging or touch. Click a side console to centre it, then select the centre console to explore. The browser honours reduced-motion preferences and remembers the selected system. The owner has confirmed basic native PS5 controls; full controller acceptance remains pending. Automated controller checks are simulated.
 - Switch between **All consoles** and **Emulator or games**. The latter shows systems with a recorded emulator route, built-in PS5/PS4 route, or example game in the bundled demo inventory. The selection persists in the browser.

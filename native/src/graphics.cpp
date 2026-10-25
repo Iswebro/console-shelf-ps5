@@ -35,6 +35,7 @@ struct Art {
     char name[256]{};
     int w = 0, h = 0;
     int support_y = 0;
+    bool monochrome = false;
     SDL_Rect bounds{};
     unsigned age = 0;
 };
@@ -253,10 +254,10 @@ void text(std::string_view value, int x, int y, int size, SDL_Color tint = white
 void centered(std::string_view value, int x, int y, int size, SDL_Color tint = white, bool bold = false) {
     text(value, x - text_width(value, size, bold) / 2, y, size, tint, bold);
 }
-Art* image(std::string_view name) {
+Art* image(std::string_view name, bool monochrome = false) {
     ++art_age;
     for (auto& entry : art)
-        if (std::string_view(entry.name) == name) {
+        if (std::string_view(entry.name) == name && entry.monochrome == monochrome) {
             entry.age = art_age;
             return &entry;
         }
@@ -269,6 +270,7 @@ Art* image(std::string_view name) {
     slot->texture = nullptr;
     std::snprintf(slot->name, sizeof(slot->name), "%.*s", static_cast<int>(name.size()), name.data());
     slot->age = art_age;
+    slot->monochrome = monochrome;
     char filename[2304];
     std::snprintf(filename, sizeof(filename), "%s/%s", root, slot->name);
     int channels = 0;
@@ -303,6 +305,12 @@ Art* image(std::string_view name) {
         } else {
             slot->bounds = {0, 0, slot->w, slot->h};
         }
+        if (monochrome)
+            for (std::size_t pixel = 0; pixel < static_cast<std::size_t>(slot->w) * slot->h; ++pixel) {
+                auto* rgba = data + pixel * 4;
+                const auto grey = static_cast<unsigned char>((54u * rgba[0] + 183u * rgba[1] + 19u * rgba[2]) / 256u);
+                rgba[0] = rgba[1] = rgba[2] = grey;
+            }
         slot->texture =
             SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, slot->w, slot->h);
         if (slot->texture) {
@@ -316,8 +324,8 @@ Art* image(std::string_view name) {
         ++resource_errors;
     return slot;
 }
-void picture(std::string_view name, int x, int y, int w, int h, Uint8 alpha = 255) {
-    auto* entry = image(name);
+void picture(std::string_view name, int x, int y, int w, int h, Uint8 alpha = 255, bool monochrome = false) {
+    auto* entry = image(name, monochrome);
     if (!entry || !entry->texture)
         return;
     const float scale = std::min(static_cast<float>(w) / static_cast<float>(entry->w),
@@ -328,8 +336,9 @@ void picture(std::string_view name, int x, int y, int w, int h, Uint8 alpha = 25
     SDL_SetTextureAlphaMod(entry->texture, alpha);
     SDL_RenderCopy(renderer, entry->texture, nullptr, &dest);
 }
-void shelf_picture(std::string_view name, int cx, int base, int w, int h, bool selected, int floor_top, int floor_end) {
-    auto* entry = image(name);
+void shelf_picture(std::string_view name, int cx, int base, int w, int h, bool selected, int floor_top, int floor_end,
+                   bool monochrome) {
+    auto* entry = image(name, monochrome);
     if (!entry || !entry->texture)
         return;
     const auto& bounds = entry->bounds;
@@ -358,8 +367,8 @@ void shelf_picture(std::string_view name, int cx, int base, int w, int h, bool s
     SDL_SetTextureAlphaMod(entry->texture, 255);
     SDL_RenderCopy(renderer, entry->texture, &bounds, &dest);
 }
-void orbit_picture(std::string_view name, double cx, double cy, double w, double h, double yaw, Uint8 alpha) {
-    auto* entry = image(name);
+void orbit_picture(std::string_view name, double cx, double cy, double w, double h, double yaw, Uint8 alpha, bool monochrome) {
+    auto* entry = image(name, monochrome);
     if (!entry || !entry->texture)
         return;
     const auto& bounds = entry->bounds;
@@ -522,9 +531,10 @@ void home(const UiState& state) {
             const int x = 80 + (slot % 4) * 442, y = 442 + (slot / 4) * 280;
             const bool active = !state.tools && at == state.focus;
             box(x, y, 416, 258, active, {23, 27, 47, 255});
-            glow(x + 30, y + 2, 350, 200, accent(s), active ? 120 : 62);
+            const bool monochrome = use_monochrome(p, state.inventory[id], s.id);
+            glow(x + 30, y + 2, 350, 200, monochrome ? SDL_Color{128, 139, 154, 255} : accent(s), active ? 120 : 62);
             if (p.grid_look == GridLook::icons)
-                picture(s.image, x + 20, y + 7, 376, 166);
+                picture(s.image, x + 20, y + 7, 376, 166, 255, monochrome);
             else {
                 text(s.brand, x + 22, y + 25, 22, purple, true);
                 text("CONSOLE", x + 22, y + 70, 38, muted, true);
@@ -557,7 +567,8 @@ void home(const UiState& state) {
                 if (active)
                     glow(cx - 165, y + 38, 330, 188, {125, 223, 211, 255}, 85);
                 glow(cx - 111, contact - 11, 222, 22, {0, 0, 0, 255}, 225);
-                shelf_picture(system.image, cx, contact, 302, 181, active, y + 120, y + 211);
+                shelf_picture(system.image, cx, contact, 302, 181, active, y + 120, y + 211,
+                              use_monochrome(p, state.inventory[id], system.id));
                 if (active)
                     rounded(cx - 31, contact + 8, 62, 3, 1, {150, 235, 219, 255});
                 centered(system.name, cx, y + 220, 23, active ? white : SDL_Color{219, 225, 238, 255}, true);
@@ -601,7 +612,8 @@ void home(const UiState& state) {
             const auto pose = orbit_pose(slots[i].offset, 1760);
             const double projection = 1200 / (1200 - pose.z), scale = pose.scale * projection;
             orbit_picture(catalog[slots[i].id].image, 960 + pose.x * projection, 630 + pose.y * projection, 320 * scale,
-                          310 * scale, pose.yaw, static_cast<Uint8>(255 * pose.opacity));
+                          310 * scale, pose.yaw, static_cast<Uint8>(255 * pose.opacity),
+                          use_monochrome(p, state.inventory[slots[i].id], catalog[slots[i].id].id));
         }
         SDL_RenderSetClipRect(renderer, nullptr);
         centered(selected.brand, 960, 845, 18, muted);
@@ -621,7 +633,7 @@ void detail(const UiState& state) {
     text(s.name, 80, 194, 58, white, true, 1100);
     text(s.brand, 84, 275, 27, muted);
     glow(1190, 230, 640, 630, accent(s), 110);
-    picture(s.image, 1160, 205, 640, 640);
+    picture(s.image, 1160, 205, 640, 640, 255, use_monochrome(state.settings.preferences, state.inventory[id], s.id));
     text(availability(state, id), 84, 366, 29, purple, true);
     char count[80];
     std::snprintf(count, sizeof(count), "%zu discovered games", state.inventory[id].game_count);
@@ -683,12 +695,14 @@ void settings(const UiState& state) {
     if (state.tab == SettingsTab::appearance) {
         text("Your shelf, your style", 394, 338, 34, white, true);
         text("Choose Grid, curved Swipe, or a lit display Shelf.", 394, 388, 24, muted);
-        label(394, 452, "Layout", layout_labels[static_cast<std::size_t>(p.layout)], state.settings_focus == 0);
-        label(394, 563, "Grid look", p.layout != Layout::grid ? "Available in Grid layout" :
+        label(394, 435, "Layout", layout_labels[static_cast<std::size_t>(p.layout)], state.settings_focus == 0);
+        label(394, 537, "Grid look", p.layout != Layout::grid ? "Available in Grid layout" :
               p.grid_look == GridLook::icons ? "3D console icons" : "Classic cards",
               state.settings_focus == 1);
-        label(394, 674, "Shelf logo", icon_names[static_cast<std::size_t>(p.icon)], state.settings_focus == 2);
-        text("Swipe and Shelf always use your 3D console icons.", 400, 802, 22, muted);
+        label(394, 639, "Shelf logo", icon_names[static_cast<std::size_t>(p.icon)], state.settings_focus == 2);
+        label(394, 741, "Missing emulator artwork", p.monochrome_missing ? "Black & white" : "Full colour",
+              state.settings_focus == 3);
+        text("Installed emulators and built-in systems stay in colour.", 400, 860, 21, muted);
     } else if (state.tab == SettingsTab::browse) {
         text("Find your next favourite", 394, 338, 34, white, true);
         text("Choose an order and narrow down your collection.", 394, 388, 24, muted);
@@ -734,7 +748,8 @@ void settings(const UiState& state) {
                 text("Cross: toggle brand", 1170, y + 20, 18, muted);
             } else {
                 const auto& s = catalog[e.index];
-                picture(s.image, 408, y + 3, 61, 55, p.hidden[e.index] ? 100 : 255);
+                picture(s.image, 408, y + 3, 61, 55, p.hidden[e.index] ? 100 : 255,
+                        use_monochrome(p, state.inventory[e.index], s.id));
                 text(s.name, 489, y + 17, 25, p.hidden[e.index] ? muted : white, true, 785);
                 switch_control(1334, y + 17, !p.hidden[e.index]);
             }

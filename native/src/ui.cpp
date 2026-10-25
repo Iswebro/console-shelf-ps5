@@ -51,6 +51,8 @@ void cycle(UiState& state, int direction) {
             p.grid_look = p.grid_look == GridLook::icons ? GridLook::cards : GridLook::icons;
         if (state.settings_focus == 2)
             p.icon = static_cast<AppIcon>((static_cast<int>(p.icon) + direction + 3) % 3);
+        if (state.settings_focus == 3)
+            p.monochrome_missing = !p.monochrome_missing;
         changed(state);
     } else if (state.tab == SettingsTab::browse) {
         if (state.settings_focus == 0)
@@ -216,7 +218,8 @@ void input(UiState& state, Action action) {
             return;
         }
         const int max_focus =
-            state.tab == SettingsTab::consoles ? 3 + static_cast<int>(console_picker(state).count) : 2;
+            state.tab == SettingsTab::consoles ? 3 + static_cast<int>(console_picker(state).count) :
+            state.tab == SettingsTab::appearance ? 3 : 2;
         if (action == Action::up)
             state.settings_focus = clamp(state.settings_focus - 1, max_focus);
         if (action == Action::down)
