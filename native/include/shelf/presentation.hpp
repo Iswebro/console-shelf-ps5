@@ -5,7 +5,7 @@
 namespace shelf {
 struct Presentation {
     bool loading = false;
-    float reveal = 1, hold = 0, close = 0;
+    float reveal = 1, appear = 1, hold = 0, close = 0;
 };
 class CloseGesture {
     bool down = false, committed = false;

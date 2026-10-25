@@ -308,11 +308,15 @@ void input(UiState& state, Action action) {
     auto shown = shown_systems(state);
     if (state.tools || !shown.count) {
         state.tools = true;
-        if (action == Action::left)
-            state.tool = clamp(state.tool - 1, 3);
-        if (action == Action::right)
-            state.tool = clamp(state.tool + 1, 2);
-        if (action == Action::down && shown.count) {
+        if (action == Action::up)
+            state.tool = 2;
+        if (action == Action::left && state.tool == 1)
+            state.tool = 0;
+        if (action == Action::right && state.tool == 0)
+            state.tool = 1;
+        if (action == Action::down && state.tool == 2)
+            state.tool = 1;
+        else if (action == Action::down && shown.count) {
             state.tools = false;
             normalize_home(state);
         }

@@ -1,0 +1,57 @@
+{
+  "structuralCheck": "passed",
+  "hardwareTest": "new build not tested",
+  "firmware12_20": "full acceptance pending",
+  "elf": {
+    "bytes": 2655180,
+    "sha256": "c926b32d137f8a2083f5282d0ada31c8728a980989ca35b97d83906cb6d9103f",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2547521,
+    "sha256": "f4411def4e901361b67cd59eaf6d9efa9df4d097f3e8f71a4a031bb8ff4b05d2"
+  },
+  "verifiedOn": "2026-10-25",
+  "scope": "UI-7 spatial settings focus, antialiased settings button and prepared startup reveal",
+  "ownerFeedbackOnUI6": {
+    "circleClosure": "perfect for now; accepted",
+    "configuredNintendo64Library": "visible in owner screenshots",
+    "navigation": "Up did not reach settings; horizontal motion did",
+    "settingsIcon": "rough appearance",
+    "opening": "not visibly observed; unaccepted"
+  },
+  "changes": [
+    "Settings is above search/layout; Up reaches it, Down returns to layout; horizontal motion stays on its row",
+    "Cached 4x supersampled cog/button matching the browser vector outline",
+    "Keep PS5 system splash through initialization and the cleared buffer until the first rendered frame is submitted",
+    "Logo fade/scale/rise, minimum 1100 ms loading presentation, and 1000 ms prepared reveal",
+    "Reveal clock starts after image/texture preparation; CloseGesture body unchanged from the accepted UI-6 build"
+  ],
+  "checks": {
+    "nativeModelSettingsUiGestures": "passed",
+    "renderer": "23 captures passed; settings focus/button visually inspected",
+    "readOnlyFtpAndBackgroundCancellation": "passed",
+    "platformMocks": "passed, including splash remaining through failure/clear-buffer initialization and hiding after the rendered frame",
+    "executableStructure": "passed"
+  },
+  "sourceFingerprintSHA256": "8fbc49841cbf8b0e67a9d9c6387ea232edf7520a402622fc1b5546de7bc70861",
+  "sourceKit": "UI-6 cold source kit retained; refresh required for the final release candidate",
+  "launches": "not implemented; no helper installed",
+  "publicRelease": false
+}

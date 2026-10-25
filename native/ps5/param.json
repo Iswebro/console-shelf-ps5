@@ -8,7 +8,7 @@
   "conceptId": "99541",
   "contentBadgeType": 1,
   "contentId": "UP9000-PPSA99541_00-CONSOLESHELF0001",
-  "contentVersion": "00.100.005",
+  "contentVersion": "00.100.006",
   "downloadDataSize": 0,
   "gameIntent": { "permittedIntents": [{ "intentType": "launchActivity" }] },
   "kernel": { "flexibleMemorySize": 536870912 },

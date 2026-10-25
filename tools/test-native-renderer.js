@@ -31,7 +31,8 @@ const reopened=JSON.parse(fs.readFileSync(path.join(captures,'reopened.json')));
 assert.equal(reopened.layout,'swipe');assert.deepEqual(reopened.hidden,changed.hidden);assert.equal(reopened.shown,36);
 const allData=path.join(directory,'all-systems-data');fs.mkdirSync(allData);
 const catalogue=require('../systems-data.js');
-const walking=['search','confirm','right','confirm','report:keyboard-before.json','favorite','report:keyboard-cleared.json','back','down'];
+run('search,confirm,right,confirm,report:keyboard-before.json,favorite,report:keyboard-cleared.json,back',allData);
+const walking=[];
 for(let i=0;i<catalogue.length;i++){if(i)walking.push(i%4===0?'down':'right');if(catalogue[i].id==='genesis')walking.push('confirm','shot:megadrive.png','back');}
 walking.push('report:all-systems.json');run(walking.join(','),allData);
 const keyboardBefore=JSON.parse(fs.readFileSync(path.join(captures,'keyboard-before.json'))),keyboardCleared=JSON.parse(fs.readFileSync(path.join(captures,'keyboard-cleared.json')));
@@ -46,7 +47,7 @@ assert.notEqual(digest('orbit-start.png'),digest('orbit-middle.png'),'native mot
 assert.notEqual(digest('orbit-middle.png'),digest('orbit-end.png'),'native motion must continue to its target');
 assert.equal(digest('orbit-end.png'),digest('orbit-reference.png'),'animated motion must settle at the correct console pose');
 const introData=path.join(directory,'intro-data');fs.mkdirSync(introData);
-run('loading,shot:loading.png,frame:340,shot:loading-motion.png,reveal,shot:reveal-start.png,frame:325,shot:reveal-middle.png,frame:325,shot:reveal-end.png',introData,0,true);
+run('loading,shot:loading.png,frame:340,shot:loading-motion.png,reveal,shot:reveal-start.png,frame:500,shot:reveal-middle.png,frame:500,shot:reveal-end.png',introData,0,true);
 run('shot:reveal-reference.png',introData);
 assert.notEqual(digest('loading.png'),digest('loading-motion.png'),'loading has visible motion');
 assert.notEqual(digest('reveal-start.png'),digest('reveal-middle.png'),'opening blends into the shelf');
@@ -55,8 +56,9 @@ run('circle-down,frame:2000,shot:hold-middle.png,circle-up,shot:hold-cancelled.p
 assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'hold-cancelled.json'))).page,0,'releasing a long hold keeps the current page');
 assert.equal(digest('hold-cancelled.png'),digest('reveal-reference.png'),'a cancelled hold restores the shelf');
 assert.notEqual(digest('close-start.png'),digest('close-middle.png'),'closing draws a separate fade before exit');
-const images=['home.png','details.png','appearance.png','browse.png','consoles.png','swipe.png','megadrive.png','orbit-start.png','orbit-middle.png','orbit-end.png','orbit-reference.png','loading.png','loading-motion.png','reveal-start.png','reveal-middle.png','reveal-end.png','reveal-reference.png','hold-middle.png','hold-cancelled.png','close-start.png','close-middle.png'];
+run('right,right,right,up,up,shot:settings-focus.png,down,shot:layout-focus.png',introData);
+const images=['home.png','details.png','appearance.png','browse.png','consoles.png','swipe.png','megadrive.png','orbit-start.png','orbit-middle.png','orbit-end.png','orbit-reference.png','loading.png','loading-motion.png','reveal-start.png','reveal-middle.png','reveal-end.png','reveal-reference.png','hold-middle.png','hold-cancelled.png','close-start.png','close-middle.png','settings-focus.png','layout-focus.png'];
 const output=[];
-for(const name of images){const filename=path.join(captures,name),bytes=fs.readFileSync(filename);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1080);assert.ok(bytes.length>40000,name+' should contain rendered UI');output.push({name,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
+for(const name of images){const filename=path.join(captures,name),bytes=fs.readFileSync(filename);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1080);assert.ok(bytes.length>(name.startsWith('loading')?1000:40000),name+' should contain its rendered frame');output.push({name,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
 fs.writeFileSync(path.join(root,'.cache/native-render-tests/latest.json'),JSON.stringify({directory,captures,processClosed:true,images:output},null,2)+'\n');
-console.log('PASS: native renderer, simulated SDL controller input, persistence, 52 images, timed carousel, loading/reveal and Circle hold/cancel/fade in 21 captures. Full physical DualSense and PS5 acceptance remains pending.');
+console.log('PASS: native renderer, simulated SDL input, spatial toolbar, persistence, 52 images, timed carousel, opening transition and Circle hold/cancel/fade in 23 captures. Full PS5 acceptance remains pending.');

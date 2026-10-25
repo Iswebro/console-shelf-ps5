@@ -521,6 +521,7 @@ int main(int argc, char** argv) {
     bool scan_started = false;
     const auto opened_at = scripting ? 0u : SDL_GetTicks();
     unsigned reveal_at = 0;
+    bool reveal_pending = false;
     unsigned measured_frames = 0, max_render_ms = 0, max_present_ms = 0;
     unsigned script_time = 0;
     while (!state.exit_requested) {
@@ -547,17 +548,17 @@ int main(int argc, char** argv) {
             if (std::strcmp(token, "reveal") == 0) {
                 state.presentation.loading = false;
                 state.presentation.reveal = 0;
-                reveal_at = script_time;
+                reveal_pending = true;
             }
             redraw = true;
         }
         const unsigned now = scripting ? script_time : SDL_GetTicks();
-        if (scan.ready() && now - opened_at >= 450) {
+        if (scan.ready() && now - opened_at >= 1100) {
             scan.stop();
             accept_library(state, *library.value, ftp, false);
             state.presentation.loading = false;
             state.presentation.reveal = 0;
-            reveal_at = now;
+            reveal_pending = true;
             redraw = true;
         }
         SDL_Event event{};
@@ -670,8 +671,12 @@ int main(int argc, char** argv) {
         }
         if (close_gesture.finished(now))
             state.exit_requested = true;
-        if (!state.presentation.loading && state.presentation.reveal < 1) {
-            const float progress = std::min(1.0f, (now - reveal_at) / 650.0f);
+        if (state.presentation.loading) {
+            const float progress = std::min(1.0f, (now - opened_at) / 600.0f);
+            state.presentation.appear = progress * progress * (3 - 2 * progress);
+        }
+        if (!state.presentation.loading && state.presentation.reveal < 1 && !reveal_pending) {
+            const float progress = std::min(1.0f, (now - reveal_at) / 1000.0f);
             state.presentation.reveal = progress * progress * (3 - 2 * progress);
         }
         shelf::Action repeated{};
@@ -690,6 +695,7 @@ int main(int argc, char** argv) {
         if (redraw || shelf::graphics_animating() || state.presentation.loading || state.presentation.reveal < 1 ||
             close_gesture.active()) {
             const auto frame_start = SDL_GetTicks();
+            const bool covered_reveal = reveal_pending && !state.presentation.loading;
             shelf::graphics_render(state, animate_script ? script_time : SDL_GetTicks(),
                                    animate_script || (!scripting && !headless));
             const auto render_end = SDL_GetTicks();
@@ -735,8 +741,14 @@ int main(int argc, char** argv) {
                     accept_library(state, *library.value, ftp, false);
                     state.presentation.loading = false;
                     state.presentation.reveal = 0;
-                    reveal_at = now;
+                    reveal_pending = true;
                 }
+            }
+            if (covered_reveal) {
+                // Image decoding and texture preparation must not consume the reveal's time.
+                reveal_at = scripting ? script_time : SDL_GetTicks();
+                reveal_pending = false;
+                startup("opening reveal ready", "prepared frame; 1000 ms blend");
             }
             redraw = false;
         }

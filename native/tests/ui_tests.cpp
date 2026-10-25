@@ -26,9 +26,17 @@ void test_ui() {
     input(spatial, Action::confirm);
     check(spatial.page == Page::home && spatial.settings.preferences.layout == Layout::swipe,
           "layout button switches view directly without opening settings");
+    input(spatial, Action::up);
+    check(spatial.tools && spatial.tool == 2, "Up reaches the settings button above the toolbar");
     input(spatial, Action::right);
+    check(spatial.tool == 2, "horizontal input does not move vertically from the settings row");
+    input(spatial, Action::down);
+    check(spatial.tools && spatial.tool == 1, "Down from settings returns to the layout button below it");
+    input(spatial, Action::left);
+    check(spatial.tool == 0, "search and layout remain neighbours on the same row");
+    input(spatial, Action::up);
     input(spatial, Action::confirm);
-    check(spatial.page == Page::settings, "the remaining toolbar action opens settings");
+    check(spatial.page == Page::settings, "settings is opened through its spatial Up route");
     input(state, Action::confirm);
     check(state.page == Page::details, "Cross opens a console");
     input(state, Action::confirm);

@@ -69,6 +69,7 @@ int sceVideoOutRegisterBuffers2(int32_t handle, int32_t set_index, int32_t buffe
 static int g_video = -1;
 static uint8_t* g_frames[2];
 static int64_t g_frame_no = 0;
+static int g_splash_hidden;
 static int64_t g_physical = -1;
 static void* g_mapping;
 /* tiled address = block(x,y) + (ypart ^ xpart); precomputed per row / column */
@@ -100,6 +101,7 @@ const char* gs_vout_init(void) {
         return "video already initialized";
     g_stopping = 0;
     g_frame_no = 0;
+    g_splash_hidden = 0;
     const uint32_t blocks_per_row = (FRAME_W + 127u) >> 7;
     for (uint32_t x = 0; x < FRAME_W; x++) {
         g_xpart[x] =
@@ -111,7 +113,6 @@ const char* gs_vout_init(void) {
         g_yblock[y] = ((y >> 7) * blocks_per_row) << 16;
     }
 
-    sceSystemServiceHideSplashScreen();
     g_video = sceVideoOutOpen(0xff, 0, 0, NULL);
     if (g_video < 0)
         return "sceVideoOutOpen failed";
@@ -167,11 +168,16 @@ static void flip_frame(const void* pixels, int pitch) {
             *(uint32_t*)(rowbase + g_xblock[x] + (yp ^ g_xpart[x])) = src[x] | 0xff000000u;
     }
     flush_range(dst, (size_t)((FRAME_H + 127) / 128) * ((FRAME_W + 127) / 128) * 0x10000);
-    if (sceVideoOutSubmitFlip(g_video, back, 1, g_frame_no) < 0) {
+    int submitted = sceVideoOutSubmitFlip(g_video, back, 1, g_frame_no);
+    if (submitted < 0) {
         sceKernelUsleep(4000); /* previous flip still queued: try once more */
-        sceVideoOutSubmitFlip(g_video, back, 1, g_frame_no);
+        submitted = sceVideoOutSubmitFlip(g_video, back, 1, g_frame_no);
     }
     sceVideoOutWaitVblank(g_video);
+    /* The initial cleared buffer is not Shelf's first picture. Keep the
+     * system splash until an actual rendered frame has been submitted. */
+    if (submitted >= 0 && !g_splash_hidden && sceSystemServiceHideSplashScreen() == 0)
+        g_splash_hidden = 1;
 }
 
 static void* flip_thread(void* arg) {

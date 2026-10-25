@@ -37,6 +37,7 @@ std::int64_t next_id = 0;
 int outstanding = 0, mappings = 0, opens = 0, fail = 0;
 bool expect_pixels = false;
 std::atomic<int> flips{0};
+std::atomic<int> splash_hides{0};
 std::array<int, 4> indices{};
 void* registered[2]{};
 std::jmp_buf shell_replaced;
@@ -107,6 +108,8 @@ int sceSystemServiceLoadExec(const char* path, const char* const* args) {
     return close_status;
 }
 int sceSystemServiceHideSplashScreen() {
+    assert(flips >= 2); // Never reveal the initial cleared screen or failed startup.
+    ++splash_hides;
     return 0;
 }
 int sceVideoOutOpen(std::int32_t, std::int32_t, std::int32_t, const void*) {
@@ -167,15 +170,18 @@ int main() {
     assert(outstanding == 0 && mappings == 0);
     for (fail = 1; fail <= 5; ++fail) {
         flips = 0;
+        splash_hides = 0;
         assert(gs_vout_init());
         gs_vout_shutdown();
         assert(outstanding == 0 && mappings == 0 && opens == 0);
+        assert(splash_hides == 0);
         gs_vout_shutdown(); // Repeated shutdown is harmless.
     }
     fail = 0;
     flips = 0;
     assert(!gs_vout_init());
     assert(gs_vout_init()); // Cannot initialise the same display twice.
+    assert(splash_hides == 0);
     auto* pixels = static_cast<std::uint32_t*>(std::calloc(1920 * 1080, sizeof(std::uint32_t)));
     assert(pixels);
     pixels[0] = 0x00123456;
@@ -185,6 +191,7 @@ int main() {
     gs_vout_present(pixels, 1920 * 4);
     gs_vout_shutdown(); // Must join the worker before freeing its frame memory.
     assert(flips == 2 && indices[0] == 0 && indices[1] == 1);
+    assert(splash_hides == 1);
     assert(outstanding == 0 && mappings == 0 && opens == 0);
     std::free(pixels);
     expect_pixels = false;

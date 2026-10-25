@@ -20,6 +20,7 @@ constexpr SDL_Color white{246, 246, 255, 255}, muted{157, 168, 198, 255}, purple
 SDL_Renderer* renderer = nullptr;
 SDL_Texture* background = nullptr;
 SDL_Texture* halo = nullptr;
+std::array<SDL_Texture*, 2> settings_buttons{};
 char root[2048]{};
 struct Font {
     SDL_Texture* texture = nullptr;
@@ -76,6 +77,72 @@ void box(int x, int y, int w, int h, bool selected, SDL_Color fill = panel) {
     rounded(x, y, w, h, 20, selected ? purple : SDL_Color{53, 59, 83, 255});
     const int edge = selected ? 3 : 1;
     rounded(x + edge, y + edge, w - edge * 2, h - edge * 2, 20 - edge, fill);
+}
+void settings_button(bool selected) {
+    auto*& texture = settings_buttons[selected ? 1 : 0];
+    if (!texture) {
+        // The same rounded cog outline as the browser UI. Supersampling and
+        // premultiplied coverage avoid jagged corners on a television.
+        constexpr std::array<SDL_FPoint, 24> cog{
+            {{9.7f, 3},   {9.1f, 5.2f},   {7.3f, 6.2f},   {5.1f, 5.6f},   {2.9f, 9.4f},   {4.5f, 11},
+             {4.5f, 13},  {2.9f, 14.6f},  {5.1f, 18.4f},  {7.3f, 17.8f},  {9.1f, 18.8f},  {9.7f, 21},
+             {14.3f, 21}, {14.9f, 18.8f}, {16.7f, 17.8f}, {18.9f, 18.4f}, {21.1f, 14.6f}, {19.5f, 13},
+             {19.5f, 11}, {21.1f, 9.4f},  {18.9f, 5.6f},  {16.7f, 6.2f},  {14.9f, 5.2f},  {14.3f, 3}}};
+        std::array<Uint32, 64 * 64> pixels{};
+        for (int py = 0; py < 64; ++py)
+            for (int px = 0; px < 64; ++px) {
+                unsigned sums[4]{};
+                for (int sy = 0; sy < 4; ++sy)
+                    for (int sx = 0; sx < 4; ++sx) {
+                        const float x = static_cast<float>(px) + (sx + .5f) / 4;
+                        const float y = static_cast<float>(py) + (sy + .5f) / 4;
+                        const float dx = std::abs(x - 32) - 13, dy = std::abs(y - 32) - 13;
+                        const float ox = std::max(0.0f, dx), oy = std::max(0.0f, dy);
+                        const float d = std::sqrt(ox * ox + oy * oy) + std::min(std::max(dx, dy), 0.0f) - 16;
+                        SDL_Color sample{};
+                        if (d <= 0) {
+                            const float gradient = std::clamp(y / 64, 0.0f, 1.0f);
+                            sample = {static_cast<Uint8>(29 - 9 * gradient), static_cast<Uint8>(32 - 9 * gradient),
+                                      static_cast<Uint8>(52 - 11 * gradient), 255};
+                            if (d >= -(selected ? 2.0f : 1.15f))
+                                sample = selected ? purple : SDL_Color{65, 67, 92, 255};
+                            const float gx = (x - 32) / 1.35f + 12, gy = (y - 32) / 1.35f + 12;
+                            bool stroke =
+                                std::abs(std::sqrt((gx - 12) * (gx - 12) + (gy - 12) * (gy - 12)) - 3.1f) <= .8f;
+                            for (std::size_t i = 0; i < cog.size() && !stroke; ++i) {
+                                const auto a = cog[i], b = cog[(i + 1) % cog.size()];
+                                const float vx = b.x - a.x, vy = b.y - a.y;
+                                const float t =
+                                    std::clamp(((gx - a.x) * vx + (gy - a.y) * vy) / (vx * vx + vy * vy), 0.0f, 1.0f);
+                                const float ex = gx - a.x - t * vx, ey = gy - a.y - t * vy;
+                                stroke = ex * ex + ey * ey <= .64f;
+                            }
+                            if (stroke)
+                                sample = selected ? SDL_Color{244, 237, 255, 255} : SDL_Color{198, 190, 223, 255};
+                        } else if (selected && d < 3) {
+                            const float falloff = 1 - d / 3;
+                            sample = {203, 187, 255, static_cast<Uint8>(52 * falloff * falloff)};
+                        }
+                        sums[0] += sample.r * sample.a;
+                        sums[1] += sample.g * sample.a;
+                        sums[2] += sample.b * sample.a;
+                        sums[3] += sample.a;
+                    }
+                const unsigned alpha = (sums[3] + 8) / 16;
+                const unsigned red = sums[3] ? (sums[0] + sums[3] / 2) / sums[3] : 0;
+                const unsigned green = sums[3] ? (sums[1] + sums[3] / 2) / sums[3] : 0;
+                const unsigned blue = sums[3] ? (sums[2] + sums[3] / 2) / sums[3] : 0;
+                pixels[static_cast<std::size_t>(py * 64 + px)] = red | (green << 8) | (blue << 16) | (alpha << 24);
+            }
+        texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, 64, 64);
+        if (!texture || SDL_UpdateTexture(texture, nullptr, pixels.data(), 64 * 4) < 0) {
+            ++resource_errors;
+            return;
+        }
+        SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+    }
+    const SDL_Rect bounds{1783, 24, 64, 64};
+    SDL_RenderCopy(renderer, texture, nullptr, &bounds);
 }
 Font* font(int size, bool bold) {
     for (auto& entry : fonts)
@@ -342,18 +409,21 @@ void footer(std::string_view hint) {
     rect(0, 1015, width, 65, {9, 12, 26, 245});
     text(hint, 80, 1032, 21, muted);
 }
-void splash(float opacity, unsigned time_ms, bool loading) {
+void splash(float opacity, unsigned time_ms, bool loading, float appearance = 1) {
     const auto alpha = static_cast<Uint8>(std::clamp(opacity, 0.0f, 1.0f) * 255);
     rect(0, 0, width, height, {11, 13, 28, alpha});
-    picture(icon_files[0], 902, 347, 116, 116, alpha);
-    centered("Console Shelf", 960, 505, 48, {241, 240, 251, alpha}, true);
-    centered(loading ? "Finding your emulators and games" : "Your systems, together", 960, 578, 23,
-             {180, 174, 205, alpha});
+    const auto ink = static_cast<Uint8>(alpha * appearance);
+    const int rise = static_cast<int>(12 * (1 - appearance));
+    const int side = static_cast<int>(116 * (.92f + .08f * appearance));
+    picture(icon_files[0], 960 - side / 2, 347 + rise, side, side, ink);
+    centered("Console Shelf", 960, 505 + rise, 48, {241, 240, 251, ink}, true);
+    centered(loading ? "Finding your emulators and games" : "Your systems, together", 960, 578 + rise, 23,
+             {180, 174, 205, ink});
     if (loading) {
         for (unsigned dot = 0; dot < 3; ++dot) {
             const auto distance = (dot + 3 - time_ms / 340 % 3) % 3;
             rounded(931 + static_cast<int>(dot) * 24, 639, 9, 9, 4,
-                    {194, 177, 255, static_cast<Uint8>(alpha / (distance + 1))});
+                    {194, 177, 255, static_cast<Uint8>(ink / (distance + 1))});
         }
         centered("Hold Circle for 4 seconds to close", 960, 984, 19, {140, 140, 165, alpha});
     }
@@ -678,8 +748,7 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
 #else
         text("NATIVE DEVELOPMENT BUILD / PC", 1388, 42, 18, muted, true);
 #endif
-        box(1786, 27, 58, 58, state.tools && state.tool == 2 && state.page == Page::home);
-        icon(3, 1815, 56);
+        settings_button(state.tools && state.tool == 2 && state.page == Page::home);
         line(80, 99, 1840, 99, {43, 48, 69, 255});
         if (state.page == Page::home)
             home(state);
@@ -704,7 +773,7 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
         }
     }
     if (state.presentation.loading)
-        splash(1, time_ms, true);
+        splash(1, time_ms, true, state.presentation.appear);
     else if (state.presentation.reveal < 1)
         splash(1 - state.presentation.reveal, time_ms, false);
     if (state.presentation.hold > 0 && state.presentation.close == 0) {
@@ -737,6 +806,11 @@ unsigned graphics_errors() {
     return resource_errors;
 }
 void graphics_shutdown() {
+    for (auto*& texture : settings_buttons) {
+        if (texture)
+            SDL_DestroyTexture(texture);
+        texture = nullptr;
+    }
     for (auto& f : fonts) {
         if (f.texture)
             SDL_DestroyTexture(f.texture);

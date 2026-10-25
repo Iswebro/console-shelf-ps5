@@ -79,7 +79,7 @@ async function scenario(pasv, malformed = false, background = false) {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
     const result = await run(['--library-ftp', '127.0.0.1', '--library-port', String(server.address().port),
-      ...(background ? ['--background-scan', '--script', 'shot:async-loading.png,wait:1000,frame:600,report:async-library.json'] : ['--scan-only'])]);
+      ...(background ? ['--background-scan', '--script', 'shot:async-loading.png,wait:1000,frame:1200,report:async-library.json'] : ['--scan-only'])]);
     if (failure) throw failure;
     assert.equal(result.code, malformed ? 2 : 0, result.stderr + result.stdout);
     assert.match(result.stdout, /2 games, 1 emulator\/core routes/);
