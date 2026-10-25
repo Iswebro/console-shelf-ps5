@@ -23,7 +23,7 @@ The build fetches the official SDL2 2.32.10 Windows development ZIP into ignored
 | Cross | Enter | Select or change |
 | Circle | Escape | Back / close settings |
 | Options | F1 | Settings / finish search |
-| Square | F2 | Sort & filter; delete while using the search keyboard |
+| Square | F2 | Switch Grid/Swipe on the home screen; delete while using the search keyboard |
 | L1 / R1 | Shift+Tab / Tab | Settings sections |
 | Triangle | — | Favourite; clear while using the search keyboard |
 | — | F3 / F4 | Console picker / main search |
@@ -44,4 +44,4 @@ The model tests also cover availability evidence, individual visibility, sorting
 
 `npm run build:ps5` now builds the native executable using a pinned compiler prefix and verified public SDK/SDL archives inside ignored `.cache/ps5/`. Windows uses an existing WSL Ubuntu instance; the build does not install packages globally or connect to a console. `npm run test:ps5-platform` runs host mocks against the actual allocator/VideoOut failure and cleanup paths. `npm run verify:ps5` checks the executable's structure independently of its packager. See the [PS5 build instructions and limits](../docs/PS5-BUILD.md).
 
-VideoOut/direct-memory integration and real discovery are implemented and cross-compiled. Discovery has been checked from PC against the owner's console. The private app identity and raw transfers are verified, with basic on-console display/input confirmed. Full controller acceptance, discovery inside the app sandbox and launch adapters remain in the [prototype milestone](../docs/PROTOTYPE-PLAN.md). One settings cog opens the configuration panel; the separate Grid/Swipe action switches layout immediately (Square on the home screen). No PS5 download has been released yet. The runtime dependencies and font licenses are in [third-party notices](../THIRD_PARTY.md).
+VideoOut/direct-memory integration and real discovery are implemented and cross-compiled. Discovery has been checked from PC and inside the console app. The private app identity and raw transfers are verified, with display/input, settings navigation and the closing fade confirmed. The opening transition still appears black before the shelf. An experimental launch candidate embeds an original cooperative helper; PC tests cover its route planning and loopback transport, while console launches remain unverified. Full acceptance remains in the [prototype milestone](../docs/PROTOTYPE-PLAN.md). One settings cog opens the configuration panel; Square switches Grid/Swipe on the home screen. Hold Circle for three seconds to close. No PS5 download has been released yet. The runtime dependencies and font licenses are in [third-party notices](../THIRD_PARTY.md).

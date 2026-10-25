@@ -34,6 +34,7 @@ constexpr char status_path[] = "/data/console-shelf/launch-status.txt";
 constexpr char status_temporary[] = "/data/console-shelf/launch-status.tmp";
 struct Context {
     const shelf::LaunchRequest* request = nullptr;
+    int origin_app = 0;
     std::uint32_t user = 0;
     int launch_status = 0;
 };
@@ -61,7 +62,8 @@ bool status(const shelf::LaunchRequest& request, shelf::LaunchStage state, int c
     std::remove(status_temporary);
     return false;
 }
-int current(void*, char (&title)[10]) {
+int current(void* raw, char (&title)[10]) {
+    auto& context = *static_cast<Context*>(raw);
     const int id = sceSystemServiceGetAppIdOfRunningBigApp();
     // -1 and zero are the no-app values used by the reference helper. Other
     // errors must not become permission to launch over an unknown application.
@@ -76,6 +78,11 @@ int current(void*, char (&title)[10]) {
     for (unsigned i = 0; i < 9; ++i)
         if (!((value[i] >= 'A' && value[i] <= 'Z') || (value[i] >= '0' && value[i] <= '9')))
             return -1;
+    if (std::strcmp(value, shelf::shelf_title_id) == 0) {
+        if (context.origin_app && context.origin_app != id)
+            return -1;
+        context.origin_app = id;
+    }
     std::memcpy(title, value, 10);
     return 1;
 }

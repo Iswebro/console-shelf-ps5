@@ -6,6 +6,7 @@ namespace shelf {
 inline constexpr std::uint32_t close_hold_ms = 3000;
 struct Presentation {
     bool loading = false, preparing = false, artwork = false;
+    bool launching = false;
     float reveal = 1, appear = 1, hold = 0, close = 0;
 };
 class OpeningGate {
@@ -49,6 +50,13 @@ class CloseGesture {
     std::uint32_t pressed_at = 0, committed_at = 0;
 
   public:
+    void begin_close(std::uint32_t now) {
+        if (!committed) {
+            committed = true;
+            committed_at = now;
+            down = false;
+        }
+    }
     void press(std::int32_t device, std::uint32_t now) {
         if (down || committed)
             return;

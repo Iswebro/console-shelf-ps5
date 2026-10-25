@@ -39,7 +39,7 @@ template <std::size_t N> inline bool launch_bounded(const char (&text)[N]) {
 inline bool launch_media_path(std::string_view path) {
     bool permitted = false;
     for (std::string_view root : {"/data/homebrew/PPSA99169/content/", "/data/homebrew/PPSA99169/roms/",
-                                  "/data/PSXS5/games/", "/data/SwanStationPS5/games/"})
+                                  "/data/PSXS5/games/", "/data/SwanStationPS5/games/", "/data/PCSX2/games/"})
         if (path.size() > root.size() && path.substr(0, root.size()) == root)
             permitted = true;
     if (!permitted || path.back() == '/' || path.find('\\') != path.npos)

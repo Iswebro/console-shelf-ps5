@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
+#include "shelf/launch_plan.hpp"
 #include "shelf/launch_protocol.hpp"
+#include "shelf/ui.hpp"
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <string>
 namespace {
 void check(bool value, const char* why) {
@@ -82,6 +85,64 @@ struct FakeHandoff {
 void test_launch() {
     using namespace shelf;
     auto r = request();
+    auto library = std::make_unique<Library>();
+    const auto n64 = find_system("n64"), ps2 = find_system("ps2"), ps5 = find_system("ps5");
+    library->route_count = 3;
+    auto& ra = library->routes[0];
+    ra.system = n64;
+    std::strcpy(ra.id, "retroarch:mupen64plus_next");
+    std::strcpy(ra.title_id, "PPSA99169");
+    std::strcpy(ra.folder, "/data/homebrew/PPSA99169");
+    std::strcpy(ra.core, "/data/homebrew/PPSA99169/cores/mupen64plus_next_libretro.so");
+    auto& standalone = library->routes[1];
+    standalone.system = n64;
+    std::strcpy(standalone.id, "PPSA99064");
+    std::strcpy(standalone.title_id, "PPSA99064");
+    std::strcpy(standalone.folder, "/data/homebrew/PPSA99064");
+    auto& ps2route = library->routes[2];
+    ps2route.system = ps2;
+    std::strcpy(ps2route.id, "PPSA99203");
+    std::strcpy(ps2route.title_id, "PPSA99203");
+    std::strcpy(ps2route.folder, "/data/homebrew/PPSA99203");
+    library->game_count = 3;
+    library->games[0].system = n64;
+    std::strcpy(library->games[0].path, "/data/homebrew/PPSA99169/content/n64/Own game.z64");
+    library->games[1].system = ps2;
+    library->games[1].kind = MediaKind::disc_image;
+    std::strcpy(library->games[1].path, "/data/PCSX2/games/Own game.iso");
+    library->games[2].system = ps5;
+    library->games[2].kind = MediaKind::native_title;
+    std::strcpy(library->games[2].title_id, "PPSA00001");
+    std::strcpy(library->games[2].path, "/user/app/PPSA00001");
+    LaunchRequest planned;
+    check(plan_game(*library, 0, ra.id, planned) == LaunchPlan::direct_game &&
+              std::strcmp(planned.core, "mupen64plus_next") == 0 && std::strstr(planned.rom, "Own game.z64"),
+          "the selected installed RetroArch core produces the external direct-game plan");
+    check(plan_game(*library, 0, standalone.id, planned) == LaunchPlan::menu && !planned.rom[0],
+          "the chosen standalone emulator remains a menu route");
+    check(plan_game(*library, 1, {}, planned) == LaunchPlan::menu && std::strcmp(planned.title, "PPSA99203") == 0,
+          "a PS2 game honestly opens the emulator's own shelf");
+    check(plan_game(*library, 2, {}, planned) == LaunchPlan::native_game && !planned.rom[0],
+          "registered native games use a title launch instead of a ROM argument");
+    std::strcpy(library->games[2].title_id, shelf_title_id);
+    check(plan_game(*library, 2, {}, planned) == LaunchPlan::unavailable, "Shelf cannot launch itself as a game");
+    std::strcpy(ra.core, "/data/other/core_libretro.so");
+    check(plan_game(*library, 0, ra.id, planned) == LaunchPlan::unavailable,
+          "a core outside the detected emulator is refused");
+    std::strcpy(ra.core, "/data/homebrew/PPSA99169/cores/mupen64plus_next_libretro.so");
+    UiState connected;
+    connected.library = library.get();
+    connected.selected_system = n64;
+    connected.launch_connected = true;
+    connected.page = Page::library;
+    std::snprintf(connected.settings.preferred_emulator[n64].data(), 48, "%s", ra.id);
+    input(connected, Action::confirm);
+    check(connected.launch_requested && connected.pending_launch.mode == LaunchMode::retroarch_game,
+          "the game action queues the selected route without executing it in the UI model");
+    input(connected, Action::up);
+    check(connected.tools && connected.tool == 2, "Up from the first game reaches the settings gear");
+    input(connected, Action::down);
+    check(!connected.tools && connected.game_focus == 0, "Down returns from the gear to the game list");
     check(launch_request_valid(r, 1000), "known emulator menu is accepted");
     char message[launch_message_capacity];
     check(encode_launch_request(r, 1000, message, sizeof(message)), "menu request is encoded");

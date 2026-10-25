@@ -78,10 +78,12 @@ def main():
 Source: https://github.com/Iswebro/console-shelf-ps5/tree/{commit}
 Unofficial test identity: PPSA99541. This build is not hardware-validated or a public release.
 
-This test displays Shelf's Grid/Swipe UI, controller settings and read-only library lists.
-Emulator/game launch actions remain unavailable. No launch helper is included.
+This private test displays Shelf's UI/settings and real library lists, and enables launch tests.
+The bundled original helper is embedded in eboot.bin and sent only to the console's existing
+loopback ELF loader when you select a launch action. It waits for Shelf's explicit commitment
+and cooperative closure; it never kills another app or writes emulator settings.
 It expects the console's existing ftpsrv on 127.0.0.1:2121; no PC DNS host is needed for discovery.
-The app writes only its own settings under /data/console-shelf.
+The app writes only its own preferences, launch request/status and diagnostics under /data/console-shelf.
 
 Before copying, list /data/homebrew and /user/app and stop if this title identity already exists.
 The isolated destination is /data/homebrew/PPSA99541. Never replace another app.
@@ -92,7 +94,11 @@ Keep firmware 12.20 and decline system update prompts. This folder contains no f
 First test: open Shelf; check the picture, D-pad/stick, Cross/Circle and Options.
 Check Nintendo 64's library and the PS1/PS2/PS3 counts, then save a layout/visibility choice.
 Close and reopen Shelf to check persistence. Report any blank screen, crash or incorrect input.
-These results are required before enabling launches or publishing a download.
+Test PS2 -> Test emulator launch first. It should close Shelf with a fade and open PS5SX2's shelf.
+PS1/PS3 and other detected standalone emulators currently open their own libraries.
+For N64 using RetroArch, a selected game uses the external --rom/--core forwarder contract.
+All launch routes remain experimental until their console result is recorded. These checks and
+the final source/license/relinking package are required before a public download.
 
 Rollback: close Shelf and remove only its owned app folder using the established app-removal procedure.
 Keep /data/console-shelf if you want to retain its preferences; existing emulator/game data is separate.
@@ -103,7 +109,7 @@ be assembled before any public binary release. This local package is for the own
     (app / "START-HERE.md").write_text(readme, encoding="utf8", newline="\n")
     files = [{"path": p.relative_to(app).as_posix(), "bytes": p.stat().st_size, "sha256": sha256(p)}
              for p in sorted(app.rglob("*")) if p.is_file()]
-    manifest = {"schema": 1, "purpose": "local UI-only test; not a public release", "titleId": "PPSA99541", "sourceCommit": commit,
+    manifest = {"schema": 1, "purpose": "private native launch test; not a public release", "titleId": "PPSA99541", "sourceCommit": commit,
                 "hardwareTest": "not run", "sourceFingerprintSHA256": hashlib.sha256((build / "build-source.json").read_bytes()).hexdigest(), "files": files}
     (destination / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     archive = destination / "Console-Shelf-UI-test.zip"

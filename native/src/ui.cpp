@@ -236,6 +236,20 @@ void input(UiState& state, Action action) {
             state.page = Page::home;
             return;
         }
+        if (state.tools) {
+            if (action == Action::down) {
+                state.tools = false;
+                state.detail_focus = 0;
+            }
+            if (action == Action::confirm)
+                input(state, Action::settings);
+            return;
+        }
+        if (action == Action::up && state.detail_focus == 0) {
+            state.tools = true;
+            state.tool = 2;
+            return;
+        }
         if (state.detail_focus == 0 && state.library &&
             (action == Action::left || action == Action::right || action == Action::confirm)) {
             const auto* selected = preferred_route(*state.library, state.selected_system,
@@ -269,6 +283,12 @@ void input(UiState& state, Action action) {
             if (state.detail_focus == 2) {
                 state.page = Page::library;
                 state.game_focus = 0;
+            } else if (state.detail_focus == 1 && state.launch_connected && state.library &&
+                       plan_emulator(*state.library, state.selected_system,
+                                     state.settings.preferred_emulator[state.selected_system].data(),
+                                     state.pending_launch) != LaunchPlan::unavailable) {
+                state.launch_requested = true;
+                std::snprintf(state.notice, sizeof(state.notice), "Preparing the emulator...");
             } else
                 std::snprintf(state.notice, sizeof(state.notice), "%s",
                               state.inventory[state.selected_system].emulator_count
@@ -280,6 +300,20 @@ void input(UiState& state, Action action) {
     if (state.page == Page::library) {
         if (action == Action::back)
             state.page = Page::details;
+        if (state.tools) {
+            if (action == Action::down) {
+                state.tools = false;
+                state.game_focus = 0;
+            }
+            if (action == Action::confirm)
+                input(state, Action::settings);
+            return;
+        }
+        if (action == Action::up && state.game_focus == 0) {
+            state.tools = true;
+            state.tool = 2;
+            return;
+        }
         if (state.library) {
             const auto games = games_for_system(*state.library, state.selected_system);
             const int maximum = games.count ? static_cast<int>(games.count) - 1 : 0;
@@ -291,9 +325,23 @@ void input(UiState& state, Action action) {
                 state.game_focus = clamp(state.game_focus - 8, maximum);
             if (action == Action::right)
                 state.game_focus = clamp(state.game_focus + 8, maximum);
-            if (action == Action::confirm && games.count)
-                std::snprintf(state.notice, sizeof(state.notice),
-                              "Game found. Direct launching is awaiting console validation.");
+            if (action == Action::confirm && games.count) {
+                const auto plan =
+                    state.launch_connected
+                        ? plan_game(*state.library, games.indices[static_cast<std::size_t>(state.game_focus)],
+                                    state.settings.preferred_emulator[state.selected_system].data(),
+                                    state.pending_launch)
+                        : LaunchPlan::unavailable;
+                if (plan != LaunchPlan::unavailable) {
+                    state.launch_requested = true;
+                    std::snprintf(state.notice, sizeof(state.notice), "%s",
+                                  plan == LaunchPlan::menu
+                                      ? "This emulator opens its own library. Choose the game there."
+                                      : "Preparing your game...");
+                } else
+                    std::snprintf(state.notice, sizeof(state.notice),
+                                  "A direct launch route is not available for this game yet.");
+            }
         }
         return;
     }

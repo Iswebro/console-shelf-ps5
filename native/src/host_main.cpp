@@ -4,6 +4,7 @@
 #include "shelf/filesystem.hpp"
 #include "shelf/ftp.hpp"
 #include "shelf/graphics.hpp"
+#include "shelf/launch_client.hpp"
 #include "shelf/memory.hpp"
 #include "shelf/navigation.hpp"
 #include <SDL.h>
@@ -13,10 +14,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <new>
 #ifdef SHELF_PS5
 #include "platform/platform.h"
 #include "shelf/memory.hpp"
+#include "shelf_launch_asset.hpp"
 #include <time.h>
 #endif
 #ifdef _WIN32
@@ -174,9 +177,9 @@ bool report(const char* path, const shelf::UiState& state) {
             comma = true;
         }
     std::fprintf(file,
-                 "],\"queryLength\":%zu,\"pickerQueryLength\":%zu,\"launchConnected\":false,\"libraryGames\":%zu,"
+                 "],\"queryLength\":%zu,\"pickerQueryLength\":%zu,\"launchConnected\":%s,\"libraryGames\":%zu,"
                  "\"libraryRoutes\":%zu}\n",
-                 std::strlen(state.query), std::strlen(state.console_query),
+                 std::strlen(state.query), std::strlen(state.console_query), state.launch_connected ? "true" : "false",
                  state.library ? state.library->game_count : 0, state.library ? state.library->route_count : 0);
     return std::fclose(file) == 0;
 }
@@ -308,7 +311,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-9 prepared entrance; three-second hold timing");
+    startup("main entered", "ui-10 cooperative launch test; startup pictures disabled");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -409,6 +412,9 @@ int main(int argc, char** argv) {
     char settings_path[2304];
     std::snprintf(settings_path, sizeof(settings_path), "%s/settings.ini", data);
     shelf::UiState state;
+#ifdef SHELF_PS5
+    state.launch_connected = true;
+#endif
     struct LibraryOwner {
         shelf::Library* value = nullptr;
         ~LibraryOwner() {
@@ -530,6 +536,7 @@ int main(int argc, char** argv) {
     int result = 0;
     shelf::NavigationInput navigation;
     shelf::CloseGesture close_gesture;
+    shelf::LaunchClient launcher;
     bool redraw = true;
     bool first_frame = true;
     bool scan_started = false;
@@ -545,7 +552,7 @@ int main(int argc, char** argv) {
     unsigned intro_frames = 0, reveal_frames = 0;
     unsigned circle_at = 0;
     bool circle_tracked = false, circle_committed_logged = false;
-#ifdef SHELF_PS5
+#if defined(SHELF_PS5) && defined(SHELF_CAPTURE_STARTUP)
     bool captured_loading = false, captured_reveal = false;
 #endif
     unsigned reveal_at = 0;
@@ -654,6 +661,12 @@ int main(int argc, char** argv) {
                 redraw = true;
             } else if (event.type == SDL_CONTROLLERBUTTONDOWN) {
                 if (event.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
+                    state.launch_requested = false;
+                    if (state.launch_busy) {
+                        launcher.cancel();
+                        state.launch_busy = false;
+                        std::snprintf(state.notice, sizeof(state.notice), "Launch cancelled.");
+                    }
                     if (!close_gesture.active()) {
                         circle_at = now;
                         circle_tracked = true;
@@ -748,19 +761,78 @@ int main(int argc, char** argv) {
                     mapped = false;
                 }
             }
-            if (mapped && !state.presentation.loading && !close_gesture.closing()) {
+            if (mapped && !state.presentation.loading && !close_gesture.closing() &&
+                (!state.launch_busy || action == shelf::Action::back)) {
+                if (action == shelf::Action::back) {
+                    state.launch_requested = false;
+                    if (state.launch_busy) {
+                        launcher.cancel();
+                        state.launch_busy = false;
+                    }
+                }
                 if (!shelf::NavigationInput::directional(action))
                     navigation.cancel();
                 shelf::input(state, action);
                 redraw = true;
             }
         }
+#ifdef SHELF_PS5
+        if (state.launch_requested && !state.exit_requested && !close_gesture.active()) {
+            state.launch_requested = false;
+            auto& request = state.pending_launch;
+            const auto epoch = std::time(nullptr);
+            request.issued = epoch > 0 ? static_cast<std::uint64_t>(epoch) : 0;
+            std::snprintf(request.id, sizeof(request.id), "%016llx%016llx",
+                          static_cast<unsigned long long>(SDL_GetPerformanceCounter()),
+                          static_cast<unsigned long long>(request.issued));
+            if (launcher.start(request, data, shelf_launch_payload, sizeof(shelf_launch_payload))) {
+                state.launch_busy = true;
+                navigation.cancel();
+                startup("launcher request started", request.mode == shelf::LaunchMode::retroarch_game
+                                                        ? "direct RetroArch route"
+                                                        : "title menu route");
+            } else {
+                std::snprintf(state.notice, sizeof(state.notice), "%s", launcher.error());
+                startup("launcher request refused");
+            }
+            redraw = true;
+        }
+        if (state.launch_busy) {
+            const auto status = launcher.state();
+            if (state.exit_requested || close_gesture.active()) {
+                launcher.cancel();
+                state.launch_busy = false;
+            } else if (status == shelf::LaunchClientState::ready) {
+                unsigned visibility = 0;
+                const bool foreground = gs_app_visibility(&visibility) == 0 && visibility == 0;
+                if (foreground && launcher.commit()) {
+                    state.presentation.launching = true;
+                    circle_at = now;
+                    close_gesture.begin_close(now);
+                    startup("launcher committed", "cooperative close; no process kill");
+                } else {
+                    launcher.cancel();
+                    std::snprintf(state.notice, sizeof(state.notice), "%s",
+                                  foreground ? launcher.error()
+                                             : "Launch cancelled while Shelf was not in the foreground.");
+                }
+                state.launch_busy = false;
+                redraw = true;
+            } else if (status == shelf::LaunchClientState::failed || status == shelf::LaunchClientState::cancelled) {
+                std::snprintf(state.notice, sizeof(state.notice), "%s",
+                              status == shelf::LaunchClientState::failed ? launcher.error() : "Launch cancelled.");
+                state.launch_busy = false;
+                redraw = true;
+                startup("launcher did not commit");
+            }
+        }
+#endif
         close_gesture.update(now, state.presentation);
         if (close_gesture.closing()) {
             if (!circle_committed_logged) {
                 char duration[80];
                 std::snprintf(duration, sizeof(duration), "%u ms after button event", now - circle_at);
-                startup("Circle hold committed", duration);
+                startup(state.presentation.launching ? "handoff fade started" : "Circle hold committed", duration);
                 circle_committed_logged = true;
             }
             navigation.cancel();
@@ -769,7 +841,7 @@ int main(int argc, char** argv) {
         if (close_gesture.finished(now)) {
             char duration[80];
             std::snprintf(duration, sizeof(duration), "%u ms after button event", now - circle_at);
-            startup("closing fade complete", duration);
+            startup(state.presentation.launching ? "handoff fade complete" : "closing fade complete", duration);
             state.exit_requested = true;
         }
         if (state.presentation.loading) {
@@ -819,6 +891,7 @@ int main(int argc, char** argv) {
             }
 #ifdef SHELF_PS5
             gs_vout_present(surface->pixels, surface->pitch);
+#ifdef SHELF_CAPTURE_STARTUP
             // Two bounded, owned diagnostic pictures let us distinguish correct
             // drawing from a delayed display handoff. No game/account files are read.
             bool captured = false;
@@ -837,6 +910,7 @@ int main(int argc, char** argv) {
             }
             if (captured)
                 last_visibility_at = SDL_GetTicks();
+#endif
 #endif
             if (preparing) {
                 state.presentation.preparing = false;
@@ -916,6 +990,7 @@ int main(int argc, char** argv) {
             SDL_Delay(16);
     }
     scan.stop();
+    launcher.stop();
     for (auto* controller : controllers)
         if (controller)
             SDL_GameControllerClose(controller);

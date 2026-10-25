@@ -26,7 +26,7 @@ def source_fingerprint():
                       "native/third_party/ps5-runtime", "native/third_party/cjson"):
         inputs.extend(p for p in (ROOT / directory).rglob("*") if p.is_file())
     inputs += [ROOT / "tools" / name for name in ("build_ps5.py", "bootstrap_ps5_toolchain.py", "fetch_ps5_deps.py",
-                                                   "ps5_common.py", "verify_ps5_build.py")]
+                                                   "ps5_common.py", "verify_ps5_build.py", "build_launch_helper.py")]
     return {p.relative_to(ROOT).as_posix(): sha256(p) for p in sorted(inputs)}
 
 
@@ -37,6 +37,15 @@ def verify_recorded_hashes(folder):
         expected = recorded[key]
         require(file.stat().st_size == expected["bytes"] and sha256(file) == expected["sha256"],
                 f"{filename} changed after its build/container validation; rebuild first")
+    if "embeddedLaunchHelper" in recorded:
+        helper = recorded["embeddedLaunchHelper"]
+        raw = (folder / "eboot.elf").read_bytes()
+        begin, size = helper["offset"], helper["bytes"]
+        require(0 <= begin < len(raw) and 64 <= size <= 1048576 and begin + size <= len(raw), "Invalid helper extent")
+        data = raw[begin:begin + size]
+        require(data[:8] == b"\x7fELF\x02\x01\x01\x00" and hashlib.sha256(data).hexdigest() == helper["sha256"],
+                "Embedded helper differs from its verified build")
+    return recorded
 
 
 def verify(elf_path, self_path):
@@ -132,8 +141,10 @@ if __name__ == "__main__":
     folder = CACHE / "build"
     identity = json.loads((folder / "build-source.json").read_text())
     require(identity == source_fingerprint(), "Sources changed since this executable was built; rebuild first")
-    verify_recorded_hashes(folder)
+    recorded = verify_recorded_hashes(folder)
     result = verify(folder / "eboot.elf", folder / "eboot.bin")
+    if "embeddedLaunchHelper" in recorded:
+        result["embeddedLaunchHelper"] = recorded["embeddedLaunchHelper"]
     (folder / "structural-check.json").write_text(json.dumps(result, indent=2) + "\n")
     print("PASS: independent PS5 ELF identity, segment bounds/alignment, executable entry, dependency set and SELF wrapper.")
     print("Firmware 12.20 and physical controller/display remain unverified.")

@@ -559,8 +559,8 @@ void detail(const UiState& state) {
             for (int row = 0; row < 8 && static_cast<std::size_t>(start + row) < games.count; ++row) {
                 const auto& game = state.library->games[games.indices[static_cast<std::size_t>(start + row)]];
                 const int y = 478 + row * 60;
-                box(80, y, 1000, 53, state.game_focus == start + row);
-                text(game.name, 100, y + 10, 23, white, state.game_focus == start + row, 950);
+                box(80, y, 1000, 53, !state.tools && state.game_focus == start + row);
+                text(game.name, 100, y + 10, 23, white, !state.tools && state.game_focus == start + row, 950);
             }
             if (games.count) {
                 char position[80];
@@ -577,10 +577,11 @@ void detail(const UiState& state) {
           state.inventory[id].built_in ? std::string_view("PS5 system")
           : detected                   ? std::string_view(detected->name)
                                        : std::string_view("No emulator detected"),
-          state.detail_focus == 0, 920);
-    box(80, 631, 443, 82, state.detail_focus == 1);
-    text("Open emulator", 107, 652, 29, state.inventory[id].emulator_count ? white : muted, true);
-    box(547, 631, 453, 82, state.detail_focus == 2);
+          !state.tools && state.detail_focus == 0, 920);
+    box(80, 631, 443, 82, !state.tools && state.detail_focus == 1);
+    text(state.launch_connected ? "Test emulator launch" : "Open emulator", 107, 652, 27,
+         state.inventory[id].emulator_count ? white : muted, true);
+    box(547, 631, 453, 82, !state.tools && state.detail_focus == 2);
     text("Show game library", 575, 652, 29, white, true);
     text("An emulator-menu route opens the emulator's own shelf.", 84, 765, 23, muted);
     footer("D-pad  Choose action    Cross  Select    Triangle  Favourite    Circle  Back    Options  Settings");
@@ -606,7 +607,7 @@ void settings(const UiState& state) {
         label(394, 452, "Layout", p.layout == Layout::grid ? "Grid" : "Swipe", state.settings_focus == 0);
         label(394, 563, "Grid look", p.grid_look == GridLook::icons ? "3D console icons" : "Classic cards",
               state.settings_focus == 1);
-        label(394, 674, "App icon", icon_names[static_cast<std::size_t>(p.icon)], state.settings_focus == 2);
+        label(394, 674, "Shelf logo", icon_names[static_cast<std::size_t>(p.icon)], state.settings_focus == 2);
         text("Swipe always uses floating icons without cards.", 400, 802, 22, muted);
     } else if (state.tab == SettingsTab::browse) {
         text("Find your next favourite", 394, 338, 34, white, true);
@@ -757,7 +758,7 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
 #else
         text("NATIVE DEVELOPMENT BUILD / PC", 1388, 42, 18, muted, true);
 #endif
-        settings_button(state.tools && state.tool == 2 && state.page == Page::home);
+        settings_button(state.tools && state.tool == 2);
         line(80, 99, 1840, 99, {43, 48, 69, 255});
         if (state.page == Page::home)
             home(state);
@@ -795,7 +796,8 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
         const auto alpha = static_cast<Uint8>(state.presentation.close * 255);
         rect(0, 0, width, height, {9, 12, 26, alpha});
         picture(icon_files[0], 916, 413, 88, 88, alpha);
-        centered("Closing Shelf", 960, 552, 29, {241, 240, 251, alpha});
+        centered(state.presentation.launching ? "Opening your selection" : "Closing Shelf", 960, 552, 29,
+                 {241, 240, 251, alpha});
     }
     SDL_RenderPresent(renderer);
 }

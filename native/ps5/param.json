@@ -1,5 +1,7 @@
 {
-  "ageLevel": { "default": 0 },
+  "ageLevel": {
+    "default": 0
+  },
   "applicationCategoryType": 0,
   "applicationDrmType": "free",
   "attribute": 1644167168,
@@ -8,11 +10,24 @@
   "conceptId": "99541",
   "contentBadgeType": 1,
   "contentId": "UP9000-PPSA99541_00-CONSOLESHELF0001",
-  "contentVersion": "00.100.008",
+  "contentVersion": "00.100.009",
   "downloadDataSize": 0,
-  "gameIntent": { "permittedIntents": [{ "intentType": "launchActivity" }] },
-  "kernel": { "flexibleMemorySize": 536870912 },
-  "localizedParameters": { "defaultLanguage": "en-US", "en-US": { "titleName": "Console Shelf (UI test)" } },
+  "gameIntent": {
+    "permittedIntents": [
+      {
+        "intentType": "launchActivity"
+      }
+    ]
+  },
+  "kernel": {
+    "flexibleMemorySize": 536870912
+  },
+  "localizedParameters": {
+    "defaultLanguage": "en-US",
+    "en-US": {
+      "titleName": "Console Shelf (UI test)"
+    }
+  },
   "masterVersion": "00.10",
   "requiredSystemSoftwareVersion": "0x0000000000000000",
   "sdkVersion": "0x0000000000000000",

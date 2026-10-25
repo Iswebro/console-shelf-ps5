@@ -6,6 +6,7 @@ from bootstrap_ps5_toolchain import environment, host_options, prepare as prepar
 from fetch_ps5_deps import prepare as prepare_dependencies
 from ps5_common import CACHE, ROOT, run, sha256
 from verify_ps5_build import require, source_fingerprint, verify
+from build_launch_helper import main as build_launch_helper
 
 
 def cached_run(args, inputs, output, env):
@@ -27,6 +28,15 @@ def build():
     sdk, ports, zlib = prepare_dependencies()
     output = CACHE / "build"
     output.mkdir(parents=True, exist_ok=True)
+    build_launch_helper()
+    helper = CACHE / "launch-helper/shelf-launch.elf"
+    helper_record = json.loads((CACHE / "launch-helper/build.json").read_text())
+    require(helper_record["elf"] == {"bytes": helper.stat().st_size, "sha256": sha256(helper)}, "Helper build changed")
+    payload = helper.read_bytes()
+    literal = ",\n".join(",".join(f"0x{byte:02x}" for byte in payload[start:start + 24]) for start in range(0, len(payload), 24))
+    (output / "shelf_launch_asset.hpp").write_text(
+        "// Generated from the verified owned helper; never read from a console or external request.\n"
+        "static const unsigned char shelf_launch_payload[] = {\n" + literal + "\n};\n")
     runtime = ROOT / "native/third_party/ps5-runtime/tooling/native"
     manifest = json.loads((runtime.parent.parent / "SOURCE.json").read_text())
     for entry in manifest["files"]:
@@ -71,9 +81,9 @@ def build():
               "-isystem", sdk / "target/include/c++/v1", "-isystem", sdk / "target/include",
               "-fno-stack-protector", "-fno-plt", "-femulated-tls", "-O2", "-fno-omit-frame-pointer", "-ffunction-sections", "-fdata-sections",
               "-DSHELF_PS5", "-DGS_NATIVE", "-DNDEBUG", "-D_REENTRANT", "-D_THREAD_SAFE",
-              "-I", ROOT / "native/include", "-I", ROOT / "native/ps5", "-I", ROOT / "native/third_party",
+              "-I", ROOT / "native/include", "-I", ROOT / "native/ps5", "-I", ROOT / "native/third_party", "-I", output,
               "-I", ports / "include/SDL2", "-I", ports / "include"]
-    sources = [ROOT / "native/src" / (name + ".cpp") for name in ("model", "settings", "ui", "graphics", "codecs", "library", "filesystem", "metadata", "ftp", "host_main")]
+    sources = [ROOT / "native/src" / (name + ".cpp") for name in ("model", "settings", "ui", "graphics", "codecs", "library", "filesystem", "metadata", "ftp", "launch_client", "host_main")]
     sources += [ROOT / "native/src/json.c"]
     sources += [ROOT / "native/ps5/platform" / name for name in ("alloc.c", "vout.c", "shims.c", "lifecycle.c")]
     sources += [runtime / "app_crt.cpp", runtime / "app_cpp_runtime.cpp"]
@@ -102,6 +112,8 @@ def build():
     run([tool, "self", "--sign", "--in", elf, "--out", signed, "--magic", "0x1D3D154F"], env=env)
     run([tool, "self", "--inspect", "--file", signed], env=env)
     report = verify(elf, signed)
+    require(elf.read_bytes().count(payload) == 1, "The verified helper is not embedded exactly once")
+    report["embeddedLaunchHelper"] = {**helper_record["elf"], "offset": elf.read_bytes().index(payload)}
     require(identity == source_fingerprint(), "Build inputs changed during compilation; rebuild before verification")
     (output / "build-source.json").write_text(json.dumps(identity, indent=2) + "\n")
     (output / "structural-check.json").write_text(json.dumps(report, indent=2) + "\n")

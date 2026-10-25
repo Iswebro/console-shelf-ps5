@@ -1,6 +1,6 @@
 # PS5 cross-build status
 
-Shelf now cross-compiles its C++ UI, SDL event loop and read-only discovery adapter into a native PS5 executable. Its software renderer uses a PS5 VideoOut backend and a direct-memory allocator. The owner has confirmed the grid and basic input on firmware 12.20. The sixth private build's journal records its first loading frame before a complete configured-library scan: 92 games and 55 routes without a connection error. **Full hardware acceptance remains pending, and no installable prototype is released yet.** Refined controls, transitions and launch adapters still need validation; the launch adapters remain unimplemented.
+Shelf cross-compiles its C++ UI, SDL event loop and read-only discovery adapter into a native PS5 executable. Its software renderer uses a PS5 VideoOut backend and a direct-memory allocator. The owner has confirmed the grid, settings navigation and closing fade on firmware 12.20. Console-local discovery records 92 games and 55 routes without a connection error. A private candidate adds an embedded cooperative launch helper and UI transport. **Full hardware and launch acceptance remain pending, and no installable prototype is released yet.**
 
 ## Build without a system-wide installation
 
@@ -23,7 +23,7 @@ After a verified app build, retain its own object/library inputs in a new snapsh
 npm run relink:ps5 -- --capture-inputs --inputs .cache/ps5/relink-inputs-my-build
 ```
 
-The tool checks all three original static archives against the pinned PacBrew tarball and all SDK stubs against the pinned SDK ZIP. It preserves seventeen application objects, source fingerprints and hashes. It then rebuilds the converter and links those objects into a separate output directory. Without a replacement library, both the raw executable and its SELF must reproduce the reference hashes exactly. `--libiconv`, `--sdl` and `--libsamplerate` accept replacement PS5 static libraries; these deliberately may change the result. They do not recompile Shelf or deploy anything.
+The tool checks all three original static archives against the pinned PacBrew tarball and all SDK stubs against the pinned SDK ZIP. It preserves eighteen application objects, source fingerprints and hashes. It then rebuilds the converter and links those objects into a separate output directory. Without a replacement library, both the raw executable and its SELF must reproduce the reference hashes exactly. `--libiconv`, `--sdl` and `--libsamplerate` accept replacement PS5 static libraries; these deliberately may change the result. They do not recompile Shelf or deploy anything.
 
 With reviewed source committed, `npm run prepare:ps5-source-kit -- --inputs .cache/ps5/relink-inputs-my-build` assembles the tracked source, notices, full library sources, original recipes and matching object/library snapshot. Its ZIP and every member are rechecked. `SOURCE-KIT.txt` documents relinking from the extracted folder and replacing libraries. First use can download the pinned public build dependencies. A cold relink from the extracted kit and full console/launch acceptance are still release gates; preparing the kit does not publish it.
 
@@ -55,6 +55,6 @@ The packager inspects the completed FSELF's container integrity. A separate Pyth
 
 Choose a separate unofficial title identity and check for an installed collision. Assemble the owned app folder, artwork, complete licenses and corresponding source/relink instructions for all linked libraries, including LGPL libiconv and the precise PS5 SDL port revision. Validate discovery and launch contracts, transfer/readback hashes, then test display, DualSense input, saved settings, restart/reopen and supported routes on firmware 12.20. Keep prototype publication gated on those results; see the [acceptance plan](PROTOTYPE-PLAN.md).
 
-No kernel helper, exploit, firmware updater, network configuration tool or console deployment command runs as part of this cross-build.
+The build also compiles Shelf's original launcher using the ordinary SDK ELF-payload ABI, embeds it, and records the byte extent and SHA-256 in the executable check. The helper is only a cooperative app launcher; it performs no exploit or privilege setup. No helper, firmware updater, network configuration tool or console deployment command runs as part of the cross-build. Matching SDK CRT/static-libc source and notices are an additional release requirement for this embedded helper.
 
 A separate [private UI test assembler](PS5-UI-TEST.md) can now prepare a local folder and ZIP after the reviewed sources are committed. It uses its own unofficial app identity and records each file's hash; it does not deploy or publish anything. That package is a hardware-test candidate, not the first public prototype release.

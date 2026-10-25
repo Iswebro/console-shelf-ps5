@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "scope": "PC checks for the private cooperative launch candidate; no PS5 launch compatibility claim",
+  "nativeModelAndPlanner": "passed",
+  "rendererCaptures": 25,
+  "renderer": "passed; simulated SDL controls",
+  "readOnlyFTPIntegration": "passed",
+  "transportFixtures": [
+    {
+      "mode": "success",
+      "connections": 1,
+      "received": 64,
+      "passed": true
+    },
+    {
+      "mode": "cancel-ready",
+      "connections": 1,
+      "received": 64,
+      "passed": true
+    },
+    {
+      "mode": "late-ready-cancel",
+      "connections": 1,
+      "received": 64,
+      "passed": true
+    },
+    {
+      "mode": "closed",
+      "connections": 0,
+      "received": 0,
+      "passed": true
+    },
+    {
+      "mode": "timeout",
+      "connections": 1,
+      "received": 64,
+      "passed": true
+    },
+    {
+      "mode": "wrong-id",
+      "connections": 1,
+      "received": 64,
+      "passed": true
+    },
+    {
+      "mode": "busy",
+      "connections": 0,
+      "received": 0,
+      "passed": true
+    },
+    {
+      "mode": "stale",
+      "connections": 1,
+      "received": 64,
+      "passed": true
+    },
+    {
+      "mode": "invalid",
+      "connections": 0,
+      "received": 0,
+      "passed": true
+    }
+  ],
+  "helperExecuted": false,
+  "consoleOpening": "selection background confirmed; opening still black before the shelf",
+  "consoleCloseTimingFromPreviousBuild": {
+    "holdCommittedMs": 3009,
+    "fadeCompleteMs": 3393
+  },
+  "publicBinaryRelease": false,
+  "elf": {
+    "bytes": 2786900,
+    "sha256": "42fef8e5c32dcd66cd6f5561f4431566aabd24f5c4e4e2aa762e75c4cdf69301",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2678193,
+    "sha256": "2f2837830389c475c83bca2525f9024996fb9bec7f759a50336c221f98adfbbf"
+  },
+  "embeddedLaunchHelper": {
+    "bytes": 112592,
+    "sha256": "85a1370fbd1acdc16b9d7aafcef6270b70258c1bb3dec3ade92a00efe8dd96b0",
+    "offset": 1599856
+  },
+  "damagedExecutableFixturesRejected": 14
+}

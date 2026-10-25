@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #pragma once
+#include "launch_plan.hpp"
 #include "library.hpp"
 #include "presentation.hpp"
 #include "settings.hpp"
@@ -44,6 +45,8 @@ struct UiState {
     int focus = 0, tool = 0, detail_focus = 1, settings_focus = 0, keyboard_focus = 0;
     int game_focus = 0;
     bool tools = false, keyboard_for_consoles = false, changed = false, exit_requested = false;
+    bool launch_connected = false, launch_requested = false, launch_busy = false;
+    LaunchRequest pending_launch;
     char query[128]{}, console_query[128]{}, notice[192]{};
 };
 BrowseResult shown_systems(const UiState& state);
