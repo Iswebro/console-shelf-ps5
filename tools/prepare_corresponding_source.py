@@ -87,6 +87,16 @@ def download(record, target):
     return fetch(record["url"], target, record["sha256"], record.get("bytes"))
 
 
+def prepare_sdk_source():
+    sdk = json.loads((ROOT / "tools/linked-sources.json").read_text())["sdkRuntime"]
+    source = sdk["source"]
+    archive = download(source, SOURCE_CACHE / source["file"])
+    inspected = inspect_archive(archive, sdk["gitTree"])
+    record = {"id": sdk["id"], "version": sdk["version"], "archive": source["file"],
+              "bytes": archive.stat().st_size, "sha256": sha256(archive), **inspected}
+    return archive, record
+
+
 def prepare():
     pins = json.loads((ROOT / "tools/linked-sources.json").read_text())
     SOURCE_CACHE.mkdir(parents=True, exist_ok=True)
@@ -104,6 +114,8 @@ def prepare():
                         "archive": source["file"], "bytes": archive.stat().st_size, "sha256": sha256(archive),
                         "recipe": recipe_name, "recipeSHA256": sha256(recipe_file), **inspected})
         print("Verified complete source:", library["id"], inspected["members"], "members", flush=True)
+    _, sdk_record = prepare_sdk_source()
+    results.append(sdk_record)
     result = {"schema": 1, "sources": results, "upstreamScriptsExecuted": False,
               "settingsOrConsoleChanged": False}
     (SOURCE_CACHE / "source-verification.json").write_text(json.dumps(result, indent=2) + "\n")

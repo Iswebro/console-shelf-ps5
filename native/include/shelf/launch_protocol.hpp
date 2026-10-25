@@ -283,7 +283,10 @@ inline HandoffResult cooperative_handoff(const LaunchRequest& request, const Han
         if (current == 0 && consent != HandoffConsent::committed)
             return HandoffResult::cancelled;
         idle = current == 0 ? idle + 1 : 0;
-        if (idle >= 2)
+        // Five observations 250 ms apart give the shell a full second after
+        // Shelf disappears. Launching during its asynchronous return-home
+        // transition can leave the new app running behind the home screen.
+        if (idle >= 5)
             break;
         if (i == 59)
             return HandoffResult::close_timeout;

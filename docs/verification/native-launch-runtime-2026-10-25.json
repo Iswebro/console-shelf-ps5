@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "scope": "Private revised handoff; no foreground acceptance claimed",
+  "helperBuild": {
+    "elf": {
+      "bytes": 91272,
+      "sha256": "d915b589b4dcf29ef163c9580f6f680ca5eac962d8d1bf9a912d446335641c76"
+    },
+    "inputs": {
+      "native/ps5/helper/shelf_launch.cpp": "f2fcddd8f0772803d18336704313e28213d8f8f448e552f93c7531a8882f152d",
+      "native/include/shelf/launch_protocol.hpp": "1c15be2b7597a534a99590c728d21e486c04e98fb98ed5fb57150b8010687914",
+      "native/ps5/helper/runtime_limits.c": "0bd7a84ddad7654880454aa53b185d5c6167e1b6938502f9326cff7154f07364"
+    },
+    "hardwareTest": "not run",
+    "transport": "not connected",
+    "deployed": false,
+    "abi": "System V ABI 0, matching pinned SDK v0.42 crt1.o; not a native app/SELF",
+    "sdkRuntimeSource": {
+      "id": "ps5-payload-sdk",
+      "version": "v0.42",
+      "archive": "sdk-4eb701204fc3f8d31e84cf8ca272974e2be9c867.tar.gz",
+      "bytes": 3381771,
+      "sha256": "fc9f5974e540c4d4af912f0661cf44075651e67a4d0070a6e8ad44e01bee8ac2",
+      "members": 1992,
+      "expandedBytes": 18155520,
+      "gitTree": "c1c921118e5a86fa270babea2e0ab2eced32626a"
+    },
+    "sdkLinkInputs": {
+      "libc.a": {
+        "bytes": 305114,
+        "sha256": "17b22ab7baec2107ee4ce4189257abbd773a9bb9ce854203e08e0581e10b72b3"
+      },
+      "libkernel_web.so": {
+        "bytes": 120464,
+        "sha256": "1a90c1f2515f84764408c9e351637b12a2d1f06c0d094b12b607cce5c34eabcc"
+      },
+      "libSceLibcInternal.so": {
+        "bytes": 358048,
+        "sha256": "c2d4fb695495e3dd33599eff1f283cf88615dbd06f4c4acb4547494d32a022b7"
+      },
+      "libSceNet.so": {
+        "bytes": 25680,
+        "sha256": "f15a91031b041e2820ca05e3807f922c4ba2ac1e9bbd2d7640001bd4debcc3ed"
+      },
+      "libSceSystemService.so": {
+        "bytes": 72200,
+        "sha256": "ac8a30f030b6dbda8a192cfe2cb721b015bc77f40514428ed45a02c62bb88258"
+      },
+      "libSceUserService.so": {
+        "bytes": 66336,
+        "sha256": "5a428293f3993892f902da32a61733e5536b65125b6cbfd49a5d26c4031c6f4b"
+      }
+    },
+    "permissionChanges": false,
+    "crtPatchHook": "verified return 0; SDK patch.c excluded; kernel write routines absent",
+    "policy": "cooperative Shelf closure; one launch attempt; no process kill, permission patches or emulator-file writes"
+  },
+  "elf": {
+    "bytes": 2770516,
+    "sha256": "f3d29673167c830d84fd4ae2b9e856ccbe78b536309437dfaba1cb393b2f8142",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2656881,
+    "sha256": "ef9365b1bd4a14e8be3af881416f33fab1e4453d1c6af5b628cb947145faf9a7"
+  },
+  "embeddedLaunchHelper": {
+    "bytes": 91272,
+    "sha256": "d915b589b4dcf29ef163c9580f6f680ca5eac962d8d1bf9a912d446335641c76",
+    "offset": 1599888
+  },
+  "nativeModelAndIdleHandoffMocks": "passed",
+  "idleSettleMs": 1000,
+  "previousConsoleResult": "Shelf closed and PS5SX2 ran, but home screen retained foreground",
+  "newConsoleTest": "pending",
+  "publicBinaryReleased": false
+}

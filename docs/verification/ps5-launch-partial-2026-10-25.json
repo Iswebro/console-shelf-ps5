@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "buildSourceCommit": "716795f80b23b2175d0e258688a4aa8cbdc7f6c9",
+  "contentVersion": "00.100.009",
+  "selfSHA256": "2f2837830389c475c83bca2525f9024996fb9bec7f759a50336c221f98adfbbf",
+  "targetFirmware": "12.20",
+  "route": "PS5SX2 menu",
+  "ownerResult": {
+    "ShelfCloses": true,
+    "emulatorStarts": true,
+    "emulatorAppearsInForeground": false
+  },
+  "journal": {
+    "handoffFadeMs": 367,
+    "displayShutdownMs": 6,
+    "launchStatus": "started",
+    "launchReturn": "0x00000018"
+  },
+  "acceptance": "partial; running-title detection does not establish a visible foreground handoff",
+  "standardSDKStartupUsed": true,
+  "nextCandidate": "Rebuild SDK CRT without credential/syscall patches or custom SO loader; observe one full idle second before launch",
+  "nextCandidateHardwareResult": "pending",
+  "publicBinaryReleased": false
+}

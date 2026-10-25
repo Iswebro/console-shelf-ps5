@@ -21,13 +21,13 @@ shelf::LaunchRequest request() {
     return result;
 }
 struct FakeHandoff {
-    unsigned checks = 0, launches = 0, waits = 0, ready_calls = 0;
+    unsigned checks = 0, launches = 0, waits = 0, ready_calls = 0, idle_checks = 0;
     int scenario = 0, launch_result = 1;
     std::uint64_t clock = 1000;
     static int current(void* raw, char (&title)[10]) {
         auto& f = *static_cast<FakeHandoff*>(raw);
         ++f.checks;
-        if (f.scenario == 1 || (f.scenario == 2 && f.checks > 1)) {
+        if (f.scenario == 1 || (f.scenario == 2 && f.checks > 1) || (f.scenario == 11 && f.checks >= 5)) {
             std::strcpy(title, "CUSA00001");
             return 1;
         }
@@ -45,6 +45,7 @@ struct FakeHandoff {
             std::strcpy(title, "PPSA99203");
             return 1;
         }
+        ++f.idle_checks;
         return 0;
     }
     static bool ready(void* raw, const char* id) {
@@ -63,6 +64,7 @@ struct FakeHandoff {
     static int launch(void* raw, const shelf::LaunchRequest& r) {
         auto& f = *static_cast<FakeHandoff*>(raw);
         ++f.launches;
+        check(f.idle_checks >= 5, "the shell settles for a full monitored second before launching");
         check(std::strcmp(r.title, "PPSA99203") == 0, "only the requested target is launched");
         return f.launch_result;
     }
@@ -208,7 +210,7 @@ void test_launch() {
     FakeHandoff f;
     check(cooperative_handoff(r, f.ops()) == HandoffResult::started && f.launches == 1 && f.ready_calls == 1,
           "cooperative closure leads to one observed launch");
-    for (int scenario : {1, 2, 3, 4, 6, 8, 9, 10}) {
+    for (int scenario : {1, 2, 3, 4, 6, 8, 9, 10, 11}) {
         FakeHandoff refused;
         refused.scenario = scenario;
         const auto result = cooperative_handoff(r, refused.ops());

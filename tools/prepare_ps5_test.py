@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-only
-"""Assemble a local UI-only app folder. Never connects to, installs on or launches a PS5."""
+"""Assemble a private native test folder. Never connects to, installs on or launches a PS5."""
 import datetime
 import hashlib
 import json
@@ -82,6 +82,9 @@ This private test displays Shelf's UI/settings and real library lists, and enabl
 The bundled original helper is embedded in eboot.bin and sent only to the console's existing
 loopback ELF loader when you select a launch action. It waits for Shelf's explicit commitment
 and cooperative closure; it never kills another app or writes emulator settings.
+Its source-built SDK runtime preserves the existing loader's permissions: the SDK's
+credential/syscall patches and custom shared-object loader are excluded. The helper
+waits through a monitored idle second after Shelf closes before its one launch call.
 It expects the console's existing ftpsrv on 127.0.0.1:2121; no PC DNS host is needed for discovery.
 The app writes only its own preferences, launch request/status and diagnostics under /data/console-shelf.
 
@@ -92,6 +95,7 @@ Use the existing trusted ShadowMount procedure to expose this new app tile, with
 Keep firmware 12.20 and decline system update prompts. This folder contains no firmware updater.
 
 First test: open Shelf; check the picture, D-pad/stick, Cross/Circle and Options.
+The selection background is confirmed; opening still shows black before the grid.
 Check Nintendo 64's library and the PS1/PS2/PS3 counts, then save a layout/visibility choice.
 Close and reopen Shelf to check persistence. Report any blank screen, crash or incorrect input.
 Test PS2 -> Test emulator launch first. It should close Shelf with a fade and open PS5SX2's shelf.

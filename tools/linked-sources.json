@@ -1,6 +1,20 @@
 {
   "schema": 1,
   "pacbrewRelease": "v0.40.2",
+  "sdkRuntime": {
+    "id": "ps5-payload-sdk",
+    "version": "v0.42",
+    "commit": "4eb701204fc3f8d31e84cf8ca272974e2be9c867",
+    "gitTree": "c1c921118e5a86fa270babea2e0ab2eced32626a",
+    "license": "GPL-3.0-or-later for CRT and SDK code; upstream notices retained per file",
+    "source": {
+      "file": "sdk-4eb701204fc3f8d31e84cf8ca272974e2be9c867.tar.gz",
+      "url": "https://codeload.github.com/ps5-payload-dev/sdk/tar.gz/4eb701204fc3f8d31e84cf8ca272974e2be9c867",
+      "bytes": 3381771,
+      "sha256": "fc9f5974e540c4d4af912f0661cf44075651e67a4d0070a6e8ad44e01bee8ac2",
+      "evidence": "Archive SHA-256 computed after all 1992 files reconstructed the exact official tag commit's Git tree; no publisher archive checksum or signature claimed"
+    }
+  },
   "libraries": [
     {
       "id": "SDL2",

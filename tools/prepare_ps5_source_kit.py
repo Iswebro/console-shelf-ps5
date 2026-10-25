@@ -18,8 +18,11 @@ INSTRUCTIONS = """Console Shelf source and relink kit (development build)
 
 This folder contains the tracked application source, artwork, credits and
 licenses, complete source archives and original release recipes for the three
-linked libraries, plus Shelf's application objects and replaceable static
-libraries. PKGBUILD files are references; this kit does not run them.
+linked libraries, complete pinned SDK source for the launcher's CRT/libc, plus
+Shelf's application objects and replaceable static libraries. SDK patch.c and
+the custom shared-object loader are excluded by Shelf's build script; its own
+runtime_limits.c supplies no-op/refusal hooks. Upstream build scripts and
+PKGBUILD files are references; this kit does not run them.
 
 From the extracted project folder, with the prerequisites in docs/PS5-BUILD.md:
   npm run relink:ps5
@@ -91,6 +94,8 @@ def main():
                 add(target, base + group + "/" + name, path.read_bytes())
         for source in sources["sources"]:
             for key in ("archive", "recipe"):
+                if key not in source:
+                    continue
                 path = SOURCE_CACHE / source[key]
                 add(target, ".cache/ps5/corresponding-source/" + path.name, path.read_bytes())
         add(target, "SOURCE-KIT.txt", INSTRUCTIONS.encode())
