@@ -5,9 +5,11 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 ## Current progress
 
 - [x] Public repository, source license, project references and image credits.
-- [x] Console-first Grid, floating-icon Swipe and lit display Shelf designs with 52 system illustrations; Shelf hardware visual acceptance pending.
+- [x] Console-first Grid, floating-icon Swipe and integrated room Shelf with 52 systems. The owner accepted UI-19's room, console-only paging and TV clearance.
 - [x] Curved carousel with centre emphasis, progressive depth, short wrap motion and timed native renderer checks.
-- [x] One settings entry with Appearance, Sort & filter and Consoles tabs; a separate direct layout toggle.
+- [x] One settings entry with Appearance, Sort & filter, Consoles and Play room tabs; a separate direct layout toggle.
+- [x] Deep counters, L1/R1 pages, an eight-console curated display, favourites-only browsing and optional reduced motion; native host and browser checks pass.
+- [x] Personal TV modes and intro-picture fallback. UI-19's clock display, three-second Circle closure and saved clock choice after app reopen are owner-confirmed on PS5.
 - [x] Searchable individual console switches, whole-brand controls, Show/Hide results and saved visibility.
 - [x] Original C++17 hardware catalogue and browsing model, compiled and tested on Windows with warnings treated as errors.
 - [x] Pinned project-local PS5 SDK/SDL/Clang toolchain and successful native executable cross-build.
@@ -15,13 +17,14 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Native C++/SDL renderer, navigation model and settings persistence exercised on PC.
 - [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
 - [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
-- [ ] Physical PS5 display/controller validation on firmware 12.20.
+- [ ] Finish UI-19's normal console restart and Grid/Swipe/Shelf controller check on firmware 12.20; Shelf paging and the clock/settings flow have passed.
 - [x] Read-only emulator/core and game discovery in configured existing library locations, checked from PC against the owner's console.
 - [x] The same configured discovery inside the PS5 app sandbox, with complete scan evidence.
 - [ ] Further dedicated-emulator and library-layout adapters.
 - [x] Four initial firmware 12.20 launch tests on UI-15: PSXS5/PS5SX2/PS5SX3 menus foreground; Mario Party 3 through RetroArch starts directly.
 - [x] Complete linked-library sources and a private source/object kit, cold-relinked to the earlier UI-only executable.
-- [x] Matching complete source/relink materials for UI-15's embedded launcher and SDK runtime; cold relink reproduces its executable exactly.
+- [x] Matching UI-19 complete source/relink kit: fresh compiler prefix and rebuilt converter reproduce its exact ELF and SELF. The application objects were retained, not recompiled during that cold relink.
+- [x] Release-input audit binds all 80 files to the console ledger, checks all 296 source-kit members, reproduces the tile icon, and compares 75 source assets/notices. LICENSE differs only in CRLF/LF; both original hashes are retained.
 - [ ] Source-linked prototype ZIP, SHA-256, install/rollback instructions and first release.
 
 ## Runtime decision
@@ -47,4 +50,6 @@ The native C++ renderer and settings flow run on Windows with the existing Visua
 
 The PS5 executable now cross-compiles using verified public SDK/PacBrew releases and a Clang 18 prefix extracted from pinned, signed-metadata-verified Ubuntu packages. Everything stays under the project cache; no apt, sudo or global configuration change is required. The clean-room runtime rebuilds twice to the reference hashes. Host mocks cover native display/memory failure paths, and the executable passes container integrity and independent ELF structure checks; see [build evidence scope](PS5-BUILD.md).
 
-Read-only discovery works from PC and inside the private PS5 app, with bounded metadata parsing, core evidence, disc reference handling and real native game lists. Its console journal records 92 games, 55 routes and no connection failures. This covers configured roots, not every possible dedicated-emulator layout. Every updated program file matched its full raw readback. The compact Circle hint is accepted. UI-15's single SystemService request now opens PS5SX2 directly on the TV, confirmed by the owner. It only observes shell focus afterward. Native UI/route tests, nine transport fixtures and the unchanged 28-capture renderer checks pass; its complete source/object kit reproduces the exact ELF and SELF from a fresh extraction and compiler prefix. Continue with PS1/PS3 menus, a RetroArch game and final settings/restart acceptance. Keep private console evidence separate from public source.
+Read-only discovery works from PC and inside the private PS5 app, with bounded metadata parsing, core evidence, disc references and real native game lists. The latest PC scan of configured console roots found 91 games and 55 routes; an earlier in-app journal recorded 92 and 55. This covers configured roots, not every dedicated-emulator layout. UI-19 has 80 complete raw file readbacks with preferences preserved, 47 native host captures, room/rotation tests and an exact cold relink. The owner confirmed its room, L1/R1 paging, clock display, Circle closure and saved clock after reopening. UI-15 retains four owner-accepted launch baselines with the same helper bytes. Recheck those routes and normal console restart on UI-19 before publishing. Keep private console evidence separate from public source.
+
+`npm run verify:ps5-release-inputs` checks the existing app and source archives without preparing a release or evaluating hardware acceptance. `npm run test:ps5-release-inputs` covers malformed or incomplete ledgers, changed assets/notices, source membership and standalone guide links. The real release still requires the owner-check file bound to the full tested package manifest. Its ZIP includes the room guide, with links that resolve from both the root README and app's START-HERE.

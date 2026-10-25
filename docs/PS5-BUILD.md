@@ -1,6 +1,6 @@
 # PS5 cross-build status
 
-Shelf cross-compiles its C++ UI, SDL event loop and read-only discovery adapter into a native PS5 executable. Its software renderer uses a PS5 VideoOut backend and a direct-memory allocator. The owner has confirmed the grid, settings navigation and closing fade on firmware 12.20. Console-local discovery records 92 games and 55 routes without a connection error. A private candidate adds an embedded cooperative launch helper and UI transport. **Full hardware and launch acceptance remain pending, and no installable prototype is released yet.**
+Shelf cross-compiles its C++ UI, SDL event loop and read-only discovery adapter into a native PS5 executable. Its software renderer uses PS5 VideoOut and a direct-memory allocator. The owner accepted UI-19's room, L1/R1 paging, TV clock, Circle closure and saved clock after app reopen on firmware 12.20. UI-15's four launch routes remain verified baseline evidence with identical helper bytes; UI-19's launch regression and normal restart checks are pending. Earlier in-app discovery recorded 92 games/55 routes; the latest PC read-only scan found 91/55. **No installable public prototype is released yet.**
 
 ## Build without a system-wide installation
 

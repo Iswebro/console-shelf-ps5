@@ -1,6 +1,6 @@
 # Console Shelf
 
-A console-first library project for PS5 homebrew. This repository contains a **browser design preview**, a **native C++/SDL development build for PC**, and a cross-compiled PS5 executable. The installable PS5 prototype is still in development. Open [index.html](index.html) for the design preview, or follow the [native build instructions](native/README.md). Both default to offline use. [Read-only PS5 library discovery](docs/DISCOVERY.md) and four initial launch routes have been checked on the owner's firmware 12.20 console. The new Shelf visuals and final persistence/restart checks still need console acceptance.
+A console-first library project for PS5 homebrew. This repository contains a **browser design preview**, a **native C++/SDL development build for PC**, and a cross-compiled PS5 executable. The installable PS5 prototype is still in development. Open [index.html](index.html) for the design preview, or follow the [native build instructions](native/README.md). Both default to offline use. [Read-only PS5 library discovery](docs/DISCOVERY.md) and four initial launch routes were checked on the owner's firmware 12.20 console. The owner has now accepted UI-19's room, paging, TV clock and app-reopen persistence. Normal console restart and current-build launch regression checks remain before the public prototype download.
 
 ![Shelf's integrated gaming room, deep console counters and personal TV](previews/display-shelf-desktop.png)
 
