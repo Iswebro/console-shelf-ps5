@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "scope": "Private UI-18 candidate: three layouts, grounded Shelf scenery and optional missing-emulator monochrome; owner display/settings checks pending",
+  "sourceCommit": "ef24c3f42b0fed7e408be9d64ca8a4c83a30130e",
+  "titleId": "PPSA99541",
+  "contentVersion": "00.100.017",
+  "self": {
+    "bytes": 2679169,
+    "sha256": "6df59689ca8945910813379ca475c2d8de5a8f4793e8c9fce27f1b89e97a4853"
+  },
+  "elf": {
+    "bytes": 2787140,
+    "sha256": "7e17b0eeab353cde9a7c95b3bfdc004798d922d22979c975f6de93a3dc45ef61"
+  },
+  "helper": {
+    "bytes": 108792,
+    "sha256": "6a848266e473351f0b3ccc2dcd23a3a022e392e2f0d81ddf7281e97a7605eaef",
+    "offset": 1600352,
+    "runtimeMode": "standard-sdk",
+    "permissionChanges": true
+  },
+  "checks": {
+    "nativeModelAndSettings": "passed; default monochrome, games without emulator, native PS4/PS5 exception, colour override, legacy settings and persistence",
+    "browser": "passed; three layouts, all 52 icons, style override and persistence, desktop/mobile geometry and controller simulation",
+    "nativeRenderer": "34 captures passed, including optional style and saved reopen; deeper shelf also reviewed across all 52 icons",
+    "readOnlyDiscovery": "55 routes in owner console inventory; two complete scans reported 91 and 92 games respectively; no console writes or app launch",
+    "structuralExecutable": "passed; embedded helper matches accepted UI-15 helper exactly",
+    "retainedInputRelink": "passed; exact ELF and SELF from 18 application objects and three replaceable libraries",
+    "consoleInstall": "all 80 full raw readbacks passed with SELF conversion disabled; previous owned program backed up",
+    "preferencesUnchanged": true,
+    "helperExecutedByInstaller": false,
+    "hardwareAcceptance": "UI-18 visual/navigation/colour persistence pending; UI-15 route acceptance retained as baseline",
+    "coldSourceKit": "passed; exact ELF and SELF from extracted kit, fresh compiler prefix and rebuilt converter; no application recompile or console contact"
+  },
+  "behaviour": {
+    "layouts": [
+      "Grid",
+      "Swipe",
+      "Shelf"
+    ],
+    "monochromeMissingDefault": true,
+    "monochromeChoice": "Appearance -> Missing emulator artwork -> Black & white / Full colour",
+    "nativeSystemException": [
+      "PS4",
+      "PS5"
+    ],
+    "gameFilesAloneMeanEmulatorInstalled": false,
+    "grayscaleAltersSourcePNG": false,
+    "settingsSchema": 1,
+    "legacySettingsReadable": true,
+    "launchHelperChanged": false,
+    "networkFirmwareOrAutoloadChanged": false
+  },
+  "publicBinary": "not published",
+  "sourceKit": {
+    "sourceCommit": "ef24c3f42b0fed7e408be9d64ca8a4c83a30130e",
+    "files": 277,
+    "archiveBytes": 114230805,
+    "archiveSHA256": "225eefe3b3eca90eaedb8bfcb4f68ebb3b3a269a139f2cc096bafe87f3ca3caf",
+    "coldRelinkTest": "passed; exact reference ELF/SELF from extracted kit, fresh compiler prefix and rebuilt converter"
+  },
+  "launchBaseline": "Owner accepted PSXS5, PS5SX2, PS5SX3 foreground menus and Mario Party 3 direct launch on UI-15. UI-18 retains the identical helper, but final artifact regression checks remain pending."
+}
