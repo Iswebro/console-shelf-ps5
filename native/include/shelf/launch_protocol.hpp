@@ -148,7 +148,109 @@ inline std::array<const char*, 6> launch_arguments(const LaunchRequest& request)
         return {"--rom", request.rom, "--core", request.core, "--exit-after-game", nullptr};
     return {};
 }
-enum class HandoffResult { invalid, foreground_changed, reply_failed, close_timeout, started, unconfirmed, refused };
+enum class LaunchStage {
+    sending,
+    ready,
+    committed,
+    cancelled,
+    started,
+    unconfirmed,
+    refused,
+    invalid,
+    foreground_changed,
+    reply_failed,
+    close_timeout,
+    service_unavailable
+};
+struct LaunchStatus {
+    char id[33]{};
+    std::uint64_t issued = 0;
+    LaunchStage stage = LaunchStage::invalid;
+    std::uint32_t code = 0;
+};
+inline constexpr std::array<std::string_view, 12> launch_stage_names = {
+    "sending", "ready",   "committed",          "cancelled",    "started",       "unconfirmed",
+    "refused", "invalid", "foreground-changed", "reply-failed", "close-timeout", "service-unavailable"};
+inline bool encode_launch_status(const LaunchStatus& status, char* output, std::size_t capacity) {
+    const auto stage = static_cast<std::size_t>(status.stage);
+    if (!output || !capacity || !launch_bounded(status.id) || std::strlen(status.id) != 32 || !status.issued ||
+        stage >= launch_stage_names.size())
+        return false;
+    for (char c : std::string_view(status.id))
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')))
+            return false;
+    const int used = std::snprintf(
+        output, capacity, "console-shelf-status 1\nid=%s\nissued=%llu\nstate=%.*s\ncode=%08x\n", status.id,
+        static_cast<unsigned long long>(status.issued), static_cast<int>(launch_stage_names[stage].size()),
+        launch_stage_names[stage].data(), status.code);
+    return used > 0 && static_cast<std::size_t>(used) < capacity;
+}
+inline bool parse_launch_status(std::string_view message, std::uint64_t now, LaunchStatus& output) {
+    if (message.empty() || message.size() >= 256 || message.back() != '\n')
+        return false;
+    for (unsigned char c : message)
+        if ((c < 32 && c != '\n') || c == 127)
+            return false;
+    constexpr std::string_view header = "console-shelf-status 1\n";
+    if (message.substr(0, header.size()) != header)
+        return false;
+    message.remove_prefix(header.size());
+    auto field = [&message](std::string_view tag, char* value, std::size_t capacity) {
+        const auto end = message.find('\n');
+        if (end == message.npos || end < tag.size() || message.substr(0, tag.size()) != tag ||
+            end - tag.size() >= capacity)
+            return false;
+        const auto length = end - tag.size();
+        std::memcpy(value, message.data() + tag.size(), length);
+        value[length] = 0;
+        message.remove_prefix(end + 1);
+        return true;
+    };
+    LaunchStatus candidate;
+    char issued[21]{}, state[24]{}, code[9]{};
+    if (!field("id=", candidate.id, sizeof(candidate.id)) || !field("issued=", issued, sizeof(issued)) ||
+        !field("state=", state, sizeof(state)) || !field("code=", code, sizeof(code)) || !message.empty() ||
+        std::strlen(candidate.id) != 32 || !issued[0] || std::strlen(code) != 8)
+        return false;
+    for (char c : std::string_view(candidate.id))
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')))
+            return false;
+    for (char c : std::string_view(issued)) {
+        if (c < '0' || c > '9' || candidate.issued > (UINT64_MAX - static_cast<unsigned>(c - '0')) / 10)
+            return false;
+        candidate.issued = candidate.issued * 10 + static_cast<unsigned>(c - '0');
+    }
+    if (!now || !candidate.issued || (now >= candidate.issued && now - candidate.issued > 30) ||
+        (candidate.issued > now && candidate.issued - now > 2))
+        return false;
+    for (char c : std::string_view(code)) {
+        const int value = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : -1;
+        if (value < 0)
+            return false;
+        candidate.code = candidate.code * 16 + static_cast<unsigned>(value);
+    }
+    bool found = false;
+    for (std::size_t i = 0; i < launch_stage_names.size(); ++i)
+        if (state == launch_stage_names[i]) {
+            candidate.stage = static_cast<LaunchStage>(i);
+            found = true;
+        }
+    if (!found)
+        return false;
+    output = candidate;
+    return true;
+}
+enum class HandoffResult {
+    invalid,
+    foreground_changed,
+    reply_failed,
+    close_timeout,
+    started,
+    unconfirmed,
+    refused,
+    cancelled
+};
+enum class HandoffConsent { pending, committed, cancelled };
 struct HandoffOps {
     void* context = nullptr;
     // 0: no foreground app; 1: title filled; -1: current title is unknown.
@@ -158,9 +260,10 @@ struct HandoffOps {
     // One launch attempt only. No process kill, alternate launch or retry.
     int (*launch)(void*, const LaunchRequest&) = nullptr;
     std::uint64_t (*now)(void*) = nullptr;
+    HandoffConsent (*consent)(void*) = nullptr;
 };
 inline HandoffResult cooperative_handoff(const LaunchRequest& request, const HandoffOps& ops) {
-    if (!ops.current || !ops.ready || !ops.wait || !ops.launch || !ops.now ||
+    if (!ops.current || !ops.ready || !ops.wait || !ops.launch || !ops.now || !ops.consent ||
         !launch_request_valid(request, ops.now(ops.context)))
         return HandoffResult::invalid;
     char title[10]{};
@@ -170,10 +273,15 @@ inline HandoffResult cooperative_handoff(const LaunchRequest& request, const Han
         return HandoffResult::reply_failed;
     unsigned idle = 0;
     for (unsigned i = 0; i < 60; ++i) {
+        const auto consent = ops.consent(ops.context);
+        if (consent == HandoffConsent::cancelled)
+            return HandoffResult::cancelled;
         title[0] = 0;
         const int current = ops.current(ops.context, title);
         if (current < 0 || (current && (!launch_bounded(title) || std::strcmp(title, shelf_title_id) != 0)))
             return HandoffResult::foreground_changed;
+        if (current == 0 && consent != HandoffConsent::committed)
+            return HandoffResult::cancelled;
         idle = current == 0 ? idle + 1 : 0;
         if (idle >= 2)
             break;
@@ -183,6 +291,8 @@ inline HandoffResult cooperative_handoff(const LaunchRequest& request, const Han
     }
     if (!launch_request_valid(request, ops.now(ops.context)))
         return HandoffResult::invalid;
+    if (ops.consent(ops.context) != HandoffConsent::committed)
+        return HandoffResult::cancelled;
     const int result = ops.launch(ops.context, request);
     for (unsigned i = 0; i < (result >= 0 ? 32u : 16u); ++i) {
         title[0] = 0;

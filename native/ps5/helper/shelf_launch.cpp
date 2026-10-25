@@ -33,6 +33,7 @@ constexpr char request_path[] = "/data/console-shelf/launch-request.txt";
 constexpr char status_path[] = "/data/console-shelf/launch-status.txt";
 constexpr char status_temporary[] = "/data/console-shelf/launch-status.tmp";
 struct Context {
+    const shelf::LaunchRequest* request = nullptr;
     std::uint32_t user = 0;
     int launch_status = 0;
 };
@@ -40,12 +41,19 @@ std::uint64_t now(void*) {
     const auto value = std::time(nullptr);
     return value > 0 ? static_cast<std::uint64_t>(value) : 0;
 }
-bool status(const char* id, const char* state, int code) {
+bool status(const shelf::LaunchRequest& request, shelf::LaunchStage state, int code) {
+    shelf::LaunchStatus reply;
+    std::memcpy(reply.id, request.id, sizeof(reply.id));
+    reply.issued = request.issued;
+    reply.stage = state;
+    reply.code = static_cast<std::uint32_t>(code);
+    char message[256];
+    if (!shelf::encode_launch_status(reply, message, sizeof(message)))
+        return false;
     FILE* file = std::fopen(status_temporary, "wb");
     if (!file)
         return false;
-    bool okay = std::fprintf(file, "console-shelf-status 1\nid=%s\nstate=%s\ncode=%08x\n", id, state,
-                             static_cast<unsigned>(code)) > 0;
+    bool okay = std::fwrite(message, 1, std::strlen(message), file) == std::strlen(message);
     okay = std::fflush(file) == 0 && okay;
     okay = std::fclose(file) == 0 && okay;
     if (okay && std::rename(status_temporary, status_path) == 0)
@@ -71,8 +79,30 @@ int current(void*, char (&title)[10]) {
     std::memcpy(title, value, 10);
     return 1;
 }
-bool ready(void*, const char* id) {
-    return status(id, "ready", 0);
+bool ready(void* raw, const char* id) {
+    const auto& context = *static_cast<Context*>(raw);
+    return context.request && std::strcmp(id, context.request->id) == 0 &&
+           status(*context.request, shelf::LaunchStage::ready, 0);
+}
+shelf::HandoffConsent consent(void* raw) {
+    const auto& context = *static_cast<Context*>(raw);
+    FILE* file = std::fopen(status_path, "rb");
+    if (!file || !context.request) {
+        if (file)
+            std::fclose(file);
+        return shelf::HandoffConsent::cancelled;
+    }
+    char message[256];
+    const auto size = std::fread(message, 1, sizeof(message), file);
+    const bool failed = std::ferror(file) != 0;
+    std::fclose(file);
+    shelf::LaunchStatus reply;
+    if (failed || !shelf::parse_launch_status({message, size}, now(nullptr), reply) ||
+        std::strcmp(reply.id, context.request->id) != 0 || reply.issued != context.request->issued)
+        return shelf::HandoffConsent::cancelled;
+    if (reply.stage == shelf::LaunchStage::committed)
+        return shelf::HandoffConsent::committed;
+    return reply.stage == shelf::LaunchStage::ready ? shelf::HandoffConsent::pending : shelf::HandoffConsent::cancelled;
 }
 void wait(void*, unsigned milliseconds) {
     usleep(milliseconds * 1000);
@@ -89,24 +119,26 @@ int launch(void* raw, const shelf::LaunchRequest& request) {
     context.launch_status = sceLncUtilLaunchApp(request.title, args[0] ? args.data() : nullptr, &params);
     return context.launch_status;
 }
-const char* result_name(shelf::HandoffResult result) {
+shelf::LaunchStage result_stage(shelf::HandoffResult result) {
     switch (result) {
     case shelf::HandoffResult::invalid:
-        return "invalid";
+        return shelf::LaunchStage::invalid;
     case shelf::HandoffResult::foreground_changed:
-        return "foreground-changed";
+        return shelf::LaunchStage::foreground_changed;
     case shelf::HandoffResult::reply_failed:
-        return "reply-failed";
+        return shelf::LaunchStage::reply_failed;
     case shelf::HandoffResult::close_timeout:
-        return "close-timeout";
+        return shelf::LaunchStage::close_timeout;
     case shelf::HandoffResult::started:
-        return "started";
+        return shelf::LaunchStage::started;
     case shelf::HandoffResult::unconfirmed:
-        return "unconfirmed";
+        return shelf::LaunchStage::unconfirmed;
     case shelf::HandoffResult::refused:
-        return "refused";
+        return shelf::LaunchStage::refused;
+    case shelf::HandoffResult::cancelled:
+        return shelf::LaunchStage::cancelled;
     }
-    return "invalid";
+    return shelf::LaunchStage::invalid;
 }
 } // namespace
 int main() {
@@ -125,14 +157,15 @@ int main() {
     if (unlink(request_path) != 0)
         return 1;
     Context context;
+    context.request = &request;
     sceUserServiceInitialize(nullptr);
     const int initialized = sceLncUtilInitialize();
     const int user_status = sceUserServiceGetForegroundUser(&context.user);
     if (initialized < 0 || user_status != 0 || context.user > 0x7fffffffu) {
-        status(request.id, "service-unavailable", user_status ? user_status : initialized);
+        status(request, shelf::LaunchStage::service_unavailable, user_status ? user_status : initialized);
         return 1;
     }
-    const auto result = shelf::cooperative_handoff(request, {&context, current, ready, wait, launch, now});
-    status(request.id, result_name(result), context.launch_status);
+    const auto result = shelf::cooperative_handoff(request, {&context, current, ready, wait, launch, now, consent});
+    status(request, result_stage(result), context.launch_status);
     return result == shelf::HandoffResult::started ? 0 : 1;
 }

@@ -66,8 +66,16 @@ struct FakeHandoff {
     static std::uint64_t now(void* raw) {
         return static_cast<FakeHandoff*>(raw)->clock;
     }
+    static shelf::HandoffConsent consent(void* raw) {
+        auto& f = *static_cast<FakeHandoff*>(raw);
+        if (f.scenario == 8)
+            return shelf::HandoffConsent::pending;
+        if (f.scenario == 9 || (f.scenario == 10 && f.waits >= 2))
+            return shelf::HandoffConsent::cancelled;
+        return shelf::HandoffConsent::committed;
+    }
     shelf::HandoffOps ops() {
-        return {this, current, ready, wait, launch, now};
+        return {this, current, ready, wait, launch, now, consent};
     }
 };
 } // namespace
@@ -78,6 +86,20 @@ void test_launch() {
     char message[launch_message_capacity];
     check(encode_launch_request(r, 1000, message, sizeof(message)), "menu request is encoded");
     const std::string original(message);
+    LaunchStatus response;
+    std::strcpy(response.id, r.id);
+    response.issued = r.issued;
+    response.stage = LaunchStage::ready;
+    response.code = 0x80940033;
+    char encoded_status[256];
+    LaunchStatus decoded_status;
+    check(encode_launch_status(response, encoded_status, sizeof(encoded_status)) &&
+              parse_launch_status(encoded_status, 1000, decoded_status) && decoded_status.stage == LaunchStage::ready &&
+              decoded_status.code == response.code && std::strcmp(decoded_status.id, r.id) == 0,
+          "reply roundtrip binds its ID, timestamp, state and numeric code");
+    check(!parse_launch_status(std::string(encoded_status) + "state=committed\n", 1000, decoded_status) &&
+              !parse_launch_status(encoded_status, 1031, decoded_status),
+          "duplicate and stale replies are rejected");
     LaunchRequest parsed;
     check(parse_launch_request(original, 1000, parsed) && std::strcmp(parsed.id, r.id) == 0 &&
               std::strcmp(parsed.title, r.title) == 0 && parsed.mode == r.mode,
@@ -125,7 +147,7 @@ void test_launch() {
     FakeHandoff f;
     check(cooperative_handoff(r, f.ops()) == HandoffResult::started && f.launches == 1 && f.ready_calls == 1,
           "cooperative closure leads to one observed launch");
-    for (int scenario : {1, 2, 3, 4, 6}) {
+    for (int scenario : {1, 2, 3, 4, 6, 8, 9, 10}) {
         FakeHandoff refused;
         refused.scenario = scenario;
         const auto result = cooperative_handoff(r, refused.ops());
