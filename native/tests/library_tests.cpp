@@ -112,6 +112,7 @@ void test_library() {
     for (const char* value : {"{\"a\":1,\"a\":2}", "{\"a\":\"x\\u0000y\"}", "{} trailing", "{\"a\":\"\xc0\xaf\"}"})
         check(!json.parse(value, std::strlen(value)), "ambiguous metadata refused");
     Tree tree;
+    tree.app("PPSA99541"); // Shelf must not list its own tile as a game.
     tree.app("PPSA99169");
     tree.app("PPSA99203");
     tree.app("PPSA97510");

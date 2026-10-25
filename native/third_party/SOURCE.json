@@ -119,5 +119,23 @@
     "bytes": 16394,
     "gitBlob": "cab5feb427725f8e5c82287f7fe59481b609b9b5",
     "sha256": "25b0145150d500498e4d209cec69c18c42cf818bffcc54690be3b895a2a16dee"
+  },
+  {
+    "local": "native/third_party/licenses/libsamplerate-0.2.2.txt",
+    "url": "https://raw.githubusercontent.com/libsndfile/libsamplerate/c96f5e3de9c4488f4e6c97f59f5245f22fda22f7/COPYING",
+    "bytes": 1334,
+    "sha256": "2c1f76ce2effdddb425018405d5690c0b1ab4e6976e35296b0a6db65c5e1a55d",
+    "repo": "libsndfile/libsamplerate",
+    "revision": "c96f5e3de9c4488f4e6c97f59f5245f22fda22f7",
+    "gitBlob": "9f82626e6371ceeb76f8d2c9968748ec1584e10f",
+    "license": "BSD-2-Clause"
+  },
+  {
+    "local": "native/third_party/licenses/LGPL-2.1.txt",
+    "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt",
+    "bytes": 26419,
+    "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+    "publisher": "Free Software Foundation",
+    "license": "LGPL-2.1"
   }
 ]

@@ -1,0 +1,36 @@
+{
+  "structuralCheck": "passed",
+  "hardwareTest": "not run",
+  "firmware12_20": "unverified",
+  "elf": {
+    "bytes": 2638836,
+    "sha256": "f5a4dafd70552d165c11b03194921cb86f5a916c322483ffa4a3287be3fef288",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ]
+  },
+  "self": {
+    "bytes": 2536113,
+    "sha256": "4ecb081367e082c5f879c9902b97e7d5b4b76f040bb0d0ccd82f010008814acd"
+  },
+  "verifiedOn": "2026-10-25",
+  "scope": "UI-only test executable and separate metadata; no console deployment or hardware acceptance yet",
+  "sourceFingerprintSHA256": "2de8618d4adfb2b7a00e68bcfc52ededd73a5c194bccfdffd94f7eae937c213a",
+  "unofficialTestTitleId": "PPSA99541",
+  "checks": {
+    "nativeModelDiscoveryAndSelfTileExclusion": "passed",
+    "nativeRendererCaptures": 11,
+    "damagedExecutableRejectionFixtures": 8,
+    "tileArtwork": "512x512 derived packaging conversion visually inspected"
+  },
+  "prototypeRelease": "not published",
+  "launchAdapters": "unavailable; no launch helper included"
+}

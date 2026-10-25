@@ -42,3 +42,5 @@ The packager inspects the completed FSELF's container integrity. A separate Pyth
 Choose a separate unofficial title identity and check for an installed collision. Assemble the owned app folder, artwork, complete licenses and corresponding source/relink instructions for all linked libraries, including LGPL libiconv and the precise PS5 SDL port revision. Validate discovery and launch contracts, transfer/readback hashes, then test display, DualSense input, saved settings, restart/reopen and supported routes on firmware 12.20. Keep prototype publication gated on those results; see the [acceptance plan](PROTOTYPE-PLAN.md).
 
 No kernel helper, exploit, firmware updater, network configuration tool or console deployment command runs as part of this cross-build.
+
+A separate [private UI test assembler](PS5-UI-TEST.md) can now prepare a local folder and ZIP after the reviewed sources are committed. It uses its own unofficial app identity and records each file's hash; it does not deploy or publish anything. That package is a hardware-test candidate, not the first public prototype release.

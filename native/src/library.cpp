@@ -506,7 +506,7 @@ static const App apps[] = {{"PPSA99169", "RetroArch", ""},
                            {"PPSA98510", "SwanStation", "ps1"}};
 bool known_utility(std::string_view title) {
     if (one_of(title, "PPSA99000|PPSA90210|PPSA77305|PPSA99995|PPSA99310|PPSA98001|PPSA75837|PPSA99841|PPSA99109|"
-                      "PPSA99350|PPSA99230|PPSA99058"))
+                      "PPSA99350|PPSA99230|PPSA99058|PPSA99541"))
         return true;
     for (const auto& app : apps)
         if (title == app.id)
