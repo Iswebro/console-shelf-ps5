@@ -17,7 +17,7 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Native C++/SDL renderer, navigation model and settings persistence exercised on PC.
 - [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
 - [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
-- [ ] Verify the installed UI-21 build on firmware 12.20: page-local navigation, persistent TV, per-console intro/video and static options, saved settings and Grid/Swipe/Shelf controls. The normal console restart check remains deferred by the owner.
+- [ ] Complete the installed UI-21 checks on firmware 12.20. The owner confirmed distinct PS1/PS2/N64 intros, improved menu readability and finer static. Page-local navigation, persistent TV, saved settings, Grid/Swipe/Shelf controls and final launch regressions remain separate checks. The normal console restart check remains deferred by the owner.
 - [x] Read-only emulator/core and game discovery in configured existing library locations, checked from PC against the owner's console.
 - [x] The same configured discovery inside the PS5 app sandbox, with complete scan evidence.
 - [ ] Further dedicated-emulator and library-layout adapters.
