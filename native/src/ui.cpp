@@ -230,6 +230,26 @@ void input(UiState& state, Action action) {
             state.page = Page::home;
             return;
         }
+        if (state.detail_focus == 0 && state.library &&
+            (action == Action::left || action == Action::right || action == Action::confirm)) {
+            const auto* selected = preferred_route(*state.library, state.selected_system,
+                                                   state.settings.preferred_emulator[state.selected_system].data());
+            std::array<std::size_t, max_routes> routes{};
+            int count = 0, current = 0;
+            for (std::size_t i = 0; i < state.library->route_count; ++i)
+                if (state.library->routes[i].system == state.selected_system) {
+                    if (&state.library->routes[i] == selected)
+                        current = count;
+                    routes[static_cast<std::size_t>(count++)] = i;
+                }
+            if (count) {
+                current = (current + count + (action == Action::left ? -1 : 1)) % count;
+                std::snprintf(state.settings.preferred_emulator[state.selected_system].data(), 48, "%s",
+                              state.library->routes[routes[static_cast<std::size_t>(current)]].id);
+                state.changed = true;
+            }
+            return;
+        }
         if (action == Action::up || action == Action::left)
             state.detail_focus = clamp(state.detail_focus - 1, 2);
         if (action == Action::down || action == Action::right)
@@ -240,9 +260,10 @@ void input(UiState& state, Action action) {
             state.changed = true;
         }
         if (action == Action::confirm) {
-            if (state.detail_focus == 2)
+            if (state.detail_focus == 2) {
                 state.page = Page::library;
-            else
+                state.game_focus = 0;
+            } else
                 std::snprintf(state.notice, sizeof(state.notice), "%s",
                               state.inventory[state.selected_system].emulator_count
                                   ? "Launch adapter is not connected in this development build."
@@ -253,6 +274,21 @@ void input(UiState& state, Action action) {
     if (state.page == Page::library) {
         if (action == Action::back)
             state.page = Page::details;
+        if (state.library) {
+            const auto games = games_for_system(*state.library, state.selected_system);
+            const int maximum = games.count ? static_cast<int>(games.count) - 1 : 0;
+            if (action == Action::up)
+                state.game_focus = clamp(state.game_focus - 1, maximum);
+            if (action == Action::down)
+                state.game_focus = clamp(state.game_focus + 1, maximum);
+            if (action == Action::left)
+                state.game_focus = clamp(state.game_focus - 8, maximum);
+            if (action == Action::right)
+                state.game_focus = clamp(state.game_focus + 8, maximum);
+            if (action == Action::confirm && games.count)
+                std::snprintf(state.notice, sizeof(state.notice),
+                              "Game found. Direct launching is awaiting console validation.");
+        }
         return;
     }
     if (action == Action::back) {
@@ -302,7 +338,7 @@ void input(UiState& state, Action action) {
     normalize_home(state);
     if (action == Action::confirm) {
         state.page = Page::details;
-        state.detail_focus = 1;
+        state.detail_focus = state.inventory[state.selected_system].built_in ? 2 : 1;
     }
     if (action == Action::favorite) {
         const auto selected = state.selected_system;

@@ -1,6 +1,6 @@
 # Console Shelf
 
-A console-first library project for PS5 homebrew. This repository contains a **browser design preview** and a **native C++/SDL development build for PC**. The PS5 package is still in development. Open [index.html](index.html) in a browser for the design preview, or follow the [native build instructions](native/README.md) to run the C++ app on PC. Both currently work offline with no console launch connection.
+A console-first library project for PS5 homebrew. This repository contains a **browser design preview**, a **native C++/SDL development build for PC**, and a cross-compiled PS5 executable. The installable PS5 prototype is still in development. Open [index.html](index.html) for the design preview, or follow the [native build instructions](native/README.md). Both default to offline use. The native app now has opt-in [read-only PS5 library discovery](docs/DISCOVERY.md), checked from PC against a real console. Console display and launch validation remain pending.
 
 ![Curved console collection with the selected system in front](previews/carousel-depth.png)
 
@@ -18,9 +18,9 @@ See the [mobile Swipe view](previews/carousel-mobile.png) and [Switch 2 icon](pr
 
 ## Inventory and compatibility
 
-The [demo system catalogue](docs/SYSTEMS.md) comes from a dated PS5 setup snapshot. Its 46 RetroArch core mappings and example game names are **not** a live scan of another user's console. A mapped core or listed emulator does not guarantee a game runs. In the demo, “Emulator or games” shows 51 of 52 cards; Switch 2 is the hardware-reference-only card and has no launch route. A future native build must replace the demo with each owner's actual emulator and game inventory.
+The [demo system catalogue](docs/SYSTEMS.md) comes from a dated PS5 setup snapshot. Its 46 RetroArch core mappings and example game names are **not** a live scan of another user's console. A mapped core or listed emulator does not guarantee a game runs. In the browser demo, “Emulator or games” shows 51 of 52 cards; Switch 2 is the hardware-reference-only card and has no launch route. The native app instead starts empty and can use its [read-only scanner](docs/DISCOVERY.md) for the owner's actual inventory.
 
-The next main milestone is a [native PS5 prototype and its first verified download](docs/PROTOTYPE-PLAN.md), targeting firmware 12.20. The [C++17 app](native/README.md) renders the console shelf and settings, handles controller-style navigation and search, and saves preferences with recovery from a backup. Model, persistence and simulated SDL controller tests pass on PC. The [PS5 executable now cross-compiles](docs/PS5-BUILD.md), with native display/memory integration checked by host mocks and executable structure checks. Real discovery, launch adapters, physical controller and firmware tests remain in development. No PS5 package is published here.
+The next main milestone is a [native PS5 prototype and its first verified download](docs/PROTOTYPE-PLAN.md), targeting firmware 12.20. The [C++17 app](native/README.md) renders the console shelf, settings and discovered game lists, handles controller-style navigation and search, and saves preferences with recovery from a backup. Model, discovery, persistence, read-only FTP and simulated SDL controller tests pass on PC. The [PS5 executable cross-compiles](docs/PS5-BUILD.md), with native display/memory integration checked by host mocks and executable structure checks. Discovery inside the app sandbox, launch adapters, physical controller and firmware tests remain pending. No PS5 package is published here.
 
 ![Searchable console visibility settings](previews/settings-consoles.png)
 

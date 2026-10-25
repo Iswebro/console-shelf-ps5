@@ -21,6 +21,7 @@ Console Shelf's preview and C++ UI are original code. Its PS5 platform/build int
 | [libsamplerate](https://github.com/libsndfile/libsamplerate) 0.2.2 | Erik de Castro Lopo and contributors | SDL's sample conversion dependency in PacBrew; BSD-2-Clause. |
 | [zlib](https://zlib.net/) 1.3.2 | Jean-loup Gailly and Mark Adler | Pinned source-built compression library for the host FSELF tool; zlib license. |
 | [stb_image, stb_truetype, stb_image_write](https://github.com/nothings/stb) | Sean Barrett and contributors | Unmodified decoder/font/screenshot headers under `native/third_party/stb/`. Their MIT/Unlicense notices remain embedded; this project uses the MIT option. |
+| [cJSON](https://github.com/DaveGamble/cJSON/tree/c859b25da02955fef659d658b8f324b5cde87be3) 1.7.19 | Dave Gamble and contributors | Unmodified, bounded JSON metadata parser. MIT license retained in `native/third_party/cjson/LICENSE`; exact source hashes recorded in `native/third_party/SOURCE.json`. |
 | [Poppins](https://github.com/google/fonts/tree/main/ofl/poppins) | Indian Type Foundry / Jonny Pinhorn and contributors | Unmodified Regular and SemiBold font files under `native/assets/fonts/`, with [SIL Open Font License 1.1](native/assets/fonts/OFL.txt). |
 
 [Pinned source revisions and file hashes](native/third_party/SOURCE.json) identify the vendored stb headers, fonts and retained SDL license. The source headers/font downloads were compared to their pinned Git blob IDs before recording SHA-256. SDL's package has its own pinned release-asset digest in `tools/fetch-native-deps.js`.

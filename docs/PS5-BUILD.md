@@ -1,6 +1,6 @@
 # PS5 cross-build status
 
-Shelf now cross-compiles its C++ UI and SDL event loop into a native PS5 executable. Its software renderer uses a PS5 VideoOut backend and a direct-memory allocator. This is a development build: **no console test or firmware 12.20 compatibility claim has been made, and no installable prototype is released yet**. Discovery and launch adapters are still disconnected.
+Shelf now cross-compiles its C++ UI, SDL event loop and read-only discovery adapter into a native PS5 executable. Its software renderer uses a PS5 VideoOut backend and a direct-memory allocator. This is a development build: **no on-console app test or firmware 12.20 compatibility claim has been made, and no installable prototype is released yet**. Discovery works from PC against real console folders; its console-local FTP connection and launch adapters still need hardware validation.
 
 ## Build without a system-wide installation
 

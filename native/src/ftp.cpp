@@ -1,0 +1,511 @@
+// SPDX-License-Identifier: GPL-3.0-only
+#include "shelf/ftp.hpp"
+#include "shelf/json.hpp"
+#include "shelf/memory.hpp"
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <arpa/inet.h>
+#include <cerrno>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <unistd.h>
+#endif
+namespace shelf {
+namespace {
+#ifdef _WIN32
+using Socket = SOCKET;
+constexpr Socket invalid_socket = INVALID_SOCKET;
+void close_socket(Socket fd) {
+    if (fd != invalid_socket)
+        closesocket(fd);
+}
+#else
+using Socket = int;
+constexpr Socket invalid_socket = -1;
+void close_socket(Socket fd) {
+    if (fd != invalid_socket)
+        close(fd);
+}
+#endif
+constexpr std::size_t max_entries = 32768, max_directories = 4096;
+struct Item {
+    Item* next;
+    FileStat stat;
+    char name[path_capacity];
+};
+struct Directory {
+    Directory* next;
+    Item* first;
+    FsStatus status;
+    char path[path_capacity];
+};
+bool in_root(std::string_view path, std::string_view root) {
+    return path == root ||
+           (path.size() > root.size() && path.substr(0, root.size()) == root && path[root.size()] == '/');
+}
+bool allowed_path(const char* path) {
+    if (!path || !valid_virtual_path(path))
+        return false;
+    for (const char* root :
+         {"/data/homebrew", "/user/app", "/data/PCSX2/games", "/data/PSXS5/games", "/data/SwanStationPS5/games"})
+        if (in_root(path, root))
+            return true;
+    return false;
+}
+bool readable(const char* path, std::uint64_t offset, std::size_t cap) {
+    const std::string_view name(path);
+    const auto dot = name.rfind('.');
+    const auto ext = dot == name.npos ? std::string_view{} : std::string_view(name.data() + dot, name.size() - dot);
+    char folded[16]{};
+    if (ext.size() >= sizeof(folded))
+        return false;
+    for (std::size_t i = 0; i < ext.size(); ++i)
+        folded[i] = ext[i] >= 'A' && ext[i] <= 'Z' ? static_cast<char>(ext[i] + 32) : ext[i];
+    const std::string_view lower(folded);
+    if (offset == 0 && cap <= 65536 && (lower == ".json" || lower == ".sfo" || lower == ".cue" || lower == ".m3u")) {
+        // JSON is only public app metadata, never emulator settings or account files.
+        return lower != ".json" || (name.size() >= 19 && name.substr(name.size() - 19) == "/sce_sys/param.json");
+    }
+    return cap <= 8 && (offset == 0 || offset == 0x8000) &&
+           (lower == ".z64" || lower == ".v64" || lower == ".n64" || lower == ".iso" || lower == ".chd");
+}
+Socket connect_to(const char* host, unsigned short port) {
+    Socket fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd == invalid_socket)
+        return fd;
+#ifdef _WIN32
+    const DWORD timeout = 3000;
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&timeout), sizeof(timeout));
+    setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<const char*>(&timeout), sizeof(timeout));
+#else
+    const timeval timeout{3, 0};
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+#endif
+    sockaddr_in address{};
+#ifdef SHELF_PS5
+    address.sin_len = sizeof(address);
+#endif
+    address.sin_family = AF_INET;
+    address.sin_port = htons(port);
+    if (inet_pton(AF_INET, host, &address.sin_addr) != 1) {
+        close_socket(fd);
+        return invalid_socket;
+    }
+#ifdef _WIN32
+    u_long nonblocking = 1;
+    if (ioctlsocket(fd, FIONBIO, &nonblocking)) {
+        close_socket(fd);
+        return invalid_socket;
+    }
+#else
+    const int flags = fcntl(fd, F_GETFL, 0);
+    if (fd >= FD_SETSIZE) {
+        close_socket(fd);
+        return invalid_socket;
+    }
+    if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
+        close_socket(fd);
+        return invalid_socket;
+    }
+#endif
+    const int connected = connect(fd, reinterpret_cast<const sockaddr*>(&address), sizeof(address));
+    if (connected != 0) {
+#ifdef _WIN32
+        const int connect_error = WSAGetLastError();
+        if (connect_error != WSAEWOULDBLOCK && connect_error != WSAEINPROGRESS) {
+            close_socket(fd);
+            return invalid_socket;
+        }
+#else
+        if (errno != EINPROGRESS) {
+            close_socket(fd);
+            return invalid_socket;
+        }
+#endif
+        fd_set writable, errors;
+        FD_ZERO(&writable);
+        FD_ZERO(&errors);
+        FD_SET(fd, &writable);
+        FD_SET(fd, &errors);
+        timeval wait{3, 0};
+        if (select(static_cast<int>(fd + 1), nullptr, &writable, &errors, &wait) <= 0 || FD_ISSET(fd, &errors)) {
+            close_socket(fd);
+            return invalid_socket;
+        }
+        int error = 0;
+#ifdef _WIN32
+        int error_size = sizeof(error);
+        if (getsockopt(fd, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&error), &error_size) || error) {
+            close_socket(fd);
+            return invalid_socket;
+        }
+#else
+        socklen_t error_size = sizeof(error);
+        if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &error_size) || error) {
+            close_socket(fd);
+            return invalid_socket;
+        }
+#endif
+    }
+#ifdef _WIN32
+    nonblocking = 0;
+    if (ioctlsocket(fd, FIONBIO, &nonblocking)) {
+        close_socket(fd);
+        return invalid_socket;
+    }
+#else
+    if (fcntl(fd, F_SETFL, flags)) {
+        close_socket(fd);
+        return invalid_socket;
+    }
+#endif
+    return fd;
+}
+struct Connection {
+    Socket control = invalid_socket, data = invalid_socket;
+    char buffer[4096]{};
+    int begin = 0, end = 0;
+    bool clean_eof = false;
+    ~Connection() {
+        close_socket(data);
+        close_socket(control);
+    }
+    bool line(char* output, std::size_t cap) {
+        std::size_t used = 0;
+        clean_eof = false;
+        while (used + 1 < cap) {
+            if (begin == end) {
+                end = static_cast<int>(recv(control, buffer, sizeof(buffer), 0));
+                begin = 0;
+                if (end <= 0) {
+                    clean_eof = end == 0 && used == 0;
+                    return false;
+                }
+            }
+            const char value = buffer[begin++];
+            if (!value)
+                return false;
+            if (value == '\n') {
+                if (used && output[used - 1] == '\r')
+                    --used;
+                output[used] = 0;
+                return true;
+            }
+            output[used++] = value;
+        }
+        return false;
+    }
+    int reply(char* output, std::size_t cap) {
+        if (!line(output, cap) || std::strlen(output) < 3)
+            return 0;
+        char code[4]{};
+        std::memcpy(code, output, 3);
+        for (int i = 0; i < 3; ++i)
+            if (code[i] < '0' || code[i] > '9')
+                return 0;
+        if (output[3] == '-') {
+            unsigned lines = 0;
+            do {
+                if (++lines > 32 || !line(output, cap))
+                    return 0;
+            } while (std::strncmp(output, code, 3) || output[3] != ' ');
+        }
+        return std::atoi(code);
+    }
+    int command(const char* verb, const char* argument = nullptr, char* result = nullptr, std::size_t cap = 0) {
+        char request[path_capacity + 64], response[2048];
+        if (argument && (std::strchr(argument, '\r') || std::strchr(argument, '\n')))
+            return 0;
+        const int size =
+            std::snprintf(request, sizeof(request), "%s%s%s\r\n", verb, argument ? " " : "", argument ? argument : "");
+        if (size <= 0 || size >= static_cast<int>(sizeof(request)))
+            return 0;
+        int sent = 0;
+        while (sent < size) {
+            const int n = static_cast<int>(send(control, request + sent, size - sent,
+#ifdef MSG_NOSIGNAL
+                                                MSG_NOSIGNAL
+#else
+                                                0
+#endif
+                                                ));
+            if (n <= 0)
+                return 0;
+            sent += n;
+        }
+        return reply(result ? result : response, result ? cap : sizeof(response));
+    }
+    bool open(const ReadOnlyFtp& client) {
+        control = connect_to(client.host, client.port);
+        if (control == invalid_socket)
+            return false;
+        char reply_text[2048];
+        if (reply(reply_text, sizeof(reply_text)) != 220)
+            return false;
+        const int user = command("USER", "anonymous");
+        return (user == 230 || (user == 331 && command("PASS", "") == 230)) && command("TYPE", "I") == 200;
+    }
+    bool passive(const ReadOnlyFtp& client) {
+        char response[2048];
+        unsigned port = 0;
+        if (command("EPSV", nullptr, response, sizeof(response)) == 229) {
+            const char* start = std::strchr(response, '(');
+            if (start && std::strlen(start) > 5 && start[1] == start[2] && start[2] == start[3]) {
+                char* end_port = nullptr;
+                port = static_cast<unsigned>(std::strtoul(start + 4, &end_port, 10));
+                if (!end_port || *end_port != start[1])
+                    port = 0;
+            }
+        } else if (command("PASV", nullptr, response, sizeof(response)) == 227) {
+            const char* start = std::strchr(response, '(');
+            unsigned a, b, c, d, hi, lo;
+            if (start && std::sscanf(start, "(%u,%u,%u,%u,%u,%u)", &a, &b, &c, &d, &hi, &lo) == 6 && a <= 255 &&
+                b <= 255 && c <= 255 && d <= 255 && hi <= 255 && lo <= 255)
+                port = hi * 256 + lo;
+        }
+        if (!port || port > 65535)
+            return false;
+        // Never follow a server-provided IP address or hostname.
+        data = connect_to(client.host, static_cast<unsigned short>(port));
+        return data != invalid_socket;
+    }
+};
+FsStatus transfer_status(int code) {
+    return code == 550 ? FsStatus::missing : FsStatus::failed;
+}
+Directory* get_directory(ReadOnlyFtp& client, const char* path) {
+    for (auto* dir = static_cast<Directory*>(client.directories); dir; dir = dir->next)
+        if (std::strcmp(dir->path, path) == 0)
+            return dir;
+    if (client.directory_count >= max_directories)
+        return nullptr;
+    auto* dir = static_cast<Directory*>(allocate_zero(1, sizeof(Directory)));
+    if (!dir)
+        return nullptr;
+    std::strcpy(dir->path, path);
+    dir->status = FsStatus::failed;
+    dir->next = static_cast<Directory*>(client.directories);
+    client.directories = dir;
+    ++client.directory_count;
+    Connection connection;
+    if (!connection.open(client) || !connection.passive(client))
+        return dir;
+    char response[2048];
+    const int code = connection.command("LIST", path, response, sizeof(response));
+    if (code != 125 && code != 150) {
+        dir->status = std::strstr(response, "denied") || std::strstr(response, "permitted") ? FsStatus::denied
+                                                                                            : transfer_status(code);
+        return dir;
+    }
+    const Socket saved = connection.control;
+    connection.control = connection.data;
+    connection.data = invalid_socket;
+    char line[2048];
+    bool valid = true, eof = false;
+    for (;;) {
+        // Reuse the bounded line reader for directory data; EOF must be clean.
+        if (!connection.line(line, sizeof(line))) {
+            eof = connection.clean_eof;
+            break;
+        }
+        const char* at = line;
+        const char* fields[8]{};
+        std::size_t lengths[8]{};
+        for (int i = 0; i < 8; ++i) {
+            while (*at == ' ' || *at == '\t')
+                ++at;
+            fields[i] = at;
+            while (*at && *at != ' ' && *at != '\t')
+                ++at;
+            lengths[i] = static_cast<std::size_t>(at - fields[i]);
+        }
+        while (*at == ' ' || *at == '\t')
+            ++at;
+        if (!lengths[0] || !lengths[7] || !*at || lengths[4] > 20) {
+            valid = false;
+            break;
+        }
+        if (line[0] == 'l')
+            continue;
+        if (line[0] != 'd' && line[0] != '-') {
+            valid = false;
+            break;
+        }
+        if (std::strcmp(at, ".") == 0 || std::strcmp(at, "..") == 0)
+            continue;
+        if (!valid_utf8(at) || std::strchr(at, '/') || std::strchr(at, '\\') || std::strlen(at) >= path_capacity) {
+            valid = false;
+            break;
+        }
+        std::uint64_t size = 0;
+        for (std::size_t i = 0; i < lengths[4]; ++i) {
+            const char digit = fields[4][i];
+            if (digit < '0' || digit > '9' || size > (UINT64_MAX - static_cast<unsigned>(digit - '0')) / 10) {
+                valid = false;
+                break;
+            }
+            size = size * 10 + static_cast<unsigned>(digit - '0');
+        }
+        if (!valid)
+            break;
+        if (client.entry_count >= max_entries) {
+            dir->status = FsStatus::limit;
+            break;
+        }
+        auto* item = static_cast<Item*>(allocate_zero(1, sizeof(Item)));
+        if (!item) {
+            valid = false;
+            break;
+        }
+        std::strcpy(item->name, at);
+        item->stat.directory = line[0] == 'd';
+        item->stat.size = size;
+        item->next = dir->first;
+        dir->first = item;
+        ++client.entry_count;
+    }
+    close_socket(connection.control);
+    connection.control = saved;
+    connection.begin = connection.end = 0;
+    const int finish = connection.reply(response, sizeof(response));
+    if (dir->status != FsStatus::limit)
+        dir->status = valid && eof && (finish == 226 || finish == 250) ? FsStatus::ok : FsStatus::failed;
+    return dir;
+}
+FsStatus ftp_list(void* raw, const char* path, EntryVisitor visitor, void* destination) {
+    if (!allowed_path(path) || !visitor)
+        return FsStatus::invalid;
+    auto* dir = get_directory(*static_cast<ReadOnlyFtp*>(raw), path);
+    if (!dir)
+        return FsStatus::limit;
+    if (dir->status != FsStatus::ok)
+        return dir->status;
+    for (auto* item = dir->first; item; item = item->next)
+        if (!visitor(destination, item->name, item->stat))
+            return FsStatus::limit;
+    return FsStatus::ok;
+}
+FsStatus ftp_stat(void* raw, const char* path, FileStat& result) {
+    if (!allowed_path(path))
+        return FsStatus::invalid;
+    // A root is established by a successful listing, never by assumed existence.
+    const std::string_view value(path);
+    const auto split = value.rfind('/');
+    char parent[path_capacity];
+    std::memcpy(parent, path, split);
+    parent[split] = 0;
+    if (!allowed_path(parent)) {
+        const auto* dir = get_directory(*static_cast<ReadOnlyFtp*>(raw), path);
+        if (!dir)
+            return FsStatus::limit;
+        if (dir->status == FsStatus::ok) {
+            result = {};
+            result.directory = true;
+        }
+        return dir->status;
+    }
+    const auto* dir = get_directory(*static_cast<ReadOnlyFtp*>(raw), parent);
+    if (!dir)
+        return FsStatus::limit;
+    if (dir->status != FsStatus::ok)
+        return dir->status;
+    for (const auto* item = dir->first; item; item = item->next)
+        if (std::strcmp(item->name, path + split + 1) == 0) {
+            result = item->stat;
+            return FsStatus::ok;
+        }
+    return FsStatus::missing;
+}
+FsStatus ftp_read(void* raw, const char* path, std::uint64_t offset, void* output, std::size_t cap, std::size_t& used) {
+    used = 0;
+    if (!allowed_path(path) || !readable(path, offset, cap) || !output || !cap)
+        return FsStatus::denied;
+    FileStat stat;
+    const auto status = ftp_stat(raw, path, stat);
+    if (status != FsStatus::ok)
+        return status;
+    if (stat.directory || offset > stat.size)
+        return FsStatus::invalid;
+    Connection connection;
+    const auto& client = *static_cast<ReadOnlyFtp*>(raw);
+    if (!connection.open(client) || !connection.passive(client))
+        return FsStatus::failed;
+    if (offset) {
+        char position[32];
+        std::snprintf(position, sizeof(position), "%llu", static_cast<unsigned long long>(offset));
+        if (connection.command("REST", position) != 350)
+            return FsStatus::failed;
+    }
+    const int code = connection.command("RETR", path);
+    if (code != 125 && code != 150)
+        return transfer_status(code);
+    const auto need = static_cast<std::size_t>(std::min<std::uint64_t>(cap, stat.size - offset));
+    while (used < need) {
+        const int size = static_cast<int>(
+            recv(connection.data, static_cast<char*>(output) + used, static_cast<int>(need - used), 0));
+        if (size <= 0)
+            return FsStatus::failed;
+        used += static_cast<std::size_t>(size);
+    }
+    // A bounded header read deliberately closes its dedicated connection early.
+    return FsStatus::ok;
+}
+} // namespace
+ReadOnlyFtp::~ReadOnlyFtp() {
+    clear_ftp_cache(*this);
+#ifdef _WIN32
+    if (network_ready)
+        WSACleanup();
+#endif
+}
+void clear_ftp_cache(ReadOnlyFtp& client) {
+    auto* dir = static_cast<Directory*>(client.directories);
+    while (dir) {
+        auto* next = dir->next;
+        auto* item = dir->first;
+        while (item) {
+            auto* after = item->next;
+            release(item);
+            item = after;
+        }
+        release(dir);
+        dir = next;
+    }
+    client.directories = nullptr;
+    client.entry_count = client.directory_count = 0;
+}
+bool init_read_only_ftp(ReadOnlyFtp& client, const char* host, unsigned short port) {
+    if (!host || std::strlen(host) >= sizeof(client.host) || !port)
+        return false;
+#ifdef _WIN32
+    if (!client.network_ready) {
+        WSADATA data;
+        if (WSAStartup(MAKEWORD(2, 2), &data) != 0)
+            return false;
+        client.network_ready = true;
+    }
+#endif
+    in_addr address{};
+    if (inet_pton(AF_INET, host, &address) != 1)
+        return false;
+    std::strcpy(client.host, host);
+    client.port = port;
+    client.network_ready = true;
+    return true;
+}
+ReadOnlyFs ftp_filesystem(ReadOnlyFtp& client) {
+    return {&client, ftp_list, ftp_stat, ftp_read};
+}
+} // namespace shelf

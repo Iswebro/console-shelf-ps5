@@ -73,7 +73,8 @@ def build():
               "-DSHELF_PS5", "-DGS_NATIVE", "-DNDEBUG", "-D_REENTRANT", "-D_THREAD_SAFE",
               "-I", ROOT / "native/include", "-I", ROOT / "native/ps5", "-I", ROOT / "native/third_party",
               "-I", ports / "include/SDL2", "-I", ports / "include"]
-    sources = [ROOT / "native/src" / (name + ".cpp") for name in ("model", "settings", "ui", "graphics", "codecs", "host_main")]
+    sources = [ROOT / "native/src" / (name + ".cpp") for name in ("model", "settings", "ui", "graphics", "codecs", "library", "filesystem", "metadata", "ftp", "host_main")]
+    sources += [ROOT / "native/src/json.c"]
     sources += [ROOT / "native/ps5/platform" / name for name in ("alloc.c", "vout.c", "shims.c")]
     sources += [runtime / "app_crt.cpp", runtime / "app_cpp_runtime.cpp"]
     objects = []

@@ -15,6 +15,7 @@
 *.ttf -text
 # Preserve hash-pinned upstream bytes, including their original license whitespace.
 native/third_party/stb/*.h -text -whitespace
+native/third_party/cjson/* -text -whitespace
 native/third_party/licenses/* -text -whitespace
 native/assets/fonts/* -text -whitespace
 native/third_party/ps5-runtime/** -text -whitespace

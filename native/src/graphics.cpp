@@ -446,15 +446,36 @@ void detail(const UiState& state) {
     std::snprintf(count, sizeof(count), "%zu discovered games", state.inventory[id].game_count);
     text(count, 84, 415, 24, muted);
     if (state.page == Page::library) {
-        text("Game library", 84, 522, 38, white, true);
-        text("Discovery adapters are not connected in this development build yet.", 84, 587, 26, muted);
-        footer("Circle  Back to console    Options  Settings");
+        if (!state.library) {
+            text("Your library", 84, 522, 38, white, true);
+            text("Connect a library to see your games here.", 84, 587, 26, muted);
+        } else {
+            const auto games = games_for_system(*state.library, id);
+            if (!games.count)
+                text("No games found for this console yet.", 84, 540, 26, muted);
+            const int start = state.game_focus / 8 * 8;
+            for (int row = 0; row < 8 && static_cast<std::size_t>(start + row) < games.count; ++row) {
+                const auto& game = state.library->games[games.indices[static_cast<std::size_t>(start + row)]];
+                const int y = 478 + row * 60;
+                box(80, y, 1000, 53, state.game_focus == start + row);
+                text(game.name, 100, y + 10, 23, white, state.game_focus == start + row, 950);
+            }
+            if (games.count) {
+                char position[80];
+                std::snprintf(position, sizeof(position), "%d / %zu", state.game_focus + 1, games.count);
+                text(position, 84, 973, 19, muted);
+            }
+        }
+        footer("D-pad  Browse games    Left / Right  Page    Circle  Back to console    Options  Settings");
         return;
     }
     const auto& route = state.settings.preferred_emulator[id];
+    const auto* detected = state.library ? preferred_route(*state.library, id, route.data()) : nullptr;
     label(80, 515, "Preferred emulator",
-          route[0] ? std::string_view(route.data()) : std::string_view("No emulator detected"), state.detail_focus == 0,
-          920);
+          state.inventory[id].built_in ? std::string_view("PS5 system")
+          : detected                   ? std::string_view(detected->name)
+                                       : std::string_view("No emulator detected"),
+          state.detail_focus == 0, 920);
     box(80, 631, 443, 82, state.detail_focus == 1);
     text("Open emulator", 107, 652, 29, state.inventory[id].emulator_count ? white : muted, true);
     box(547, 631, 453, 82, state.detail_focus == 2);

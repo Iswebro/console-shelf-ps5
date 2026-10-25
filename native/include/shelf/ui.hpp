@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #pragma once
+#include "library.hpp"
 #include "settings.hpp"
 
 namespace shelf {
@@ -33,10 +34,12 @@ struct PickerList {
 struct UiState {
     Settings settings;
     Inventory inventory{};
+    const Library* library = nullptr;
     Page page = Page::home, return_page = Page::home, keyboard_return = Page::home;
     SettingsTab tab = SettingsTab::appearance;
     std::size_t selected_system = 0;
     int focus = 0, tool = 0, detail_focus = 1, settings_focus = 0, keyboard_focus = 0;
+    int game_focus = 0;
     bool tools = false, keyboard_for_consoles = false, changed = false, exit_requested = false;
     char query[128]{}, console_query[128]{}, notice[192]{};
 };

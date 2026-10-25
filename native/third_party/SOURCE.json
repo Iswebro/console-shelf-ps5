@@ -86,5 +86,38 @@
     "bytes": 884,
     "sha256": "97f35b302b361680ec1e891e95d2d52097bb95abff361434916d99dc1305f127",
     "archiveSHA256": "a85f65de418a8e6a898c6c3e3c870d50fff7618a200e4dd59ea9692af6ecec4d"
+  },
+  {
+    "repo": "DaveGamble/cJSON",
+    "revision": "c859b25da02955fef659d658b8f324b5cde87be3",
+    "source": "LICENSE",
+    "local": "native/third_party/cjson/LICENSE",
+    "license": "MIT",
+    "url": "https://raw.githubusercontent.com/DaveGamble/cJSON/c859b25da02955fef659d658b8f324b5cde87be3/LICENSE",
+    "bytes": 1084,
+    "gitBlob": "78deb0406d713ab9730e3c2447be1abdbd70b9a2",
+    "sha256": "a36dda207c36db5818729c54e7ad4e8b0c6fba847491ba64f372c1a2037b6d5c"
+  },
+  {
+    "repo": "DaveGamble/cJSON",
+    "revision": "c859b25da02955fef659d658b8f324b5cde87be3",
+    "source": "cJSON.c",
+    "local": "native/third_party/cjson/cJSON.c",
+    "license": "MIT",
+    "url": "https://raw.githubusercontent.com/DaveGamble/cJSON/c859b25da02955fef659d658b8f324b5cde87be3/cJSON.c",
+    "bytes": 80399,
+    "gitBlob": "6e4fb0dd369cd905923da515be87ab06db6c1ee0",
+    "sha256": "298581a04a36c0165da4b0aade235c23088cb2faa58651d720ea2f3706ed0b0d"
+  },
+  {
+    "repo": "DaveGamble/cJSON",
+    "revision": "c859b25da02955fef659d658b8f324b5cde87be3",
+    "source": "cJSON.h",
+    "local": "native/third_party/cjson/cJSON.h",
+    "license": "MIT",
+    "url": "https://raw.githubusercontent.com/DaveGamble/cJSON/c859b25da02955fef659d658b8f324b5cde87be3/cJSON.h",
+    "bytes": 16394,
+    "gitBlob": "cab5feb427725f8e5c82287f7fe59481b609b9b5",
+    "sha256": "25b0145150d500498e4d209cec69c18c42cf818bffcc54690be3b895a2a16dee"
   }
 ]

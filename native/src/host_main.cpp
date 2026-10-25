@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Shared native event loop. The host build never deploys or launches PS5 apps.
 #define SDL_MAIN_HANDLED
+#include "shelf/filesystem.hpp"
+#include "shelf/ftp.hpp"
 #include "shelf/graphics.hpp"
+#include "shelf/memory.hpp"
 #include <SDL.h>
 #include <algorithm>
 #include <cerrno>
@@ -9,6 +12,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <new>
 #ifdef SHELF_PS5
 #include "platform/platform.h"
 #include "shelf/memory.hpp"
@@ -63,8 +67,11 @@ bool report(const char* path, const shelf::UiState& state) {
                          shelf::catalog[i].id.data());
             comma = true;
         }
-    std::fprintf(file, "],\"queryLength\":%zu,\"pickerQueryLength\":%zu,\"launchConnected\":false}\n",
-                 std::strlen(state.query), std::strlen(state.console_query));
+    std::fprintf(file,
+                 "],\"queryLength\":%zu,\"pickerQueryLength\":%zu,\"launchConnected\":false,\"libraryGames\":%zu,"
+                 "\"libraryRoutes\":%zu}\n",
+                 std::strlen(state.query), std::strlen(state.console_query),
+                 state.library ? state.library->game_count : 0, state.library ? state.library->route_count : 0);
     return std::fclose(file) == 0;
 }
 bool mapped_button(Uint8 button, const shelf::UiState& state, shelf::Action& action) {
@@ -195,6 +202,10 @@ int main(int argc, char** argv) {
     const char* script_arg = nullptr;
     bool headless = false;
     bool animate_script = false;
+    const char* library_host = nullptr;
+    const char* library_root = nullptr;
+    unsigned short library_port = 2121;
+    bool scan_only = false;
 #ifndef SHELF_PS5
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--asset-root") == 0 && i + 1 < argc)
@@ -209,6 +220,18 @@ int main(int argc, char** argv) {
             headless = true;
         else if (std::strcmp(argv[i], "--animate-script") == 0)
             animate_script = true;
+        else if (std::strcmp(argv[i], "--library-ftp") == 0 && i + 1 < argc)
+            library_host = argv[++i];
+        else if (std::strcmp(argv[i], "--library-root") == 0 && i + 1 < argc)
+            library_root = argv[++i];
+        else if (std::strcmp(argv[i], "--library-port") == 0 && i + 1 < argc) {
+            char* end = nullptr;
+            const auto port = std::strtoul(argv[++i], &end, 10);
+            if (!*argv[i] || *end || port == 0 || port > 65535)
+                return 1;
+            library_port = static_cast<unsigned short>(port);
+        } else if (std::strcmp(argv[i], "--scan-only") == 0)
+            scan_only = true;
         else {
             std::fprintf(stderr, "Unknown or incomplete host option: %s\n", argv[i]);
             return 1;
@@ -218,7 +241,12 @@ int main(int argc, char** argv) {
     // Console storage paths are owned constants, never supplied by launch arguments.
     (void)argc;
     (void)argv;
+    library_host = "127.0.0.1";
 #endif
+    if (library_host && library_root) {
+        std::fprintf(stderr, "Choose one explicit library source.\n");
+        return 1;
+    }
     if (!assets || !data || std::strlen(assets) > 2000 || std::strlen(data) > 2000 ||
         (script_arg && std::strlen(script_arg) > 8191)) {
         std::fprintf(stderr, "Use --asset-root and --data-dir; optional --headless --script and --capture-dir.\n");
@@ -240,12 +268,55 @@ int main(int argc, char** argv) {
     char settings_path[2304];
     std::snprintf(settings_path, sizeof(settings_path), "%s/settings.ini", data);
     shelf::UiState state;
+    struct LibraryOwner {
+        shelf::Library* value = nullptr;
+        ~LibraryOwner() {
+            if (value) {
+                value->~Library();
+                shelf::release(value);
+            }
+        }
+    } library;
+    shelf::ReadOnlyFtp ftp;
+    shelf::ReadOnlyTree tree;
+    if (library_host || library_root) {
+        const bool ready = library_host ? shelf::init_read_only_ftp(ftp, library_host, library_port)
+                                        : shelf::init_read_only_tree(tree, library_root);
+        if (!ready) {
+            std::fprintf(stderr, "Library source could not initialise.\n");
+            return 1;
+        }
+        void* memory = shelf::allocate(sizeof(shelf::Library));
+        if (!memory) {
+            std::fprintf(stderr, "Library memory allocation failed.\n");
+            return 1;
+        }
+        library.value = new (memory) shelf::Library{};
+        shelf::discover_library(library_host ? shelf::ftp_filesystem(ftp) : shelf::tree_filesystem(tree),
+                                *library.value);
+        state.library = library.value;
+        state.inventory = library.value->inventory;
+        std::printf("Read-only library: %zu games, %zu emulator/core routes; scan %s.\n", library.value->game_count,
+                    library.value->route_count, library.value->scan.complete ? "complete" : "partial");
+        for (std::size_t i = 0; i < shelf::system_count; ++i)
+            if (state.inventory[i].game_count || state.inventory[i].emulator_count)
+                std::printf("  %.*s: %zu games, %zu routes\n", static_cast<int>(shelf::catalog[i].id.size()),
+                            shelf::catalog[i].id.data(), state.inventory[i].game_count,
+                            state.inventory[i].emulator_count);
+        shelf::clear_ftp_cache(ftp);
+        if (scan_only)
+            return library.value->scan.complete ? 0 : 2;
+    } else if (scan_only)
+        return 1;
     const auto loaded = shelf::load_settings(settings_path, state.settings);
     if (loaded == shelf::SettingsLoad::backup)
         std::snprintf(state.notice, sizeof(state.notice), "Settings recovered from the last valid backup.");
     if (loaded == shelf::SettingsLoad::invalid)
         std::snprintf(state.notice, sizeof(state.notice),
                       "Settings could not be read. Defaults are in use; the original file is kept.");
+    if (state.library && !state.library->scan.complete && !state.notice[0])
+        std::snprintf(state.notice, sizeof(state.notice),
+                      "Library scan incomplete. Keep ftpsrv running and reopen Shelf to try again.");
     SDL_SetMainReady();
 #ifdef SHELF_PS5
     SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, "0");

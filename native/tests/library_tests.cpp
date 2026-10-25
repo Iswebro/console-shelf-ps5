@@ -1,0 +1,201 @@
+// SPDX-License-Identifier: GPL-3.0-only
+#include "shelf/json.hpp"
+#include "shelf/library.hpp"
+#include "shelf/ui.hpp"
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+namespace {
+void check(bool ok, const char* message) {
+    if (!ok) {
+        std::fprintf(stderr, "FAIL library: %s\n", message);
+        std::exit(1);
+    }
+}
+struct File {
+    bool directory = false;
+    std::uint64_t size = 0;
+    std::vector<unsigned char> bytes;
+};
+struct Tree {
+    std::map<std::string, File> files;
+    std::string denied;
+    std::string unreadable;
+    void directory(std::string path) {
+        if (path.empty())
+            return;
+        files[path].directory = true;
+        const auto slash = path.rfind('/');
+        if (slash != path.npos)
+            directory(path.substr(0, slash));
+    }
+    void file(std::string path, std::string text, std::uint64_t size = 0) {
+        directory(path.substr(0, path.rfind('/')));
+        auto& f = files[path];
+        f.bytes.assign(text.begin(), text.end());
+        f.size = size ? size : text.size();
+    }
+    void app(const char* id) {
+        std::string root = std::string("/user/app/") + id;
+        file(root + "/eboot.bin", "PROGRAM");
+        file(root + "/sce_sys/param.json", std::string("{\"titleId\":\"") + id + "\",\"titleName\":\"Test emulator\"}");
+    }
+    shelf::ReadOnlyFs fs() {
+        return {
+            this,
+            [](void* raw, const char* path, shelf::EntryVisitor visit, void* dest) {
+                auto& tree = *static_cast<Tree*>(raw);
+                if (tree.denied == path)
+                    return shelf::FsStatus::denied;
+                const auto at = tree.files.find(path);
+                if (at == tree.files.end())
+                    return shelf::FsStatus::missing;
+                if (!at->second.directory)
+                    return shelf::FsStatus::invalid;
+                const std::string prefix = std::string(path) + "/";
+                for (const auto& pair : tree.files)
+                    if (pair.first.compare(0, prefix.size(), prefix) == 0) {
+                        const auto child = pair.first.substr(prefix.size());
+                        if (child.find('/') != child.npos)
+                            continue;
+                        if (!visit(dest, child.c_str(), {pair.second.directory, pair.second.size, 0}))
+                            return shelf::FsStatus::limit;
+                    }
+                return shelf::FsStatus::ok;
+            },
+            [](void* raw, const char* path, shelf::FileStat& info) {
+                auto& tree = *static_cast<Tree*>(raw);
+                if (tree.denied == path)
+                    return shelf::FsStatus::denied;
+                const auto at = tree.files.find(path);
+                if (at == tree.files.end())
+                    return shelf::FsStatus::missing;
+                info = {at->second.directory, at->second.size, 0};
+                return shelf::FsStatus::ok;
+            },
+            [](void* raw, const char* path, std::uint64_t offset, void* output, std::size_t cap, std::size_t& used) {
+                used = 0;
+                const auto& tree = *static_cast<Tree*>(raw);
+                if (tree.unreadable == path)
+                    return shelf::FsStatus::failed;
+                const auto& files = tree.files;
+                const auto at = files.find(path);
+                if (at == files.end())
+                    return shelf::FsStatus::missing;
+                if (offset < at->second.bytes.size()) {
+                    used = std::min<std::size_t>(cap, at->second.bytes.size() - static_cast<std::size_t>(offset));
+                    std::memcpy(output, at->second.bytes.data() + offset, used);
+                }
+                return shelf::FsStatus::ok;
+            }};
+    }
+};
+} // namespace
+void test_library() {
+    using namespace shelf;
+    check(valid_virtual_path("/data/roms/Great Game (USA).z64"), "canonical path");
+    for (const char* path : {"relative", "/data/../keys", "/data//games", "/data/games/", "/data/./x",
+                             "/data/roms\nQUIT", "/data/a:b", "/data/a\\b", "/data/\xc0\xaf"})
+        check(!valid_virtual_path(path), "unsafe path refused");
+    char joined[path_capacity];
+    check(join_media_path("/data/roms", "disc/a.cue", joined, sizeof(joined)), "nested relative path");
+    check(!join_media_path("/data/roms", "../keys.bin", joined, sizeof(joined)), "traversal reference refused");
+    check(!join_media_path("/data/roms", "/other/file", joined, sizeof(joined)), "absolute reference refused");
+    JsonDocument json;
+    const char* good = "{\"name\":\"Mario\"}";
+    check(json.parse(good, std::strlen(good)), "JSON metadata parser");
+    for (const char* value : {"{\"a\":1,\"a\":2}", "{\"a\":\"x\\u0000y\"}", "{} trailing", "{\"a\":\"\xc0\xaf\"}"})
+        check(!json.parse(value, std::strlen(value)), "ambiguous metadata refused");
+    Tree tree;
+    tree.app("PPSA99169");
+    tree.app("PPSA99203");
+    tree.app("PPSA97510");
+    tree.file("/user/app/PPSA99169/cores/mupen64plus_next_libretro.so", "CORE");
+    tree.file("/user/app/PPSA99169/cores/snes9x_libretro.info", "INFO IS NOT A CORE");
+    tree.directory("/data/homebrew/PPSA99169");
+    tree.file("/data/homebrew/PPSA99169/cores/mupen64plus_next_libretro.so", "CORE");
+    tree.file("/data/homebrew/PPSA99169/cores/ps5sx2_libretro.so", "CORE");
+    tree.file("/data/homebrew/PPSA99169/content/n64/Mario Party.z64", std::string("\x80\x37\x12\x40", 4), 32000000);
+    tree.file("/data/homebrew/PPSA99169/content/n64/Bad.z64", "WRONG");
+    tree.file("/data/homebrew/PPSA99169/content/n64/Partial.z64.part", "PARTIAL");
+    tree.file("/data/homebrew/PPSA99169/content/n64/bios/Firmware.z64", std::string("\x80\x37\x12\x40", 4));
+    std::string iso(0x8008, 0);
+    iso.replace(0x8001, 5, "CD001");
+    tree.file("/data/PCSX2/games/Example.iso", iso, 1234567);
+    tree.file("/data/PSXS5/games/Two Discs/Disc 1.bin", "TRACK");
+    tree.file("/data/PSXS5/games/Two Discs/Disc 2.bin", "TRACK");
+    tree.file("/data/PSXS5/games/Two Discs/Disc 1.cue", "FILE \"Disc 1.bin\" BINARY\n  TRACK 01 MODE2/2352\n");
+    tree.file("/data/PSXS5/games/Two Discs/Disc 2.cue", "FILE \"Disc 2.bin\" BINARY\n  TRACK 01 MODE2/2352\n");
+    tree.file("/data/PSXS5/games/Two Discs/Collection.m3u", "# two discs\n\nDisc 1.cue\nDisc 2.cue\n");
+    tree.file("/data/PSXS5/games/Orphan.cue", "FILE \"Missing.bin\" BINARY\n");
+    tree.file("/data/PSXS5/games/Bad.m3u", "Orphan.cue\n");
+    tree.file("/data/PSXS5/games/Secret.cue", "FILE \"../../keys.bin\" BINARY\n");
+    std::string sfo(128, 0);
+    const auto put = [&](std::size_t at, unsigned value, unsigned bytes) {
+        for (unsigned i = 0; i < bytes; ++i)
+            sfo[at + i] = static_cast<char>((value >> (8 * i)) & 255);
+    };
+    sfo.replace(1, 3, "PSF");
+    put(8, 52, 4);
+    put(12, 80, 4);
+    put(16, 2, 4);
+    put(22, 0x0204, 2);
+    put(24, 10, 4);
+    put(28, 16, 4);
+    put(36, 6, 2);
+    put(38, 0x0204, 2);
+    put(40, 10, 4);
+    put(44, 16, 4);
+    put(48, 16, 4);
+    sfo.replace(52, 15, std::string("TITLE\0TITLE_ID\0", 15));
+    sfo.replace(80, 10, std::string("Test Game\0", 10));
+    sfo.replace(96, 10, std::string("BLES12345\0", 10));
+    tree.file("/data/homebrew/PPSA99303/rpcs3/games/PS3 example/PS3_GAME/PARAM.SFO", sfo);
+    tree.file("/data/homebrew/PPSA99303/rpcs3/games/PS3 example/PS3_GAME/USRDIR/EBOOT.BIN", "PROGRAM NOT READ");
+    auto result = std::make_unique<Library>();
+    discover_library(tree.fs(), *result);
+    check(result->scan.complete, "bounded successful scan");
+    check(result->game_count == 4, "games only; no tracks, dependencies, partial dumps or duplicates");
+    check(result->inventory[find_system("n64")].game_count == 1 &&
+              result->inventory[find_system("ps2")].game_count == 1 &&
+              result->inventory[find_system("ps1")].game_count == 1,
+          "system folder mapping");
+    check(result->inventory[find_system("snes")].emulator_count == 0, "info file is not installation evidence");
+    check(result->route_count == 4 && result->scan.missing_references == 3, "real routes and missing disc references");
+    check(result->inventory[find_system("ps3")].game_count == 1 &&
+              result->inventory[find_system("ps3")].emulator_count == 0,
+          "SFO identity without invented emulator evidence");
+    const auto* preferred = preferred_route(*result, find_system("ps2"), "");
+    check(preferred && std::strcmp(preferred->id, "PPSA99203") == 0, "standalone route is the default");
+    preferred = preferred_route(*result, find_system("ps2"), "retroarch:ps5sx2");
+    check(preferred && std::strcmp(preferred->id, "retroarch:ps5sx2") == 0, "explicit core preference wins");
+    for (std::size_t i = 0; i < result->route_count; ++i)
+        check(result->routes[i].capability == LaunchCapability::unavailable, "discovery is not launch validation");
+    UiState state;
+    state.library = result.get();
+    state.inventory = result->inventory;
+    state.selected_system = find_system("n64");
+    state.page = Page::details;
+    state.detail_focus = 2;
+    input(state, Action::confirm);
+    check(state.page == Page::library && state.game_focus == 0, "real library navigation");
+    input(state, Action::down);
+    check(state.game_focus == 0, "library selection remains in bounds");
+    input(state, Action::confirm);
+    check(state.notice[0] != 0, "untested launch gives an honest notice");
+    tree.unreadable = "/data/homebrew/PPSA99169/content/n64/Mario Party.z64";
+    discover_library(tree.fs(), *result);
+    check(!result->scan.complete, "header transport failure is not a complete scan");
+    tree.unreadable.clear();
+    tree.denied = "/data/PCSX2/games";
+    discover_library(tree.fs(), *result);
+    check(!result->scan.complete && result->scan.roots_denied == 1, "unreadable root remains partial");
+    check(result->inventory[find_system("ps2")].game_count == 0, "rescan clears stale inventory");
+    std::puts("PASS: read-only discovery, bounded metadata, path validation, real cores, disc references, partial "
+              "scans and game navigation.");
+}

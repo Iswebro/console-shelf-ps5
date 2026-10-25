@@ -1,0 +1,39 @@
+{
+  "structuralCheck": "passed",
+  "hardwareTest": "not run",
+  "firmware12_20": "unverified",
+  "elf": {
+    "bytes": 2638836,
+    "sha256": "994d648f8e053e36350f61b02d91499f64d88abc7d2293f6c9265dba04cd633f",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ]
+  },
+  "self": {
+    "bytes": 2536081,
+    "sha256": "591ec2d63b14f5cb725b0c75c44ae66fc162665c7b60eebc3210e058d22f12e2"
+  },
+  "verifiedOn": "2026-10-25",
+  "scope": "Read-only discovery and native game-list cross-build; not an installable or console-tested prototype",
+  "sourceFingerprintSHA256": "dc0913e4caba45eab6bc217a34ca50a64099c071ecab6c9f60bd0c1fdf4c2797",
+  "checks": {
+    "browserSettingsCarouselAnd52Icons": "passed",
+    "nativeModelSettingsNavigationAndDiscovery": "passed",
+    "nativeRendererCaptures": 11,
+    "readOnlyFtpProtocolFixtures": "passed; loopback only",
+    "damagedExecutableRejectionFixtures": 8,
+    "liveConsoleReadOnlyScan": "passed from the PC client; private inventory omitted"
+  },
+  "consoleDeployment": "not performed",
+  "prototypeRelease": "not published",
+  "consoleLocalDiscovery": "unverified inside the app sandbox",
+  "launchAdapters": "unavailable; no launch was attempted"
+}
