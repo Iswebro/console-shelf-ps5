@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "verifiedOn": "2026-10-25",
+  "scope": "UI-9 prepared opening and measured close timing after UI-8 owner feedback",
+  "titleId": "PPSA99541",
+  "contentVersion": "00.100.008",
+  "elf": {
+    "bytes": 2655324,
+    "sha256": "2c49f89aa12bf192eeaf864605504b0df65fc6585a6deb19557738a78584d197"
+  },
+  "self": {
+    "bytes": 2551137,
+    "sha256": "fd5c567fcde4fb98e5b4e6ed6ef54022e8c7bed905afe90108d9f5472a8e276b"
+  },
+  "changes": [
+    "Render a fully covered scene with the actual inventory before starting the logo entrance clock",
+    "Keep the branded loading picture visible while scene resources are prepared",
+    "Preserve the 3000 ms Circle threshold and accepted 360 ms closing fade",
+    "Log button receipt, hold commitment, fade completion and display shutdown separately",
+    "Write two fixed private diagnostic PNGs in the owned data folder to distinguish rendering from TV visibility"
+  ],
+  "checks": {
+    "nativeModelSettingsUiGesturesAndLaunchPolicy": "passed",
+    "renderer": "24 captures passed, including covered scene preparation and three-second hold/cancel/fade",
+    "readOnlyFtpAndBackgroundCancellation": "passed",
+    "executableStructureAndContainer": "passed"
+  },
+  "hardwareTest": "not yet run; UI-8 opening and perceived close duration remain unaccepted",
+  "launches": "not connected; protocol and cooperative-policy host tests do not enable console launches",
+  "sourceKit": "UI-6 cold relink evidence retained; refresh required for the final release candidate",
+  "publicRelease": false
+}

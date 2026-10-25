@@ -32,7 +32,19 @@
     "executableStructure": "passed, including strong SystemService lifecycle and visibility imports",
     "negativeExecutableFixtures": "14 rejected"
   },
-  "hardwareTest": "UI-8 not yet tested; submitted frames and host checks alone do not prove TV visibility",
+  "hardwareTest": "UI-8 ran on the console, but the owner still saw no opening and reported closure taking four seconds or longer; both changes remain unaccepted",
+  "deviceFollowUp": {
+    "installedRawSelfMatches": true,
+    "startupMarker": "ui-8 foreground-gated opening; three-second Circle hold",
+    "status": "foreground with no overlay; result zero",
+    "firstRenderedFlipAfterGraphicsReadyMs": 63,
+    "entranceStartAfterGraphicsReadyMs": 122,
+    "openingWallMs": 6354,
+    "openingForegroundClockMs": 2112,
+    "entranceFramesSubmitted": 38,
+    "revealFramesSubmitted": 24,
+    "conclusion": "The updated executable ran and submitted animation frames; this does not establish visibility on the TV or the observed hold/exit duration"
+  },
   "firmware12_20": "full UI-8 acceptance pending",
   "launches": "not implemented; no launch helper installed",
   "sourceKit": "UI-6 cold relink evidence retained; refresh required for the final release candidate",

@@ -17,6 +17,7 @@
 #ifdef SHELF_PS5
 #include "platform/platform.h"
 #include "shelf/memory.hpp"
+#include <time.h>
 #endif
 #ifdef _WIN32
 #include <direct.h>
@@ -114,9 +115,21 @@ void accept_library(shelf::UiState& state, shelf::Library& library, shelf::ReadO
                       "Library scan incomplete. Keep ftpsrv running and reopen Shelf to try again.");
 }
 #ifdef SHELF_PS5
+std::uint64_t monotonic_ms() {
+    struct timespec time{};
+    return clock_gettime(CLOCK_MONOTONIC, &time) == 0
+               ? static_cast<std::uint64_t>(time.tv_sec) * 1000 + static_cast<std::uint64_t>(time.tv_nsec) / 1000000
+               : 0;
+}
 struct PlatformExit {
     ~PlatformExit() {
+        const auto begin = monotonic_ms();
+        startup("display shutdown starting");
         gs_vout_shutdown();
+        char elapsed[80];
+        std::snprintf(elapsed, sizeof(elapsed), "%llu ms", static_cast<unsigned long long>(monotonic_ms() - begin));
+        startup("display shutdown complete", elapsed);
+        startup("shell close requesting");
         const int status = gs_request_close();
         char message[48];
         std::snprintf(message, sizeof(message), "0x%08x", static_cast<unsigned>(status));
@@ -219,7 +232,7 @@ bool script_event(const char* token) {
         SDL_Delay(static_cast<Uint32>(delay));
         return true;
     }
-    if (std::strcmp(token, "loading") == 0 || std::strcmp(token, "reveal") == 0)
+    if (std::strcmp(token, "loading") == 0 || std::strcmp(token, "reveal") == 0 || std::strcmp(token, "prepare") == 0)
         return true;
     if (std::strcmp(token, "circle-down") == 0 || std::strcmp(token, "circle-up") == 0) {
         SDL_Event event{};
@@ -294,7 +307,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-8 foreground-gated opening; three-second Circle hold");
+    startup("main entered", "ui-9 prepared entrance; three-second hold timing");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -521,6 +534,7 @@ int main(int argc, char** argv) {
     bool scan_started = false;
     const auto opened_at = scripting ? 0u : SDL_GetTicks();
     const bool automatic_intro = !scripting && state.presentation.loading;
+    bool library_accepted = !background_scan || !scan.library, opening_prepared = !automatic_intro;
     shelf::OpeningGate opening_gate;
     bool intro_started = !automatic_intro, previous_visible = false;
     bool visibility_sampled = false, frame_acknowledged = false, opening_logged = false;
@@ -528,6 +542,11 @@ int main(int argc, char** argv) {
     unsigned last_visibility_flags = 0, visibility_notes = 0;
     unsigned visible_time = 0, last_visibility_at = opened_at;
     unsigned intro_frames = 0, reveal_frames = 0;
+    unsigned circle_at = 0;
+    bool circle_tracked = false, circle_committed_logged = false;
+#ifdef SHELF_PS5
+    bool captured_loading = false, captured_reveal = false;
+#endif
     unsigned reveal_at = 0;
     bool reveal_pending = false;
     unsigned measured_frames = 0, max_render_ms = 0, max_present_ms = 0;
@@ -587,7 +606,7 @@ int main(int argc, char** argv) {
                 std::snprintf(info, sizeof(info), "%u ms after graphics ready", now - opened_at);
                 startup("first rendered flip acknowledged", info);
             }
-            const bool visible = rendered_frame && opening_gate.ready(now);
+            const bool visible = rendered_frame && opening_prepared && opening_gate.ready(now);
             if (visible && previous_visible)
                 visible_time += now - last_visibility_at;
             previous_visible = visible;
@@ -602,9 +621,14 @@ int main(int argc, char** argv) {
         }
         const unsigned visual_now = automatic_intro ? visible_time : now;
         const unsigned visual_start = automatic_intro ? 0 : opened_at;
-        if (scan.ready() && intro_started && visual_now - visual_start >= 1100) {
+        if (scan.ready()) {
             scan.stop();
             accept_library(state, *library.value, ftp, false);
+            library_accepted = true;
+            redraw = true;
+        }
+        if (state.presentation.loading && background_scan && scan.library && library_accepted && opening_prepared &&
+            intro_started && visual_now - visual_start >= 1100) {
             state.presentation.loading = false;
             state.presentation.reveal = 0;
             reveal_pending = true;
@@ -627,6 +651,11 @@ int main(int argc, char** argv) {
                 redraw = true;
             } else if (event.type == SDL_CONTROLLERBUTTONDOWN) {
                 if (event.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
+                    if (!close_gesture.active()) {
+                        circle_at = now;
+                        circle_tracked = true;
+                        startup("Circle hold received", "3000 ms threshold");
+                    }
                     close_gesture.press(event.cbutton.which, now);
                     navigation.cancel();
                     redraw = true;
@@ -637,6 +666,16 @@ int main(int argc, char** argv) {
             } else if (event.type == SDL_CONTROLLERBUTTONUP) {
                 if (event.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
                     mapped = close_gesture.release(event.cbutton.which, now);
+                    if (circle_tracked) {
+                        char duration[80];
+                        std::snprintf(duration, sizeof(duration), "%u ms; %s", now - circle_at,
+                                      close_gesture.closing()  ? "committed"
+                                      : close_gesture.active() ? "other controller"
+                                                               : "released early");
+                        startup("Circle released", duration);
+                        if (!close_gesture.active())
+                            circle_tracked = false;
+                    }
                     action = shelf::Action::back;
                     redraw = true;
                 } else if (mapped_button(event.cbutton.button, state, action) &&
@@ -715,11 +754,21 @@ int main(int argc, char** argv) {
         }
         close_gesture.update(now, state.presentation);
         if (close_gesture.closing()) {
+            if (!circle_committed_logged) {
+                char duration[80];
+                std::snprintf(duration, sizeof(duration), "%u ms after button event", now - circle_at);
+                startup("Circle hold committed", duration);
+                circle_committed_logged = true;
+            }
             navigation.cancel();
             SDL_AtomicSet(&scan.cancelled, 1);
         }
-        if (close_gesture.finished(now))
+        if (close_gesture.finished(now)) {
+            char duration[80];
+            std::snprintf(duration, sizeof(duration), "%u ms after button event", now - circle_at);
+            startup("closing fade complete", duration);
             state.exit_requested = true;
+        }
         if (state.presentation.loading) {
             const float progress = intro_started ? std::min(1.0f, (visual_now - visual_start) / 600.0f) : 0;
             state.presentation.appear = progress * progress * (3 - 2 * progress);
@@ -744,9 +793,13 @@ int main(int argc, char** argv) {
         if (redraw || shelf::graphics_animating() || state.presentation.loading || state.presentation.reveal < 1 ||
             close_gesture.active()) {
             const auto frame_start = SDL_GetTicks();
+            const bool preparing =
+                (token && std::strcmp(token, "prepare") == 0) ||
+                (automatic_intro && state.presentation.loading && library_accepted && !opening_prepared);
+            state.presentation.preparing = preparing;
             const bool covered_reveal = reveal_pending && !state.presentation.loading;
             shelf::graphics_render(state, animate_script ? script_time : SDL_GetTicks(),
-                                   animate_script || (!scripting && !headless));
+                                   !preparing && (animate_script || (!scripting && !headless)));
             const auto render_end = SDL_GetTicks();
             if (shelf::graphics_errors()) {
                 startup("render resource failed");
@@ -763,7 +816,34 @@ int main(int argc, char** argv) {
             }
 #ifdef SHELF_PS5
             gs_vout_present(surface->pixels, surface->pitch);
+            // Two bounded, owned diagnostic pictures let us distinguish correct
+            // drawing from a delayed display handoff. No game/account files are read.
+            bool captured = false;
+            if (!captured_loading && state.presentation.loading && intro_started && state.presentation.appear >= 1) {
+                captured_loading = captured = true;
+                startup(shelf::graphics_capture("/data/console-shelf/diagnostic-loading.png")
+                            ? "loading diagnostic picture saved"
+                            : "loading diagnostic picture failed");
+            }
+            if (!captured_reveal && !state.presentation.loading && state.presentation.reveal >= .4f &&
+                state.presentation.reveal < .8f) {
+                captured_reveal = captured = true;
+                startup(shelf::graphics_capture("/data/console-shelf/diagnostic-reveal.png")
+                            ? "reveal diagnostic picture saved"
+                            : "reveal diagnostic picture failed");
+            }
+            if (captured)
+                last_visibility_at = SDL_GetTicks();
 #endif
+            if (preparing) {
+                state.presentation.preparing = false;
+                opening_prepared = true;
+                last_visibility_at = SDL_GetTicks();
+                char duration[100];
+                std::snprintf(duration, sizeof(duration), "%u ms render; %u ms after graphics ready",
+                              render_end - frame_start, last_visibility_at - opened_at);
+                startup("covered scene prepared", duration);
+            }
             // Bounded timing evidence, not a claim about displayed frame rate.
             if (measured_frames < 16) {
                 if (measured_frames) {
@@ -800,9 +880,7 @@ int main(int argc, char** argv) {
                     startup("library worker unavailable", SDL_GetError());
                     library.value->scan.complete = false;
                     accept_library(state, *library.value, ftp, false);
-                    state.presentation.loading = false;
-                    state.presentation.reveal = 0;
-                    reveal_pending = true;
+                    library_accepted = true;
                 }
             }
             if (covered_reveal) {

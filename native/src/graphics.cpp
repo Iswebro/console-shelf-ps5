@@ -412,7 +412,7 @@ void footer(std::string_view hint) {
 void splash(float opacity, unsigned time_ms, bool loading, float appearance = 1) {
     const auto alpha = static_cast<Uint8>(std::clamp(opacity, 0.0f, 1.0f) * 255);
     rect(0, 0, width, height, {11, 13, 28, alpha});
-    const auto ink = static_cast<Uint8>(alpha * appearance);
+    const auto ink = alpha;
     const int rise = static_cast<int>(12 * (1 - appearance));
     const int side = static_cast<int>(116 * (.92f + .08f * appearance));
     picture(icon_files[0], 960 - side / 2, 347 + rise, side, side, ink);
@@ -725,8 +725,8 @@ bool graphics_init(SDL_Renderer* target, const char* asset_root) {
     return background && halo && font(24, false) && font(27, true);
 }
 void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
-    const bool show_orbit =
-        !state.presentation.loading && state.page == Page::home && state.settings.preferences.layout == Layout::swipe;
+    const bool show_orbit = (!state.presentation.loading || state.presentation.preparing) && state.page == Page::home &&
+                            state.settings.preferences.layout == Layout::swipe;
     if (show_orbit) {
         const auto list = shown_systems(state);
         if (!orbit_visible || list.count != orbit_list.count || list.indices != orbit_list.indices) {
@@ -742,7 +742,7 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
     SDL_SetRenderDrawColor(renderer, 11, 13, 28, 255);
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, background, nullptr, nullptr);
-    if (!state.presentation.loading) {
+    if (!state.presentation.loading || state.presentation.preparing) {
         picture(icon_files[static_cast<std::size_t>(state.settings.preferences.icon)], 80, 30, 50, 50);
         text("Console Shelf", 147, 36, 29, white, true);
 #ifdef SHELF_PS5
