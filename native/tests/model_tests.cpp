@@ -22,6 +22,7 @@ void test_settings();
 void test_ui();
 void test_library();
 void test_navigation();
+void test_launch();
 int main() {
     using namespace shelf;
     Preferences preferences;
@@ -83,5 +84,6 @@ int main() {
     test_ui();
     test_navigation();
     test_library();
+    test_launch();
     return 0;
 }
