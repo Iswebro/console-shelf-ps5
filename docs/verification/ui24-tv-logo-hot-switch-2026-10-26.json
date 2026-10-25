@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "revision": "UI-24",
+  "programSourceCommit": "5c34e67aba3e51ca209d56215f97b586ff58c1e5",
+  "status": "passed on native PC host only",
+  "scope": "hot switching four logo choices inside one compiled native-host process, after five seconds of bundled intro playback",
+  "badgeHashes": {
+    "vector": "d772a6cd5dabe90f698c6ece8f2ea6dfbbc6d3cdcb350fe689c668bc46a25f01",
+    "gaming": "325410eb4b5422bf722aac6e2ddb273d8836039fd3c0756e172416a76bb1d008",
+    "classic": "2928fa77ba7ede7800f53a0998bf4aff9385f3907d20ba63c6cf7e4b3dfac49c",
+    "jade": "4cf988cb53b6e5ea46e50ea586bed4177e00d8d05ba4adc3fd9d5c6ed39f4092",
+    "vector-return": "d772a6cd5dabe90f698c6ece8f2ea6dfbbc6d3cdcb350fe689c668bc46a25f01"
+  },
+  "consoleContacted": false,
+  "ownerConsoleReport": "TV logo stays the same when switching; unresolved",
+  "hardwareAcceptance": false
+}

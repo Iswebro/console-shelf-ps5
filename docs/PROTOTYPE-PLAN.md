@@ -18,7 +18,8 @@ Build isShelf as a native PS5 app and publish the first downloadable prototype i
 - [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
 - [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
 - [x] UI-22 owner acceptance on firmware 12.20: controls, saved choices, normal console restart, foreground PSXS5/PS5SX2/PS5SX3 menus and direct N64/PS1 RetroArch launch. The owner also confirmed Quick Menu and playlist switching after a Shelf-forwarded PS1 game.
-- [ ] UI-23 isShelf branding candidate: vector home tile, Glass and Light background, Vector/Gaming/Classic mint/Jade choices and final exact-package console checks. The existing launcher helper remains unchanged.
+- [x] UI-24 isShelf branding installed with 242 complete raw readbacks: the owner's screenshots confirm the Vector home tile and Glass and Light background. Vector/Gaming/Classic mint/Jade remain selectable and the launcher helper bytes are unchanged.
+- [ ] UI-24 final acceptance: TV-logo switching remains reported unresolved on the console despite passing native PC checks. The owner deferred the final exact-package restart, layouts, persistence and launch checks; publication waits for those results.
 - [x] Read-only emulator/core and game discovery in configured existing library locations, checked from PC against the owner's console.
 - [x] The same configured discovery inside the PS5 app sandbox, with complete scan evidence.
 - [ ] Further dedicated-emulator and library-layout adapters.

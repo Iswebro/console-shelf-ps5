@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "revision": "UI-24",
+  "programSourceCommit": "5c34e67aba3e51ca209d56215f97b586ff58c1e5",
+  "selfSHA256": "9834451dc2ca0f59f6fe487900ebe3ab55f08b23f53fb9aabf16faaac2eda88e",
+  "packageManifestSHA256": "baedb6e622ba571e3d5ff9f12cbcd34707aec9744d3f612226f5a055ecc1621b",
+  "status": "partial; final hardware acceptance pending",
+  "homePresentation": {
+    "status": "passed",
+    "basis": "Visual inspection of the two requested owner PS5 Create screenshots",
+    "homeName": "isShelf",
+    "homeIcon": "Vector",
+    "homeBackground": "Glass and Light"
+  },
+  "tvLogo": {
+    "vectorVisibleInScreenshot": true,
+    "switchingOnConsole": "Owner reports it still stays the same; unresolved",
+    "nativeHostHotSwitch": "All four choices produce distinct TV badges in one process and cycling back reproduces Vector",
+    "notAcceptedAsConsoleSwitchingProof": true
+  },
+  "finalRestartLayoutsPersistenceAndLaunchChecks": "Owner deferred these tests until later",
+  "previousUI23FunctionalChecks": "Retained separately; not promoted to current-build acceptance",
+  "privateScreenshotsPublished": false,
+  "publicBinaryRelease": "not published"
+}

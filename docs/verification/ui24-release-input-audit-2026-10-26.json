@@ -1,0 +1,19 @@
+{
+  "scope": "Artifact input audit only; physical hardware checks were not evaluated",
+  "sourceCommit": "5c34e67aba3e51ca209d56215f97b586ff58c1e5",
+  "applicationSelf": {
+    "bytes": 2773777,
+    "sha256": "9834451dc2ca0f59f6fe487900ebe3ab55f08b23f53fb9aabf16faaac2eda88e"
+  },
+  "consoleReadbackMembers": 242,
+  "sourceAssets": {
+    "filesCompared": 237,
+    "byteExactFiles": 237,
+    "lineEndingOnlyNotices": []
+  },
+  "sourceArchiveMembers": 507,
+  "generatedIconReproduced": true,
+  "releaseAssetsWritten": false,
+  "consoleContacted": false,
+  "publicationAuthorizedByThisAudit": false
+}

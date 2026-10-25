@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "programSourceCommit": "5c34e67aba3e51ca209d56215f97b586ff58c1e5",
+  "privateArchiveBytes": 166272369,
+  "privateArchiveSHA256": "c9201d3dfab31c17b90a6aac84c541e0209a3a246f4fe49cbd41dc3759b8c93f",
+  "sourceKitMembers": 507,
+  "applicationObjects": 19,
+  "replaceableLibraries": 3,
+  "freshCompilerPrefix": true,
+  "converterRebuilt": true,
+  "applicationRecompiled": false,
+  "consoleContacted": false,
+  "status": "passed",
+  "elf": {
+    "bytes": 2890164,
+    "sha256": "26b84e0a60620df0dce26e1d81a6717da9c80407079ce01cba5823f34304c883",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2773777,
+    "sha256": "9834451dc2ca0f59f6fe487900ebe3ab55f08b23f53fb9aabf16faaac2eda88e"
+  },
+  "initialAttempt": "WSL Python could not find Node before compiler startup; retained in the private attempt log",
+  "successfulRuntime": "Windows Node called the configured WSL compiler through the unmodified build wrapper"
+}
