@@ -1,0 +1,31 @@
+# Local source research and console notes are not part of the public preview.
+native-estante/
+native-jewelcase/
+PS5-INTEGRATION.md
+JEWEL-CASE-INTEGRATION.md
+SYSTEM-SUPPORT.md
+v1-preview.html
+estanteicon.png
+
+# Source photographs are credited by URL, not redistributed.
+assets/references/
+assets/3d-icons/archive/
+assets/*.jpg
+assets/*.png
+!assets/shelf-icon.png
+!assets/shelf-icon-v1.png
+!assets/shelf-icon-premium-v2.png
+!assets/shelf-icon-gaming-v3.png
+
+# Keep a few current screenshots; others are local review artifacts.
+previews/*
+!previews/console-images-grid.png
+!previews/console-images-swipe.png
+!previews/mobile-swipe.png
+!previews/switch2-3d-card.png
+
+node_modules/
+.cache/
+*.log
+*.tmp
+.DS_Store

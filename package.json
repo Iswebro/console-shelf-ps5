@@ -1,0 +1,15 @@
+{
+  "name": "console-shelf-ps5",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Offline PC preview for a console-first PS5 homebrew shelf",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "test": "node tools/verify-preview.js",
+    "build:systems": "node tools/build-support-list.js",
+    "build:icons": "node tools/build-icon-manifest.js"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

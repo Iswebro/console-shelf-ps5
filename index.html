@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0c1c">
+  <title>Console Shelf — design preview</title>
+  <link id="appFavicon" rel="icon" type="image/png" href="assets/shelf-icon.png">
+  <link id="appTouchIcon" rel="apple-touch-icon" href="assets/shelf-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="systems-data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <header class="site-header">
+      <div class="brand"><img id="brandIcon" class="mark" src="assets/shelf-icon.png" width="40" height="40" alt=""><span>Estante <span class="brand-divider">/</span> Console Shelf</span></div>
+      <span class="preview-badge">DESIGN PREVIEW · PC ONLY</span>
+    </header>
+
+    <main>
+      <section id="home">
+        <div class="welcome">
+          <p class="eyebrow">ONE HOME FOR YOUR SYSTEMS</p>
+          <h1>What do you want<br><em>to play today?</em></h1>
+          <p class="intro">Explore console and computer systems mapped in your PS5 setup. Choose a look, browse by brand or status, and see which games have actually been tried.</p>
+        </div>
+
+        <div class="browse-panel">
+          <div class="search-row">
+            <label class="search-wrap"><span class="sr-only">Find a system</span><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find a system, brand or core…" autocomplete="off"></label>
+            <span class="count" id="systemCount" aria-live="polite"></span>
+          </div>
+          <div class="options-row">
+            <div class="option-block">
+              <span class="option-label">SHOW · DEMO INVENTORY</span>
+              <div class="segmented" role="group" aria-label="Which consoles to show">
+                <button type="button" id="scopeAll" aria-pressed="true">All consoles</button>
+                <button type="button" id="scopeAvailable" aria-pressed="false">Emulator or games</button>
+              </div>
+            </div>
+            <div class="option-block">
+              <span class="option-label">GRID LOOK</span>
+              <div class="segmented" role="group" aria-label="Console look">
+                <button type="button" id="lookImages" aria-pressed="true">3D system icons</button>
+                <button type="button" id="lookCards" aria-pressed="false">Classic cards</button>
+              </div>
+            </div>
+            <div class="option-block">
+              <span class="option-label">LAYOUT</span>
+              <div class="segmented" role="group" aria-label="Shelf layout">
+                <button type="button" id="layoutGrid" aria-pressed="true">Grid</button>
+                <button type="button" id="layoutCarousel" aria-pressed="false">Swipe</button>
+              </div>
+            </div>
+            <label class="option-block select-block" for="sort">
+              <span class="option-label">SORT BY</span>
+              <select id="sort">
+                <option value="featured">Featured order</option>
+                <option value="az">Name · A to Z</option>
+                <option value="za">Name · Z to A</option>
+                <option value="newest">Newest hardware first</option>
+                <option value="oldest">Oldest hardware first</option>
+                <option value="brand">Brand, then name</option>
+                <option value="games">Example games · most first</option>
+                <option value="favorites">Favorites first</option>
+              </select>
+            </label>
+            <label class="option-block select-block brand-filter" for="family">
+              <span class="option-label">BRAND</span>
+              <select id="family">
+                <option value="all">All brands</option>
+                <option value="PlayStation">PlayStation</option>
+                <option value="Nintendo">Nintendo</option>
+                <option value="Sega">Sega</option>
+                <option value="Sammy">Sammy</option>
+                <option value="Atari">Atari</option>
+                <option value="NEC">NEC</option>
+                <option value="SNK">SNK</option>
+                <option value="Bandai">Bandai</option>
+                <option value="3DO">3DO</option>
+                <option value="Arcade">Arcade</option>
+                <option value="Commodore">Commodore</option>
+                <option value="Computer">Computer</option>
+              </select>
+            </label>
+            <label class="option-block select-block" for="availability">
+              <span class="option-label">PS5 STATUS</span>
+              <select id="availability">
+                <option value="all">All statuses</option>
+                <option value="tested">Game tested here</option>
+                <option value="native">Native on PS5</option>
+                <option value="mapped">RetroArch core listed</option>
+                <option value="app">Emulator app listed</option>
+                <option value="reference">Hardware reference only</option>
+              </select>
+            </label>
+            <label class="option-block select-block icon-style" for="iconStyle">
+              <span class="option-label">APP ICON</span>
+              <select id="iconStyle">
+                <option value="gaming">Gaming · default</option>
+                <option value="classic">Classic mint</option>
+                <option value="jade">Jade</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <p class="inventory-note">The demo inventory is based on one PS5 snapshot from 24 October 2026: <strong>46 RetroArch system mappings</strong> plus native and dedicated apps. “Emulator or games” uses that snapshot, including built-in PS5/PS4 routes; this PC preview does not scan your console. A listed core is a route to try, not a guarantee that games will run. Switch 2 is a visual reference only. <a href="docs/SYSTEMS.md">See the demo system list</a>.</p>
+
+        <div class="shelf-heading">
+          <div><p class="eyebrow">YOUR SYSTEM COLLECTION</p><h2>Choose a system</h2></div>
+          <div id="carouselControls" class="carousel-controls" hidden>
+            <span id="carouselPosition" class="count"></span>
+            <button type="button" id="carouselPrev" aria-label="Previous console">←</button>
+            <button type="button" id="carouselNext" aria-label="Next console">→</button>
+          </div>
+        </div>
+        <p id="swipeHint" class="swipe-hint" hidden>Floating console icons. Swipe sideways, drag with a mouse, or use the arrows to explore.</p>
+        <div id="systems" class="systems-grid" role="list" aria-label="Systems"></div>
+        <p id="emptySearch" class="empty-search" hidden>No systems match those filters. Try another name, brand or status.</p>
+      </section>
+
+      <section id="detail" hidden>
+        <button type="button" class="back" id="back">← All systems</button>
+        <div id="hero" class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow" id="detailFamily"></p>
+            <h1 id="detailName"></h1>
+            <span id="detailStatus" class="status-badge"></span>
+            <p id="detailDescription"></p>
+            <div class="detail-controls">
+              <label class="emulator-label" for="emulator" id="emulatorLabel">Preferred emulator<select id="emulator"></select></label>
+              <button type="button" class="primary" id="openEmulator">Open emulator <span aria-hidden="true">↗</span></button>
+              <button type="button" class="secondary" id="showLibrary">Show game library</button>
+            </div>
+          </div>
+          <div class="hero-art"><img id="heroImage" alt=""><span id="heroSymbol" aria-hidden="true"></span></div>
+        </div>
+        <div id="libraryPanel" hidden>
+          <div class="library-heading"><div><p class="eyebrow">LIBRARY PREVIEW</p><h2 id="libraryTitle"></h2></div><span class="count" id="libraryCount"></span></div>
+          <div id="games" class="games"></div>
+        </div>
+        <p class="notice">This is a PC design preview. Emulator buttons do not start PS5 apps, and the game lists are examples from prior setup notes. Console scanning and launch support still need to be built and tested.</p>
+      </section>
+    </main>
+
+    <footer>Stylized system icons and <a href="assets/CREDITS.md">reference credits</a>. The Switch 2 image follows Nintendo's official hardware photo. No official PS6 design was verified, so no PS6 card was made. This preview does not connect to your PS5.</footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

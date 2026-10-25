@@ -1,0 +1,418 @@
+[
+  {
+    "id": "ps5",
+    "local": "assets/3d-icons/ps5.png",
+    "bytes": 1016674,
+    "sha256": "061FB1DEA8C7D15974A6BA5DBCEE6AE0A8BF4C73FFBB45B19DCC677AAAD02C99",
+    "reference": "https://commons.wikimedia.org/wiki/File:Black_and_white_Playstation_5_base_edition_with_controller.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "ps4",
+    "local": "assets/3d-icons/ps4.png",
+    "bytes": 786174,
+    "sha256": "F89D161CBC4EB8EE479DC7C147A3C820A754DD023B8D10852444C4AB9F508CD6",
+    "reference": "https://commons.wikimedia.org/wiki/File:PS4-Console-wDS4.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "ps3",
+    "local": "assets/3d-icons/ps3.png",
+    "bytes": 1249729,
+    "sha256": "BBE609C4805FD13D0401A5B715ECE80C2A4C0F289FC628A9687E20F394F8D817",
+    "reference": "https://commons.wikimedia.org/wiki/File:PS3-Fat-Console-Set.jpg",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "ps2",
+    "local": "assets/3d-icons/ps2.png",
+    "bytes": 1140352,
+    "sha256": "F42E7D0E3DD8435FD4F994ABE48B4A8FB22427CB1956C31DCCA36CD38987C1CF",
+    "reference": "https://commons.wikimedia.org/wiki/File:Sony_PlayStation_2.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "ps1",
+    "local": "assets/3d-icons/ps1.png",
+    "bytes": 1312472,
+    "sha256": "63262E6E37D154E180E43ECD4262426FBE48D956E70BD7E1534D7D5D2AC1107D",
+    "reference": "https://commons.wikimedia.org/wiki/File:Sony-PlayStation-5501-Console-FL.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "psp",
+    "local": "assets/3d-icons/psp.png",
+    "bytes": 1120216,
+    "sha256": "CFB65A17DA77B71E79A6366EB1B92F7718392ACC5D1902DAE0ED31B2C4765A49",
+    "reference": "https://commons.wikimedia.org/wiki/File:PSP-1000.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "switch2",
+    "local": "assets/3d-icons/switch2.png",
+    "bytes": 1551354,
+    "sha256": "ED81C062746A3A7F8119D44810192251BA8730F0B867D90786A4E68A0863AC72",
+    "reference": "https://nintendoes-newsroom.prgloo.com/resources/nintendo-switch-2",
+    "referenceType": "official Nintendo press image"
+  },
+  {
+    "id": "switch",
+    "local": "assets/3d-icons/switch.png",
+    "bytes": 1041380,
+    "sha256": "287EE30C661351329BC60E83CBD9EAA7E407C412BC2842131082F33A14A63300",
+    "reference": "https://commons.wikimedia.org/wiki/File:Nintendo-Switch-Console-Docked-wJoyConRB.jpg",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "wiiu",
+    "local": "assets/3d-icons/wiiu.png",
+    "bytes": 751638,
+    "sha256": "8F28BE59F37A70E498625AB4562FC8C98375A513B8A3EF50325712F6E3A9BF77",
+    "reference": "https://commons.wikimedia.org/wiki/File:Wii_U_Console_and_Gamepad.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "wii",
+    "local": "assets/3d-icons/wii.png",
+    "bytes": 1267195,
+    "sha256": "479B31FFD9CD825141E4940EF1E975BCA8105FAD38FD66391115936A5AC108F1",
+    "reference": "https://commons.wikimedia.org/wiki/File:Wii-Console.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "gamecube",
+    "local": "assets/3d-icons/gamecube.png",
+    "bytes": 1228278,
+    "sha256": "4782049B6F1DE1C7AFD50C513DC9C46030A31A37A4FB822A6DF08131B7113A1B",
+    "reference": "https://commons.wikimedia.org/wiki/File:GameCube-Set.jpg",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "n64",
+    "local": "assets/3d-icons/n64.png",
+    "bytes": 1316797,
+    "sha256": "13CA39711D4FDBB43CB89FEA73D5D11A4757B9510F20D46B02D4AE06D9C36AF4",
+    "reference": "https://commons.wikimedia.org/wiki/File:Nintendo-64-wController-L.jpg",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "3ds",
+    "local": "assets/3d-icons/3ds.png",
+    "bytes": 1567350,
+    "sha256": "EC9E8ACD133E09545F6E76F6EFEC5E528D6BACB86D0ADD9BACB0E95233ECD4E8",
+    "reference": "https://commons.wikimedia.org/wiki/File:Nintendo-3DS-AquaOpen.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "ds",
+    "local": "assets/3d-icons/ds.png",
+    "bytes": 1520949,
+    "sha256": "FCF280D186B3EEAFB478CAF2D56215E9DB34B40A98826C25790D076B1BD19811",
+    "reference": "https://commons.wikimedia.org/wiki/File:Nintendo-DS-Fat-Blue.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "gba",
+    "local": "assets/3d-icons/gba.png",
+    "bytes": 1388734,
+    "sha256": "AF238110AF83E85D13B294133588A6AFE7B11AAC757E5B25047F34E1A73724AE",
+    "reference": "https://commons.wikimedia.org/wiki/File:Nintendo-Game-Boy-Advance-Purple-FL.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "gbc",
+    "local": "assets/3d-icons/gbc.png",
+    "bytes": 1647445,
+    "sha256": "E2EC49401E2EE6D5F4A69779B5630E3DDEEE8CC0A6CEC9C0EECA897595880DFC",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "gb",
+    "local": "assets/3d-icons/gb.png",
+    "bytes": 1623352,
+    "sha256": "23AF81F39E38834830D16D63D6AA1F337B6A96BBF7869FA2B7B5426D82B3988A",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "snes",
+    "local": "assets/3d-icons/snes.png",
+    "bytes": 1211987,
+    "sha256": "B2FF77E305D5298A13DDBC5F8406098D505086441FFDBC83B457E5624095EE17",
+    "reference": "https://commons.wikimedia.org/wiki/File:SNES-Mod1-Console-Set.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "nes",
+    "local": "assets/3d-icons/nes.png",
+    "bytes": 1021916,
+    "sha256": "B81B43A328F746E9F36210B4142E2C0A3AEF0167017BB707B4E5BC9936C05F77",
+    "reference": "https://commons.wikimedia.org/wiki/File:NES-Console-Set.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "fds",
+    "local": "assets/3d-icons/fds.png",
+    "bytes": 1883030,
+    "sha256": "D144ED05DB3FD0D649728551C4E183BC2AC961C2E2E4BC8B963C13B9AB97A28A",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "virtualboy",
+    "local": "assets/3d-icons/virtualboy.png",
+    "bytes": 1484055,
+    "sha256": "85FDC3D40E59AB848F563E9B0DA85E801F182CA0B76A9FEC7B11801B707BDCCB",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "pokemonmini",
+    "local": "assets/3d-icons/pokemonmini.png",
+    "bytes": 1599871,
+    "sha256": "D8ABB318D72CBAFCE787D974F0C49541C545DE263BBEEF8CA20268FF033379BA",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "dreamcast",
+    "local": "assets/3d-icons/dreamcast.png",
+    "bytes": 944376,
+    "sha256": "195D4DDE5A5141E36D36DCF4FFDDFCDFB7BEF45650497AD41028DCE43B3F2520",
+    "reference": "https://commons.wikimedia.org/wiki/File:Dreamcast-Console-Set.png",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "saturn",
+    "local": "assets/3d-icons/saturn.png",
+    "bytes": 1263703,
+    "sha256": "583B9C105673A348F49137B88FCC3AD3164B26C7A1B05A78347951FEC3529BE2",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "naomi",
+    "local": "assets/3d-icons/naomi.png",
+    "bytes": 1505417,
+    "sha256": "5588DD55CFFE1C195A51001A7D5A2A7064D79D4732B6F9B5CA2CB18B55FD3B19",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "genesis",
+    "local": "assets/3d-icons/genesis.png",
+    "bytes": 1403434,
+    "sha256": "70FE2747E8EFF024149CDA2B0BF9788EAA8CB6789F75767121D6D1F174EFDA3A",
+    "reference": "https://commons.wikimedia.org/wiki/File:Sega-Mega-Drive-JP-Mk1-Console-Set.jpg",
+    "referenceType": "credited hardware photo"
+  },
+  {
+    "id": "segacd",
+    "local": "assets/3d-icons/segacd.png",
+    "bytes": 1828613,
+    "sha256": "B0391AC821341B4FE7EED0226275DFD6258E7E18F96D46A7C7DDE8D60A01E924",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "sega32x",
+    "local": "assets/3d-icons/sega32x.png",
+    "bytes": 1711053,
+    "sha256": "1AAAAA46FE892168A3E1B9A7BCEF0893612DF81F1909983471C450EB6F9FF605",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "mastersystem",
+    "local": "assets/3d-icons/mastersystem.png",
+    "bytes": 1629300,
+    "sha256": "9808D187876B91B7D57FE92790970E84AC374F16058AD16E8A09A5D810EFE806",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "gamegear",
+    "local": "assets/3d-icons/gamegear.png",
+    "bytes": 1338315,
+    "sha256": "D71DBE0569A7944FB33F1E5B15384C766AD5F6334E1FE7499E0542E065FB7475",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "sg1000",
+    "local": "assets/3d-icons/sg1000.png",
+    "bytes": 1317871,
+    "sha256": "D2C27B2FC27C4B45D39812E39F41E3374630E280E03611269E59AE9958927DEB",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "atomiswave",
+    "local": "assets/3d-icons/atomiswave.png",
+    "bytes": 1885274,
+    "sha256": "867DBD639FD812A796A7E77F74EAC54CE483E3FBFA45217B6E934B4609429251",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "atarijaguar",
+    "local": "assets/3d-icons/atarijaguar.png",
+    "bytes": 1617544,
+    "sha256": "F6E94D91D8267EEC1234DB0881F1BEB5D4F886E2EAD06DA49E16B54D5D45176F",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "atarilynx",
+    "local": "assets/3d-icons/atarilynx.png",
+    "bytes": 1793571,
+    "sha256": "C0372F67C0A93FB187AADD47B2D97BA7544549A9D49208FD4E224D61F9EC30CE",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "atari7800",
+    "local": "assets/3d-icons/atari7800.png",
+    "bytes": 1570683,
+    "sha256": "0498ADA4B19DEA061BC37C7C77FABB2FDC0A37F9B53DE218805B8CC616A8E39F",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "atari5200",
+    "local": "assets/3d-icons/atari5200.png",
+    "bytes": 1447235,
+    "sha256": "C9286F20626A69F463836F3CAE4FE09D46FA9E14ACEAD5AED654381D8A60EE70",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "atari2600",
+    "local": "assets/3d-icons/atari2600.png",
+    "bytes": 1571822,
+    "sha256": "D197290F5A0AA9A9873D8BACC49525476CE5648B45BC2E7B03F3F5F22A1C225C",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "pcengine",
+    "local": "assets/3d-icons/pcengine.png",
+    "bytes": 1278411,
+    "sha256": "24F5D3BD03AAEAE8F294F59FABBE08E0B0903BC2596CB730A0F189B73F0E7EDA",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "supergrafx",
+    "local": "assets/3d-icons/supergrafx.png",
+    "bytes": 1876980,
+    "sha256": "3E891FBAF135AB01426AB8C2DB4E915C3D0F71BB479917ACF64DCBE137B02C4A",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "pcfx",
+    "local": "assets/3d-icons/pcfx.png",
+    "bytes": 1313372,
+    "sha256": "2D6F984D78FF5A778B58CAED46D9A4BDCB6235815A8276B1FEC820584B3028A7",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "neogeocd",
+    "local": "assets/3d-icons/neogeocd.png",
+    "bytes": 1907731,
+    "sha256": "FF951637BBCD3587B4103E4CFDE55D63259EFACE8D7560549F7652D4634C169C",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "neogeopocketcolor",
+    "local": "assets/3d-icons/neogeopocketcolor.png",
+    "bytes": 1626069,
+    "sha256": "F4301CB4CB6304B6D947D336E0D8F18098D7E753DBDE9A6364998503B6C7C941",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "neogeopocket",
+    "local": "assets/3d-icons/neogeopocket.png",
+    "bytes": 1740997,
+    "sha256": "BA2774276EA1946F82D0B3CB2DC7308F9CCAA49E2658ECE8799695E7FE9EB468",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "wonderswancolor",
+    "local": "assets/3d-icons/wonderswancolor.png",
+    "bytes": 1463260,
+    "sha256": "26E4FEFD955F65D8EB004FB484CF0FF2AA0CC3FFF8628E335ABA08BD47AE8410",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "wonderswan",
+    "local": "assets/3d-icons/wonderswan.png",
+    "bytes": 1424504,
+    "sha256": "CDFFAA2083A7290AAA3F1B0D3298B26F7DF8A0127C18D261531C97E5B7A74ECB",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "threedo",
+    "local": "assets/3d-icons/threedo.png",
+    "bytes": 1796329,
+    "sha256": "3B828FAD47C0A006CD657C48F8068328DEBDD60DCBC273D93B4137D2E7448FD4",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "arcadefbneo",
+    "local": "assets/3d-icons/arcadefbneo.png",
+    "bytes": 1456242,
+    "sha256": "D2E37C907F07F4C30F01C0F593BC8959BC07C202A1D5187B6DA6111DE2A55B41",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "arcademame",
+    "local": "assets/3d-icons/arcademame.png",
+    "bytes": 1338582,
+    "sha256": "123A69CE6835E99F51F1C77FECC88C3D6CBAD4065689E931BAE8080D41EB775F",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "amiga",
+    "local": "assets/3d-icons/amiga.png",
+    "bytes": 1281152,
+    "sha256": "D9FA4E7FF52FE036A2F9143420D88DE3FA9DD888CEBC99848608839EFFE0D439",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "c64",
+    "local": "assets/3d-icons/c64.png",
+    "bytes": 1487955,
+    "sha256": "A45CCE66A9A2B388AA751DB1624411C6765C581C55E57238A4BFD15F78E17F02",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "dos",
+    "local": "assets/3d-icons/dos.png",
+    "bytes": 1821501,
+    "sha256": "69E2BE57630309DA299B29D92D54852246EC88C9F8D1F68A09D0AE875907DE1D",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  },
+  {
+    "id": "scummvm",
+    "local": "assets/3d-icons/scummvm.png",
+    "bytes": 1770629,
+    "sha256": "4B32AA1EA0D130E4D26E334ABAB4F3752006774E3B89F4017FA711B19E55C759",
+    "reference": null,
+    "referenceType": "general hardware features and existing Shelf icon style"
+  }
+]

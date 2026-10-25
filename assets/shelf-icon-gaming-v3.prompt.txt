@@ -1,0 +1,17 @@
+Shelf gaming icon v3
+Mode: built-in image_gen
+Reference: assets/shelf-icon-premium-v2.png
+
+Prompt
+
+Use case: precise-object-edit.
+Asset type: final home-screen app icon for Shelf, a personal gaming library.
+Edit target / identity reference: the supplied Shelf icon with the S-shaped bookshelf. Use it as the starting identity, but make a substantial, art-directed gaming edition, not merely a colour swap.
+
+Primary request: create a premium, highly desirable gaming launcher icon: bold, memorable, confident, extremely clean, readable when small. A distinctive custom brand mark that belongs beside the best game platform icons.
+Design the S-shaped shelf as one strong, compact angular monogram. Preserve its clever shelf construction: three horizontal bars, upper-left connector and lower-right connector, upper bay open to the right and lower bay open to the left. Keep the capital S immediately clear.
+Give the monogram thicker, decisive strokes and restrained 45-degree chamfered corners/end cuts. A subtly forward-moving silhouette, with precise geometric consistency and balanced negative space. Reinterpret the upright books as sleek game-case spines. Simplify them to three clean varied-height spines in each bay; retain room around them and avoid tiny details.
+Colour: a luminous electric mint-to-cyan accent for the dominant S, with mostly pale icy-white spines and one restrained periwinkle accent spine. Deep midnight graphite-navy background. Bright clean contrast, with the mint as the unmistakable signature.
+Finish: polished vector-like edges, mostly flat graphic design with only a very restrained hint of depth from a tight teal edge and soft ambient colour immediately around the mark. Tasteful and contemporary, not a glowing neon sign. The S silhouette must stay crisp; avoid diffuse halos.
+Composition: ONE finished square app icon, straight-on, full-bleed dark background, emblem centered and occupying about 68 percent of the canvas. Balanced safe margins for a home-screen icon mask. Background nearly uniform, with at most a very subtle cool tonal lift behind the emblem. Do not show a phone or an icon mockup.
+No text or wordmark. No controllers, weapons, mascots, shields, badges, decorative frames, extra lightning bolts, starbursts, circuitry, flames, chrome, metallic bevels, heavy shadows, rainbow RGB, noise, or tiny ornamental details. Deliver only the clean icon.

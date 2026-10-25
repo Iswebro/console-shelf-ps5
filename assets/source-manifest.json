@@ -1,0 +1,128 @@
+[
+  {
+    "id": "ps5",
+    "bytes": 600976,
+    "sha256": "8BC0550D41DA8041D93C43C804A73D1519A090E3231CA475A5A04604037F48B9",
+    "source": "https://commons.wikimedia.org/wiki/File:Black_and_white_Playstation_5_base_edition_with_controller.png",
+    "local": "assets/ps5.png"
+  },
+  {
+    "id": "ps4",
+    "bytes": 243937,
+    "sha256": "EEFE3B6C1EC45AFE05F76F579A5CE75B52D7561F7F65D6C1C6201EB50AF80AC7",
+    "source": "https://commons.wikimedia.org/wiki/File:PS4-Console-wDS4.png",
+    "local": "assets/ps4.png"
+  },
+  {
+    "id": "ps3",
+    "bytes": 150683,
+    "sha256": "098EDA5C96BA976C20C5D71EC9F64C7A2A6157159D326D3CFDEE54C883709489",
+    "source": "https://commons.wikimedia.org/wiki/File:PS3-Fat-Console-Set.jpg",
+    "local": "assets/ps3.jpg"
+  },
+  {
+    "id": "ps2",
+    "bytes": 311227,
+    "sha256": "AA3D06DC773E7BE769DF8E43A00E54CB4CDB1AAFA0A52FDAB966E1AC30DD110C",
+    "source": "https://commons.wikimedia.org/wiki/File:Sony_PlayStation_2.png",
+    "local": "assets/ps2.png"
+  },
+  {
+    "id": "ps1",
+    "bytes": 299786,
+    "sha256": "6D22A99510BBFF1A975528FE0AF28835062D8EBE06A4312F1CDE40C2488E11AF",
+    "source": "https://commons.wikimedia.org/wiki/File:Sony-PlayStation-5501-Console-FL.png",
+    "local": "assets/ps1.png"
+  },
+  {
+    "id": "n64",
+    "bytes": 50265,
+    "sha256": "58579106D5ADE0B490A904AEA93944EDEDC6B34979BC3FF57E103DAAEF42A3B7",
+    "source": "https://commons.wikimedia.org/wiki/File:Nintendo-64-wController-L.jpg",
+    "local": "assets/n64.jpg"
+  },
+  {
+    "id": "gamecube",
+    "bytes": 64721,
+    "sha256": "215DAEB598F0060D149F2635CA265DC1CCDB5980D73799119A914B323FEE6D60",
+    "source": "https://commons.wikimedia.org/wiki/File:GameCube-Set.jpg",
+    "local": "assets/gamecube.jpg"
+  },
+  {
+    "id": "wii",
+    "bytes": 358115,
+    "sha256": "FABCB3CA191821AB383722744A47574E7FE3BED69EC3C506A1B4BD95E38D9BD1",
+    "source": "https://commons.wikimedia.org/wiki/File:Wii-Console.png",
+    "local": "assets/wii.png"
+  },
+  {
+    "id": "wiiu",
+    "bytes": 200430,
+    "sha256": "C3131F29BA1A121DEA9769410C72AB46272E26B5B2AE685C4ACF3250E6F05FE8",
+    "source": "https://commons.wikimedia.org/wiki/File:Wii_U_Console_and_Gamepad.png",
+    "local": "assets/wiiu.png"
+  },
+  {
+    "id": "3ds",
+    "bytes": 730259,
+    "sha256": "1633AFCA946E20E0D2AEA14AAFB8F26CB03E8574FCFD3FC655682EDD2D9FD5B5",
+    "source": "https://commons.wikimedia.org/wiki/File:Nintendo-3DS-AquaOpen.png",
+    "local": "assets/3ds.png"
+  },
+  {
+    "id": "ds",
+    "bytes": 731607,
+    "sha256": "44B201AC812E4350AD113481F7FC47511D8B10A3CC1EEDA3EEF3480C3576E1D0",
+    "source": "https://commons.wikimedia.org/wiki/File:Nintendo-DS-Fat-Blue.png",
+    "local": "assets/ds.png"
+  },
+  {
+    "id": "switch",
+    "bytes": 49013,
+    "sha256": "A4E5702207010DF96DD3D15218ADEADCE7D45513D507EA9E99A90EC056E4FA44",
+    "source": "https://commons.wikimedia.org/wiki/File:Nintendo-Switch-Console-Docked-wJoyConRB.jpg",
+    "local": "assets/switch.jpg"
+  },
+  {
+    "id": "nes",
+    "bytes": 251156,
+    "sha256": "CAE3C189F5154A8EA97D2C9AF93A2DFF8EE5464178E4CF66468E519CFA2A9A0B",
+    "source": "https://commons.wikimedia.org/wiki/File:NES-Console-Set.png",
+    "local": "assets/nes.png"
+  },
+  {
+    "id": "snes",
+    "bytes": 253311,
+    "sha256": "46FAC6FD090276A09A167D5262AF0A5FD966E941E042DA71FBA95AD3D2671F41",
+    "source": "https://commons.wikimedia.org/wiki/File:SNES-Mod1-Console-Set.png",
+    "local": "assets/snes.png"
+  },
+  {
+    "id": "gba",
+    "bytes": 501924,
+    "sha256": "78CED9B7059E0F5FC6138DAD06A1DE2ECBBD2A2E3A749891934B10017688218E",
+    "source": "https://commons.wikimedia.org/wiki/File:Nintendo-Game-Boy-Advance-Purple-FL.png",
+    "local": "assets/gba.png"
+  },
+  {
+    "id": "psp",
+    "bytes": 321120,
+    "sha256": "B0D42036E6DFBF8DBF28953AB695503239CB817E53FFF7B6D1D8D210DA37FE8B",
+    "source": "https://commons.wikimedia.org/wiki/File:PSP-1000.png",
+    "local": "assets/psp.png"
+  },
+  {
+    "id": "genesis",
+    "bytes": 55841,
+    "sha256": "DC2A7E66489F8050D9E0038ABFF73E505815B999921191B4F1BADE9367352194",
+    "source": "https://commons.wikimedia.org/wiki/File:Sega-Mega-Drive-JP-Mk1-Console-Set.jpg",
+    "local": "assets/genesis.jpg"
+  },
+  {
+    "id": "dreamcast",
+    "bytes": 220756,
+    "sha256": "B88C81EB95D501CDA8B544D207E30C7CDE27D8E50837D76F47EC1BF8499B3E73",
+    "source": "https://commons.wikimedia.org/wiki/File:Dreamcast-Console-Set.png",
+    "local": "assets/dreamcast.png"
+  }
+]

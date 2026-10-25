@@ -1,0 +1,20 @@
+Shelf icon v1
+Mode: built-in image_gen
+Reference: user-supplied Estante icon
+
+Initial prompt
+
+Use case: precise-object-edit / logo-brand.
+Edit target: the attached Estante bookshelf app icon. Create a finished square app icon for our project, Shelf, using this image as the base.
+Primary change: turn the large geometric E-shaped shelf outline into an unmistakable angular capital S-shaped shelf outline. Keep three horizontal bars. Keep the LEFT vertical connector only between the TOP and MIDDLE bars, and put the RIGHT vertical connector only between the MIDDLE and BOTTOM bars. The upper bay must open to the right; the lower bay must open to the left. There must be no lower-left vertical connector and no upper-right vertical connector. This precise S silhouette is essential.
+Preserve the original minimal, flat, crisp, rectangular bookshelf style, consistent stroke thickness, centered composition, generous square margins, near-black green background, and small upright rectangular books of varied heights inside both shelf bays. Use three books in the upper bay and four in the lower bay, alternating the shelf accent and pale warm ivory.
+Colour change: shift the original bright mint subtly toward a slightly cooler, softer seafoam teal, approximately #8FCFD0; use warm ivory approximately #EDF1E7 for alternate books and an almost-black green background approximately #111610.
+The S is the symbol itself, not an extra letter. Make the silhouette legible at app-icon size. Keep the linework very clean and balanced, a refined evolution of the reference.
+Output one square icon, straight-on flat graphic. No wordmark, captions, gradients, shadows, texture, 3D, border, mockup, or additional symbols.
+
+Refinement prompt
+
+Use case: precise-object-edit / logo-brand.
+Edit target: the attached newly created S-shaped bookshelf app icon for Shelf.
+Change only the surface finish: make this a strictly flat vector-style graphic with solid uniform colour regions. Remove ALL grain, mottling, texture, lighting, shading, highlights, gradients, glow, bevels, edge outlines, and shadows. The background must be one perfectly uniform solid almost-black green #111610. All teal areas must be exactly the same single flat soft seafoam teal #8FCFD0. All ivory book areas must be the same flat warm ivory #EDF1E7. Crisp straight rectangular edges, with normal clean edge antialiasing only.
+Preserve the exact existing S-shaped shelf silhouette, its position and size, consistent line thickness, the three upper books and four lower books, their positions and varied heights, square canvas, and all the spacing. Do not redesign or move anything. No text, wordmark, watermark, extra details, border, or mockup. Return one finished square icon.

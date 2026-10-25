@@ -1,0 +1,17 @@
+Shelf premium icon v2
+Mode: built-in image_gen
+Reference: assets/shelf-icon-v1.png
+
+Prompt
+
+Use case: precise-object-edit / logo-brand.
+Edit target: the supplied S-shaped bookshelf icon for the app Shelf.
+Primary request: evolve this specific mark into a more premium, stylish, carefully designed app icon. Keep its identity and recognisable S bookshelf, but refine the proportions, spacing, and colour.
+
+Art direction: understated contemporary literary brand, quiet confidence, elegant geometric construction, meticulous optical balance. A polished flat logo that works as an app icon.
+Preserve the essential S: three horizontal shelf bars, a left vertical join only between the upper and middle bars, and a right vertical join only between the middle and bottom bars. Upper bay opens right, lower bay opens left. Preserve the small upright books inside both bays.
+Refinements: make the shelf strokes approximately 12 percent slimmer; give the corners only a tiny, precise softening, retaining the architectural S rather than making it bubbly. Carefully balance the book heights and gaps, with generous negative space. Keep three books in the upper bay and four below. Make the books slightly more slender and elegant, all upright. Do not add spine decorations. Preserve excellent small-size legibility.
+Palette: a beautifully restrained muted jade green #A1C4B4 for the S and selected books, warm parchment ivory #E8E4D8 for the other books, on a uniform deep ink-green background #101A18. This should feel calmer and richer than the original bright cyan.
+Composition: one isolated centered logo on a square background with generous, balanced margins; the mark occupies roughly 60 percent of the canvas width and height.
+Surface: perfectly flat solid colour fills, crisp clean edges and smooth antialiasing, no lighting or texture.
+Avoid: gold, metallic effects, gradients, shadows, bevels, glow, 3D, grain, mockups, decorative frames, wordmarks, captions, text, extra symbols. Show only the finished icon.
