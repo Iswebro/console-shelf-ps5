@@ -52,7 +52,7 @@ def sdk_stubs(sdk, archive):
 def capture(sdk, pins, inputs):
     require(not inputs.exists(), "Relink snapshot already exists; use --inputs for a new build snapshot")
     build = CACHE / "build"
-    verify_recorded_hashes(build)
+    verified = verify_recorded_hashes(build)
     require(source_fingerprint() == json.loads((build / "build-source.json").read_text()),
             "Application sources differ from the recorded build")
     ports_archive = fetch(pins["ports"]["url"], CACHE / "downloads/pacbrew-v0.40.2.tar.gz",
@@ -89,6 +89,10 @@ def capture(sdk, pins, inputs):
               "objectOrder": [name + ".o" for name in OBJECTS], "referenceElf": report["elf"],
               "referenceSelf": report["self"], "sourceFingerprint": file_record(inputs / "build-source.json"),
               "scope": "Application object relink inputs; no firmware compatibility claim"}
+    if "embeddedLaunchHelper" in verified:
+        helper = verified["embeddedLaunchHelper"]
+        record["launcherRuntime"] = {key: helper[key] for key in
+                                     ("bytes", "sha256", "runtimeMode", "permissionChanges")}
     (inputs / "link-inputs.json").write_text(json.dumps(record, indent=2) + "\n")
     print("Retained and verified", len(objects), "application objects and three replaceable libraries.", flush=True)
 
@@ -171,6 +175,8 @@ def main():
     result.update({"relinkedOnly": True, "applicationRecompiled": False, "replacementSupplied": modified,
                    "exactReferenceMatch": exact, "libraries": {name: file_record(path)
                                                                for name, path in zip(LIBRARIES, libraries)}})
+    if "launcherRuntime" in record:
+        result["launcherRuntime"] = record["launcherRuntime"]
     (output / "relink-verification.json").write_text(json.dumps(result, indent=2) + "\n")
     print("Relink verified:", output, "exact reference match:" + str(exact), flush=True)
 

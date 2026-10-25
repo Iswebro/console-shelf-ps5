@@ -33,6 +33,8 @@ Console Shelf's preview and C++ UI are original code. Its PS5 platform/build int
 
 The [PS5 build notes](docs/PS5-BUILD.md) distinguish imported source, linked libraries, isolated Ubuntu compiler packages and remaining binary-release requirements. Imported source hashes are in [ps5-runtime/SOURCE.json](native/third_party/ps5-runtime/SOURCE.json); platform adaptations record their origins in [platform/SOURCE.json](native/ps5/platform/SOURCE.json).
 
+The LLVM libc++ 18.1.8 header license is retained in [LLVM-libcxx.txt](native/third_party/licenses/LLVM-libcxx.txt), from the [official tagged source](https://github.com/llvm/llvm-project/blob/llvmorg-18.1.8/libcxx/LICENSE.TXT), including its LLVM exceptions and third-party notices.
+
 Complete linked-library source pins and original PacBrew recipes are in [tools/linked-sources.json](tools/linked-sources.json). The source preparation tool verifies them without running upstream scripts. The local source-kit assembler includes those archives with matching application objects and static libraries for relinking; these private artifacts are not a public binary release.
 
 No emulator binaries, payloads, games, BIOS, proprietary firmware/runtime binaries, keys, account data, or complete reference-project source checkouts are bundled in this source repository.

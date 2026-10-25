@@ -19,10 +19,10 @@ INSTRUCTIONS = """Console Shelf source and relink kit (development build)
 This folder contains the tracked application source, artwork, credits and
 licenses, complete source archives and original release recipes for the three
 linked libraries, complete pinned SDK source for the launcher's CRT/libc, plus
-Shelf's application objects and replaceable static libraries. SDK patch.c and
-the custom shared-object loader are excluded by Shelf's build script; its own
-runtime_limits.c supplies no-op/refusal hooks. Upstream build scripts and
-PKGBUILD files are references; this kit does not run them.
+Shelf's application objects and replaceable static libraries.
+{runtime_notice}
+Upstream build scripts and PKGBUILD files are references; this kit does not
+run them.
 
 From the extracted project folder, with the prerequisites in docs/PS5-BUILD.md:
   npm run relink:ps5
@@ -40,7 +40,8 @@ library for the PS5 target with the public SDK before supplying its .a file.
 An overridden library is allowed to change the executable hash. Structural
 validation is not proof of hardware compatibility for the modified program.
 
-To change and rebuild the complete app, use npm run build:ps5 instead.
+To change and rebuild the complete app with this kit's runtime selection:
+  {build_command}
 Read docs/PS5-UI-TEST.md for the current test scope. This kit does not install,
 launch, update firmware or grant privileges. No games, BIOS, keys, account
 information, console logs or personal inventory are included.
@@ -59,6 +60,20 @@ def main():
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     inputs = args.inputs.resolve()
     record = json.loads((inputs / "link-inputs.json").read_text())
+    launcher = record.get("launcherRuntime", {})
+    mode = launcher.get("runtimeMode")
+    require(mode in ("standard-sdk", "restricted"), "Relink snapshot needs an explicit launcher runtime mode")
+    standard = mode == "standard-sdk"
+    require(launcher.get("permissionChanges") is standard, "Launcher runtime permission metadata differs")
+    runtime_notice = ("This kit retains the standard SDK launcher runtime. Its startup changes the\n"
+                      "helper process's capabilities and syscall bounds in RAM when executed on\n"
+                      "a PS5. Obtain owner approval before installing or running that variant."
+                      if standard else
+                      "This kit retains the restricted launcher CRT. SDK patch.c and the custom\n"
+                      "shared-object loader are excluded; Shelf's runtime_limits.c supplies\n"
+                      "no-op/refusal hooks and keeps the existing loader's permissions.")
+    build_command = ("node tools/build-ps5.js build_ps5.py --standard-helper-runtime"
+                     if standard else "npm run build:ps5")
     checked(inputs / "build-source.json", record["sourceFingerprint"])
     fingerprint = json.loads((inputs / "build-source.json").read_text())
     require(source_fingerprint() == fingerprint, "Source kit does not match the compiled application inputs")
@@ -98,8 +113,10 @@ def main():
                     continue
                 path = SOURCE_CACHE / source[key]
                 add(target, ".cache/ps5/corresponding-source/" + path.name, path.read_bytes())
-        add(target, "SOURCE-KIT.txt", INSTRUCTIONS.encode())
+        add(target, "SOURCE-KIT.txt", INSTRUCTIONS.format(runtime_notice=runtime_notice,
+                                                        build_command=build_command).encode())
         metadata = {"schema": 1, "sourceCommit": commit, "applicationSelf": record["referenceSelf"],
+                    "launcherRuntime": launcher,
                     "sourceArchives": sources["sources"], "privatePreparation": True,
                     "hardwareAcceptance": "pending", "files": members.copy()}
         add(target, "SOURCE-KIT-MANIFEST.json", (json.dumps(metadata, indent=2) + "\n").encode())
@@ -112,6 +129,7 @@ def main():
                     "Source kit member changed")
     result = {"directory": str(output.relative_to(ROOT)), "sourceCommit": commit, "files": len(members),
               "archiveBytes": archive.stat().st_size, "archiveSHA256": sha256(archive),
+              "launcherRuntime": launcher,
               "applicationSelf": record["referenceSelf"], "coldRelinkTest": "not yet run", "published": False}
     (output / "source-kit-verification.json").write_text(json.dumps(result, indent=2) + "\n")
     (CACHE / "source-kits/latest.json").write_text(json.dumps(result, indent=2) + "\n")

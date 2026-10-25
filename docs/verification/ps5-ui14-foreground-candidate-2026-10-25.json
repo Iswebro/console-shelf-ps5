@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "scope": "Private owner test candidate; not a public binary release or foreground acceptance",
+  "sourceCommit": "e58a673fedf01ae078e797442195c8e63e1d2042",
+  "titleId": "PPSA99541",
+  "contentVersion": "00.100.013",
+  "self": {
+    "bytes": 2674433,
+    "sha256": "97889025695e1e5745640294468b89730781fe9a0ef94d58af61c70c1940bbda"
+  },
+  "helper": {
+    "bytes": 108648,
+    "sha256": "136b9da4dfa51e2854a1326426010506cc292f56b29644eee42173e04efbff01",
+    "runtimeMode": "standard-sdk",
+    "permissionChanges": true,
+    "ownerApproval": "Explicitly approved for Shelf launcher tests on 2026-10-25"
+  },
+  "privatePackage": {
+    "bytes": 75276190,
+    "sha256": "add037b74a2e2a328ed33c8f53519e60d6c6f4c1860276099cabfd4f5c1eecec",
+    "files": 76,
+    "zipIntegrity": "passed; every member compared to size and SHA-256 manifest"
+  },
+  "checks": {
+    "nativeTests": "passed; includes foreground-request status roundtrip and guarded follow-up scenarios",
+    "transportTests": "nine loopback fixtures passed; no helper executed",
+    "executableStructure": "passed; exact embedded helper verified",
+    "consoleTransfer": "full raw backup and all 76 final file readbacks passed with SELF conversion disabled",
+    "preferences": "unchanged",
+    "helperExecutedByInstaller": false,
+    "physicalForegroundTest": "pending"
+  },
+  "previousOwnerResults": {
+    "compactCircleHint": "accepted; fades automatically",
+    "ps5sx2": "cold launch works, stays behind PS5 home screen",
+    "retroarch": "cold launch works, stays behind PS5 home screen",
+    "opening": "black before grid; known limitation"
+  },
+  "policy": "One cold launch after committed cooperative closure and monitored idle; one null-argument running-title request only after the same target remains observed for six seconds. No repeated cold-launch loop or SetAppFocus call.",
+  "reference": "https://github.com/Swordpdf/PS5SX2/blob/bea3c2e8420934aad24d5665eb75b8a6e462d452/ps5/disclaunch/disc_launch.c"
+}
