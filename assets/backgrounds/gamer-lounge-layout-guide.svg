@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941">
+ <rect width="1672" height="941" fill="#292a29"/>
+ <rect x="1040" y="70" width="507" height="271" fill="#111" stroke="#70736e"/>
+ <text x="1065" y="110" fill="#bbb" font-family="sans-serif" font-size="20">Existing TV stays in place</text>
+ <text x="180" y="90" fill="#bbb" font-family="sans-serif" font-size="24">SHELF PLACEMENT GUIDE ONLY</text>
+ <text x="180" y="125" fill="#bbb" font-family="sans-serif" font-size="18">Keep the photographic room. Use these exact two top planes.</text>
+ <path d="M160 450H1537L1559 520H137Z" fill="#876140" stroke="#d5b58b" stroke-width="2"/>
+ <path d="M137 520H1559V538H137Z" fill="#4b321e"/>
+ <text x="600" y="490" fill="#fff" font-family="sans-serif" font-size="21">UPPER: deep wood top, y450 to y520</text>
+ <path d="M160 635H1537L1559 707H137Z" fill="#876140" stroke="#d5b58b" stroke-width="2"/>
+ <path d="M137 707H1559V725H137Z" fill="#4b321e"/>
+ <text x="600" y="678" fill="#fff" font-family="sans-serif" font-size="21">LOWER: deep wood top, y635 to y707</text>
+ <path d="M110 730H1570" stroke="#a19b8b" stroke-dasharray="10 10"/>
+ <text x="580" y="800" fill="#bbb" font-family="sans-serif" font-size="18">Original living-room floor, rug and sofa edges remain below</text>
+ </svg>

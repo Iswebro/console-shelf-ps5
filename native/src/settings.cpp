@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "shelf/settings.hpp"
+#include <algorithm>
 #include <cerrno>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -16,11 +18,18 @@ namespace shelf {
 namespace {
 constexpr std::array<const char*, 3> layout_names = {"grid", "swipe", "shelf"};
 constexpr std::array<const char*, 2> look_names = {"icons", "cards"};
-constexpr std::array<const char*, 2> scope_names = {"all", "available"};
+constexpr std::array<const char*, 3> scope_names = {"all", "available", "favorites"};
 constexpr std::array<const char*, 8> sort_names = {"featured", "az",    "za",    "newest",
                                                    "oldest",   "brand", "games", "favorites"};
 constexpr std::array<const char*, 5> filter_names = {"all", "emulators", "games", "built_in", "no_route"};
 constexpr std::array<const char*, 3> icon_names = {"gaming", "classic", "jade"};
+constexpr std::array<const char*, 7> tv_names = {"console", "intro", "picture", "clock", "message", "favorites", "off"};
+bool valid_text(const char* text, std::size_t capacity) {
+    if (!std::memchr(text, 0, capacity)) return false;
+    for (const unsigned char* at = reinterpret_cast<const unsigned char*>(text); *at; ++at)
+        if (*at < 32 || *at == 127) return false;
+    return true;
+}
 #ifdef _WIN32
 bool wide_path(const char* path, wchar_t (&output)[4096]) {
     return MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, output, 4096) > 0;
@@ -80,12 +89,19 @@ bool valid(const Settings& settings) {
         static_cast<unsigned>(p.grid_look) >= look_names.size() ||
         static_cast<unsigned>(p.scope) >= scope_names.size() || static_cast<unsigned>(p.sort) >= sort_names.size() ||
         static_cast<unsigned>(p.filter) >= filter_names.size() || static_cast<unsigned>(p.icon) >= icon_names.size() ||
-        p.brand >= brands.size())
+        p.brand >= brands.size() || static_cast<unsigned>(p.tv_mode) >= tv_names.size() ||
+        p.tv_period >= tv_periods.size() || !valid_text(settings.tv_text, sizeof(settings.tv_text)))
         return false;
     for (const auto& route : settings.preferred_emulator) {
         if (!std::memchr(route.data(), 0, route.size()) || !valid_route(route.data()))
             return false;
     }
+    if (static_cast<std::size_t>(std::count(p.shelf_selected.begin(), p.shelf_selected.end(), true)) > shelf_capacity)
+        return false;
+    for (std::size_t i = 0; i < settings.game_favorites.size(); ++i)
+        if (settings.game_favorites[i] && std::find(settings.game_favorites.begin(), settings.game_favorites.begin() + i,
+                                                 settings.game_favorites[i]) != settings.game_favorites.begin() + i)
+            return false;
     return true;
 }
 bool read_file(const char* path, Settings& output) {
@@ -100,7 +116,8 @@ bool read_file(const char* path, Settings& output) {
     }
     std::rewind(file);
     Settings parsed;
-    std::array<bool, 9 + system_count * 3> seen{};
+    constexpr std::size_t room_keys = 11 + system_count * 4;
+    std::array<bool, room_keys + 4 + 64> seen{};
     char line[256];
     std::size_t bytes = 0;
     bool okay = true;
@@ -169,11 +186,18 @@ bool read_file(const char* path, Settings& output) {
             else
                 parsed.preferences.icon = static_cast<AppIcon>(n);
         } else if (std::strcmp(line, "monochrome_missing") == 0) {
-            key = static_cast<int>(seen.size()) - 1; // Optional in older schema-1 settings.
+            key = static_cast<int>(8 + system_count * 3); // Optional in older schema-1 settings.
             if (std::strcmp(value, "0") != 0 && std::strcmp(value, "1") != 0)
                 okay = false;
             else
                 parsed.preferences.monochrome_missing = value[0] == '1';
+        } else if (std::strcmp(line, "shelf_single") == 0 || std::strcmp(line, "reduced_motion") == 0) {
+            const bool single = std::strcmp(line, "shelf_single") == 0;
+            key = static_cast<int>(9 + system_count * 3 + (single ? 0 : 1));
+            if (std::strcmp(value, "0") != 0 && std::strcmp(value, "1") != 0)
+                okay = false;
+            else
+                (single ? parsed.preferences.shelf_single : parsed.preferences.reduced_motion) = value[0] == '1';
         } else if (std::strcmp(line, "brand") == 0) {
             key = 7;
             bool found = false;
@@ -185,6 +209,46 @@ bool read_file(const char* path, Settings& output) {
                 }
             if (!found)
                 okay = false;
+        } else if (std::strcmp(line, "tv_mode") == 0) {
+            key = static_cast<int>(room_keys);
+            const int n = choice(value, tv_names);
+            if (n < 0) okay = false;
+            else parsed.preferences.tv_mode = static_cast<TvMode>(n);
+        } else if (std::strcmp(line, "tv_period") == 0) {
+            key = static_cast<int>(room_keys + 1);
+            bool found = false;
+            for (std::size_t i = 0; i < tv_periods.size(); ++i) {
+                char period[8]; std::snprintf(period, sizeof(period), "%u", tv_periods[i]);
+                if (std::strcmp(value, period) == 0) { parsed.preferences.tv_period = i; found = true; break; }
+            }
+            if (!found) okay = false;
+        } else if (std::strcmp(line, "intro_all") == 0) {
+            key = static_cast<int>(room_keys + 2);
+            if (std::strcmp(value, "0") != 0 && std::strcmp(value, "1") != 0) okay = false;
+            else parsed.preferences.intro_all = value[0] == '1';
+        } else if (std::strcmp(line, "tv_text") == 0) {
+            key = static_cast<int>(room_keys + 3);
+            if (std::strlen(value) >= sizeof(parsed.tv_text) || !valid_text(value, std::strlen(value) + 1)) okay = false;
+            else std::memcpy(parsed.tv_text, value, std::strlen(value) + 1);
+        } else if (std::strncmp(line, "game_favorite.", 14) == 0) {
+            char* end = nullptr;
+            const auto slot = std::strtoul(line + 14, &end, 10);
+            char canonical[8]; std::snprintf(canonical, sizeof(canonical), "%lu", slot);
+            if (!line[14] || *end || slot >= parsed.game_favorites.size() || std::strcmp(line + 14, canonical) != 0) okay = false;
+            else {
+                key = static_cast<int>(room_keys + 4 + slot);
+                const auto digits = std::strlen(value);
+                if (digits != 16) okay = false;
+                else {
+                    std::uint64_t number = 0;
+                    for (std::size_t i = 0; i < digits; ++i) {
+                        const char c = value[i];
+                        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) { okay = false; break; }
+                        number = number * 16 + static_cast<unsigned>(c <= '9' ? c - '0' : c - 'a' + 10);
+                    }
+                    parsed.game_favorites[slot] = number;
+                }
+            }
         } else {
             const char* dot = std::strchr(line, '.');
             if (!dot)
@@ -200,6 +264,12 @@ bool read_file(const char* path, Settings& output) {
                 const bool favorite = prefix == 8;
                 key = static_cast<int>(8 + id + (favorite ? system_count : 0));
                 (favorite ? parsed.preferences.favorite : parsed.preferences.hidden)[id] = value[0] == '1';
+            } else if (prefix == 5 && std::strncmp(line, "shelf", 5) == 0) {
+                key = static_cast<int>(11 + system_count * 3 + id);
+                if (std::strcmp(value, "0") != 0 && std::strcmp(value, "1") != 0)
+                    okay = false;
+                else
+                    parsed.preferences.shelf_selected[id] = value[0] == '1';
             } else if (prefix == 8 && std::strncmp(line, "emulator", 8) == 0) {
                 key = static_cast<int>(8 + system_count * 2 + id);
                 if (!valid_route(value))
@@ -295,13 +365,22 @@ bool save_settings(const char* path, const Settings& settings) {
                     filter_names[static_cast<std::size_t>(p.filter)], icon_names[static_cast<std::size_t>(p.icon)],
                     static_cast<int>(brands[p.brand].size()), brands[p.brand].data()) > 0;
     if (okay)
-        okay = std::fprintf(file, "monochrome_missing=%d\n", p.monochrome_missing ? 1 : 0) > 0;
+        okay = std::fprintf(file, "monochrome_missing=%d\nshelf_single=%d\nreduced_motion=%d\n",
+                            p.monochrome_missing ? 1 : 0, p.shelf_single ? 1 : 0, p.reduced_motion ? 1 : 0) > 0;
+    if (okay)
+        okay = std::fprintf(file, "tv_mode=%s\ntv_period=%u\nintro_all=%d\ntv_text=%s\n",
+                            tv_names[static_cast<std::size_t>(p.tv_mode)], tv_periods[p.tv_period], p.intro_all ? 1 : 0,
+                            settings.tv_text) > 0;
+    for (std::size_t i = 0; i < settings.game_favorites.size() && okay; ++i)
+        okay = std::fprintf(file, "game_favorite.%zu=%016llx\n", i,
+                            static_cast<unsigned long long>(settings.game_favorites[i])) > 0;
     for (std::size_t i = 0; i < system_count && okay; ++i) {
         const auto id = catalog[i].id;
         okay =
-            std::fprintf(file, "hidden.%.*s=%d\nfavorite.%.*s=%d\nemulator.%.*s=%s\n", static_cast<int>(id.size()),
+            std::fprintf(file, "hidden.%.*s=%d\nfavorite.%.*s=%d\nemulator.%.*s=%s\nshelf.%.*s=%d\n", static_cast<int>(id.size()),
                          id.data(), p.hidden[i] ? 1 : 0, static_cast<int>(id.size()), id.data(), p.favorite[i] ? 1 : 0,
-                         static_cast<int>(id.size()), id.data(), settings.preferred_emulator[i].data()) > 0;
+                         static_cast<int>(id.size()), id.data(), settings.preferred_emulator[i].data(),
+                         static_cast<int>(id.size()), id.data(), p.shelf_selected[i] ? 1 : 0) > 0;
     }
     if (!flush_file(file))
         okay = false;

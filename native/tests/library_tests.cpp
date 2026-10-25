@@ -189,6 +189,13 @@ void test_library() {
     check(state.game_focus == 0, "library selection remains in bounds");
     input(state, Action::confirm);
     check(state.notice[0] != 0, "untested launch gives an honest notice");
+    const auto selected_games = games_for_system(*result, state.selected_system);
+    check(selected_games.count > 0, "favourite test has a discovered game");
+    const auto& favorite_game = result->games[selected_games.indices[0]];
+    input(state, Action::favorite);
+    check(state.settings.game_favorites[0] == game_favorite_key(favorite_game), "Triangle saves the selected game's stable identity");
+    input(state, Action::favorite);
+    check(state.settings.game_favorites[0] == 0, "Triangle removes the same favourite without affecting files");
     tree.unreadable = "/data/homebrew/PPSA99169/content/n64/Mario Party.z64";
     discover_library(tree.fs(), *result);
     check(!result->scan.complete, "header transport failure is not a complete scan");

@@ -4,6 +4,44 @@
 #include <cstdint>
 namespace shelf {
 inline constexpr std::uint32_t close_hold_ms = 3000;
+// Only the hardware layer moves. The room and wood are rendered separately.
+class ShelfPageMotion {
+    std::uint32_t began = 0;
+  public:
+    int from = 0, target = 0, direction = 1;
+    bool active = false;
+    float progress = 1;
+    void reset(int page) {
+        from = target = page;
+        active = false;
+        progress = 1;
+    }
+    void select(int page, std::uint32_t now, bool snap) {
+        if (snap) {
+            reset(page);
+            return;
+        }
+        if (page != target) {
+            from = target;
+            target = page;
+            direction = target > from ? 1 : -1;
+            began = now;
+            active = true;
+        }
+        progress = active ? std::min(1.f, static_cast<std::uint32_t>(now - began) / 380.f) : 1;
+        if (progress >= 1)
+            active = false;
+    }
+    bool outgoing() const { return active && progress < .42f; }
+    int page() const { return outgoing() ? from : target; }
+    float fraction() const {
+        const float t = outgoing() ? progress / .42f : (progress - .42f) / .58f;
+        const float clamped = std::max(0.f, std::min(1.f, t));
+        return clamped * clamped * (3 - 2 * clamped);
+    }
+    float opacity() const { return !active ? 1 : outgoing() ? 1 - fraction() : fraction(); }
+    float offset() const { return !active ? 0 : direction * 190.f * (outgoing() ? -fraction() : 1 - fraction()); }
+};
 struct Presentation {
     bool loading = false, preparing = false, artwork = false;
     bool launching = false;

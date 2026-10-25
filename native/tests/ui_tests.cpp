@@ -137,6 +137,31 @@ void test_ui() {
     check(!motion.active && std::abs(motion.position - 1) < .0001, "animation settles at its most recent target");
     motion.select(0, system_count, 600, true);
     check(!motion.active && std::abs(motion.position) < .0001, "reduced motion settles immediately");
+    UiState paged;
+    paged.settings.preferences.layout = Layout::shelf;
+    paged.focus = 3;
+    input(paged, Action::next_tab);
+    check(paged.focus == 11, "R1 advances a Shelf page while retaining the column and row");
+    input(paged, Action::previous_tab);
+    check(paged.focus == 3, "L1 returns to the same position on the previous page");
+    for (int i = 0; i < 20; ++i) input(paged, Action::next_tab);
+    check(paged.focus == 51, "repeated shoulder presses stop safely at the final partial page");
+    input(paged, Action::previous_tab);
+    check(paged.focus == 43, "paging back from a partial page retains a valid slot");
+    paged.settings.preferences.scope = Scope::favorites;
+    paged.settings.preferences.favorite[find_system("ps2")] = true;
+    check(shown_systems(paged).count == 1, "favourites-only view is a filter, not just a sort");
+    paged = {};
+    paged.settings.preferences.layout = Layout::shelf;
+    paged.settings.preferences.shelf_single = true;
+    input(paged, Action::consoles);
+    paged.settings_focus = 2;
+    input(paged, Action::confirm);
+    check(std::count(paged.settings.preferences.shelf_selected.begin(), paged.settings.preferences.shelf_selected.end(), true) == 8,
+          "Fill spaces never adds a ninth console");
+    check(shown_systems(paged).count == 8, "a curated Shelf shows only its selected consoles");
+    paged.settings.preferences.layout = Layout::grid;
+    check(shown_systems(paged).count == system_count, "curated selection does not hide the full Grid catalogue");
     std::puts("PASS: native controller navigation, settings tabs, independent searches, group visibility, honest "
               "unavailable routes and page return.");
 }

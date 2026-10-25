@@ -1,0 +1,58 @@
+{
+  "revision": "UI-19",
+  "scope": "PC browser and native host checks plus cross-compiled PS5 structure; physical PS5 acceptance pending",
+  "tests": {
+    "nativeModelAndSettings": "passed",
+    "nativeRendererCaptures": 47,
+    "browserPreview": "passed",
+    "personalRoom": "passed",
+    "allSystemsVisualReview": 52,
+    "actualInventoryReadOnly": {
+      "games": 91,
+      "routes": 55
+    },
+    "fixedRoomPixelsDuringPageSwap": "passed",
+    "favoriteGameRotation": "passed on PC renderer using read-only console inventory"
+  },
+  "elf": {
+    "bytes": 2807580,
+    "sha256": "dd31cdfc887a0b887671e52fb67266304951d38be596924803ec31f69db4482d",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2697473,
+    "sha256": "91f83d28992718bcaa65e59fa6cfef3e35165234d5ee1211f170aa03bf52dc3b"
+  },
+  "helper": {
+    "bytes": 108792,
+    "sha256": "6a848266e473351f0b3ccc2dcd23a3a022e392e2f0d81ddf7281e97a7605eaef",
+    "offset": 1619216,
+    "runtimeMode": "standard-sdk",
+    "permissionChanges": true
+  },
+  "helperUnchangedFromOwnerTestedUI15": true,
+  "physicalPS5": "pending",
+  "publicRelease": "not published"
+}

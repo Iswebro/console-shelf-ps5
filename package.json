@@ -9,6 +9,7 @@
     "test:native": "node tools/test-native.js",
     "build:native-host": "node tools/build-native-host.js",
     "test:native-renderer": "node tools/build-native-host.js && node tools/test-native-renderer.js",
+    "test:room": "node tools/test-room.js",
     "test:library-ftp": "node tools/test-library-ftp.js",
     "test:launch-client": "node tools/test-launch-client.js",
     "prepare:ps5-ui-test": "node tools/build-package-art.js && node tools/build-ps5.js prepare_ps5_test.py",
@@ -25,7 +26,8 @@
     "build:native-catalog": "node tools/build-native-catalog.js",
     "build:systems": "node tools/build-support-list.js",
     "build:icons": "node tools/build-icon-manifest.js",
-    "build:art-layout": "node tools/build-art-layout.js"
+    "build:art-layout": "node tools/build-art-layout.js",
+    "build:scene-layout": "node tools/build-scene-layout.js"
   },
   "devDependencies": {
     "playwright": "1.62.1"

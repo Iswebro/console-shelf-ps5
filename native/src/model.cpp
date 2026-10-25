@@ -47,7 +47,10 @@ BrowseResult browse(const Preferences& preferences, const Inventory& inventory, 
                                                            : std::string_view{};
     for (std::size_t i = 0; i < system_count; ++i) {
         const auto& system = catalog[i];
-        if (preferences.hidden[i] || (preferences.scope == Scope::available && !is_available(inventory[i])))
+        const bool curated = preferences.layout == Layout::shelf && preferences.shelf_single;
+        if ((!curated && preferences.hidden[i]) || (preferences.scope == Scope::available && !is_available(inventory[i])) ||
+            (preferences.scope == Scope::favorites && !preferences.favorite[i]) ||
+            (curated && !preferences.shelf_selected[i]))
             continue;
         if (!brand.empty() && system.brand != brand)
             continue;

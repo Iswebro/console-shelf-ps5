@@ -103,4 +103,19 @@ void test_navigation() {
     hint.dismiss();
     hint.update(0x90u, view);
     check(view.close_hint == 0, "another action can dismiss the hint immediately");
+    ShelfPageMotion pages;
+    pages.select(1, 1000, false);
+    pages.select(1, 1080, false);
+    check(pages.active && pages.outgoing() && pages.offset() < 0 && pages.opacity() < 1,
+          "next page moves the outgoing consoles to the left");
+    pages.select(1, 1240, false);
+    check(!pages.outgoing() && pages.page() == 1 && pages.offset() > 0,
+          "incoming consoles arrive from the right in the same shelf positions");
+    pages.select(0, 1250, false);
+    pages.select(0, 1330, false);
+    check(pages.direction == -1 && pages.offset() > 0, "rapid reverse paging uses the latest requested direction");
+    pages.select(0, 1630, false);
+    check(!pages.active && pages.offset() == 0 && pages.opacity() == 1, "page motion settles with opaque stationary consoles");
+    pages.select(2, 1700, true);
+    check(!pages.active && pages.page() == 2, "reduced motion changes pages without sliding");
 }

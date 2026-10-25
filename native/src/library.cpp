@@ -726,4 +726,12 @@ GameList games_for_system(const Library& library, std::size_t system) {
             result.indices[result.count++] = i;
     return result;
 }
+std::uint64_t game_favorite_key(const LibraryGame& game) {
+    if (game.system >= system_count) return 0;
+    std::uint64_t key = 14695981039346656037ull;
+    for (unsigned char c : catalog[game.system].id) key = (key ^ c) * 1099511628211ull;
+    key = (key ^ 255u) * 1099511628211ull;
+    for (const char* at = game.path; *at; ++at) key = (key ^ static_cast<unsigned char>(*at)) * 1099511628211ull;
+    return key ? key : 1;
+}
 } // namespace shelf

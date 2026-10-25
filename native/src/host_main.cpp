@@ -178,10 +178,16 @@ bool report(const char* path, const shelf::UiState& state) {
         }
     std::fprintf(file,
                  "],\"queryLength\":%zu,\"pickerQueryLength\":%zu,\"launchConnected\":%s,\"libraryGames\":%zu,"
-                 "\"libraryRoutes\":%zu,\"monochromeMissing\":%s}\n",
+                 "\"libraryRoutes\":%zu,\"monochromeMissing\":%s,\"shelfSingle\":%s,\"reducedMotion\":%s,"
+                 "\"shelfPage\":%d,\"shelfSelected\":%zu,\"tvMode\":%d,\"tvTextLength\":%zu,\"favoriteGames\":%zu}\n",
                  std::strlen(state.query), std::strlen(state.console_query), state.launch_connected ? "true" : "false",
                  state.library ? state.library->game_count : 0, state.library ? state.library->route_count : 0,
-                 p.monochrome_missing ? "true" : "false");
+                 p.monochrome_missing ? "true" : "false", p.shelf_single ? "true" : "false",
+                 p.reduced_motion ? "true" : "false", state.focus / 8,
+                 static_cast<std::size_t>(std::count(p.shelf_selected.begin(), p.shelf_selected.end(), true)),
+                 static_cast<int>(p.tv_mode), std::strlen(state.settings.tv_text),
+                 static_cast<std::size_t>(std::count_if(state.settings.game_favorites.begin(), state.settings.game_favorites.end(),
+                                                       [](std::uint64_t key) { return key != 0; })));
     return std::fclose(file) == 0;
 }
 bool mapped_button(Uint8 button, const shelf::UiState& state, shelf::Action& action) {
@@ -312,7 +318,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-18 optional monochrome for missing emulators; grounded Shelf; UI-15 helper unchanged");
+    startup("main entered", "ui-19 integrated lounge, console-only page motion, curated display and personal TV; UI-15 helper unchanged");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -508,7 +514,7 @@ int main(int argc, char** argv) {
     SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, 1920, 1080, 32, SDL_PIXELFORMAT_ABGR8888);
     SDL_Renderer* renderer = surface ? SDL_CreateSoftwareRenderer(surface) : nullptr;
     startup("graphics starting");
-    if (!renderer || !shelf::graphics_init(renderer, assets)) {
+    if (!renderer || !shelf::graphics_init(renderer, assets, data)) {
         startup("graphics failed", SDL_GetError());
         std::fprintf(stderr, "Native renderer or packaged fonts could not load.\n");
         if (renderer)
@@ -561,6 +567,7 @@ int main(int argc, char** argv) {
     bool reveal_pending = false;
     unsigned measured_frames = 0, max_render_ms = 0, max_present_ms = 0;
     unsigned script_time = 0;
+    unsigned tv_redraw_at = 0;
     while (!state.exit_requested) {
         char* token = nullptr;
         if (scripting) {
@@ -755,6 +762,12 @@ int main(int argc, char** argv) {
                 case SDLK_F4:
                     action = shelf::Action::search;
                     break;
+                case SDLK_PAGEUP:
+                    action = shelf::Action::previous_tab;
+                    break;
+                case SDLK_PAGEDOWN:
+                    action = shelf::Action::next_tab;
+                    break;
                 case SDLK_TAB:
                     action =
                         (event.key.keysym.mod & KMOD_SHIFT) ? shelf::Action::previous_tab : shelf::Action::next_tab;
@@ -878,6 +891,12 @@ int main(int argc, char** argv) {
                 result = 1;
             }
             state.changed = false;
+        }
+        if (!scripting && state.page == shelf::Page::home && state.settings.preferences.layout == shelf::Layout::shelf &&
+            (state.settings.preferences.tv_mode == shelf::TvMode::clock || state.settings.preferences.tv_mode == shelf::TvMode::favorites) &&
+            static_cast<unsigned>(now - tv_redraw_at) >= 1000) {
+            redraw = true;
+            tv_redraw_at = now;
         }
         if (redraw || shelf::graphics_animating() || state.presentation.loading || state.presentation.reveal < 1 ||
             close_gesture.active()) {

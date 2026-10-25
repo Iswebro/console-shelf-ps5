@@ -22,14 +22,18 @@ Keep firmware 12.20 and decline any system software update prompt.
 2. Extract the ZIP on your PC. The app folder is `PPSA99541`; keep all its subfolders together. You do not need Node.js, a compiler or the PC preview to use the installed app.
 3. Close games, emulators and downloads on the PS5. Start your existing FTP service and connect using your established local FTP client.
 4. Check both `/data/homebrew/PPSA99541` and `/user/app/PPSA99541` for an existing title. This is an unofficial ID, not a globally reserved one. If it belongs to another app or you cannot identify it, stop. For an existing Shelf installation, use the upgrade steps below.
-5. Copy the complete `PPSA99541` folder into `/data/homebrew/`. Compare the copied files with the included size/SHA-256 manifest. Do not open Shelf during the transfer.
+5. Copy the complete `PPSA99541` folder into `/data/homebrew/`. Compare the copied files with the included size/SHA-256 manifest. For a raw readback of `eboot.bin`, first send `SELF` and confirm the FTP reply explicitly says conversion is **disabled**; otherwise the server can transform the downloaded file. Do not open Shelf during the transfer.
 6. Let your existing ShadowMountPlus workflow discover the folder. If necessary, run ShadowMountPlus once through your usual Payload Manager dashboard and wait for its library-synchronised message. Open **Console Shelf (UI test)**.
 
 Shelf itself needs no PC host afterward; it uses the services on the console. A console illustration in All consoles does not mean an emulator exists for it; installed routes and real game counts come from discovery.
 
 ## Controls and first check
 
-Browse with the D-pad or left stick; Cross selects and Circle goes back. Square switches Grid/Swipe. Options or the gear opens settings. A short Circle tap on Shelf's home page shows a small close hint; hold Circle for three seconds to close with a fade.
+Browse with the D-pad or left stick; Cross selects and Circle goes back. Square cycles **Grid → Swipe → Shelf**. Shelf places eight systems on the living room's two deep counters; continue Down to reach the next rows. Options or the gear opens settings. A short Circle tap on Shelf's home page shows a small close hint; hold Circle for three seconds to close with a fade.
+
+In Shelf, **L1/R1** changes pages with only the consoles moving. **Sort & filter → Shelf pages** also offers one curated display of up to eight consoles; choose its members in **Consoles**. There is a Favourites-only view and an optional Reduced motion setting. **Play room** controls the TV's pictures, clock, message, intro-picture scope and favourite-game rotation. Triangle on a game in Shelf's library stars it. See [personal room setup](ROOM.md) for PNG paths and current limitations.
+
+Appearance → Missing emulator artwork defaults to **Black & white** for systems without a detected emulator. Choose **Full colour** to turn that cue off. Native PS4/PS5 stay coloured. This setting changes the artwork, not which systems appear. Layout, sorting, favourites and individual console visibility save in Shelf's own data folder.
 
 Open a console to choose a preferred detected emulator or show its game library. Standalone emulators can open their own shelves; a selected RetroArch game uses a separate direct-game route. Use the release's verified-route list to distinguish accepted behavior from experimental plans. Opening can still show black before the grid; the home-screen selection artwork is confirmed.
 

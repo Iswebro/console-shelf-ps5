@@ -7,7 +7,7 @@
 
 namespace shelf {
 enum class Page { home, details, library, settings, keyboard };
-enum class SettingsTab { appearance, browse, consoles };
+enum class SettingsTab { appearance, browse, consoles, room };
 enum class Action {
     up,
     down,
@@ -45,6 +45,7 @@ struct UiState {
     int focus = 0, tool = 0, detail_focus = 1, settings_focus = 0, keyboard_focus = 0;
     int game_focus = 0;
     bool tools = false, keyboard_for_consoles = false, changed = false, exit_requested = false;
+    bool keyboard_for_tv = false;
     bool launch_connected = false, launch_requested = false, launch_busy = false;
     bool close_hint_requested = false;
     LaunchRequest pending_launch;

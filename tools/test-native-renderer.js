@@ -54,6 +54,21 @@ assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'missing-colour-reope
 run('settings,confirm,back,right,shot:orbit-start.png,frame:120,shot:orbit-middle.png,frame:400,shot:orbit-end.png',motionData,0,true);
 run('right,shot:orbit-reference.png',motionData);
 const digest=name=>crypto.createHash('sha256').update(fs.readFileSync(path.join(captures,name))).digest('hex');
+const roomData=path.join(directory,'room-data');fs.mkdirSync(roomData);
+run('layout,layout,settings,tab,tab,tab,shot:room-settings.png,confirm,back,frame:500,shot:room-intro.png,settings,confirm,back,shot:room-picture-fallback.png,settings,confirm,back,shot:room-clock.png,settings,confirm,down,confirm,favorite,text:MY PLAY ROOM,back,back,shot:room-message.png,settings,confirm,back,shot:room-favourites.png,settings,confirm,back,shot:room-screen-off.png,report:room.json',roomData,0,true);
+const roomReport=JSON.parse(fs.readFileSync(path.join(captures,'room.json')));
+assert.equal(roomReport.tvMode,6);assert.equal(roomReport.tvTextLength,12);assert.equal(roomReport.favoriteGames,0);
+run('shot:shelf-swap-before.png,tab,shot:shelf-swap-start.png,frame:80,shot:shelf-swap-out.png,frame:160,shot:shelf-swap-in.png,frame:200,shot:shelf-swap-end.png',roomData,0,true);
+run('tab,shot:shelf-swap-reference.png',roomData);
+assert.notEqual(digest('shelf-swap-start.png'),digest('shelf-swap-out.png'),'outgoing hardware has a visible intermediate position');
+assert.notEqual(digest('shelf-swap-out.png'),digest('shelf-swap-in.png'),'the next set of consoles enters');
+assert.equal(digest('shelf-swap-end.png'),digest('shelf-swap-reference.png'),'the page settles on the correct opaque consoles');
+const region=require('./png-regions');
+for(const area of [[200,548,1500,4],[200,739,1500,3],[100,820,1700,70]]){
+  const stationary=region(path.join(captures,'shelf-swap-before.png'),...area);
+  for(const frame of ['shelf-swap-start.png','shelf-swap-out.png','shelf-swap-in.png','shelf-swap-end.png'])
+    assert.deepEqual(region(path.join(captures,frame),...area),stationary,'wood, wall and floor pixels stay fixed during page changes');
+}
 assert.notEqual(digest('missing-monochrome.png'),digest('missing-full-colour.png'),'missing-emulator style changes the rendered artwork');
 assert.notEqual(digest('orbit-start.png'),digest('orbit-middle.png'),'native motion must draw a new intermediate frame');
 assert.notEqual(digest('orbit-middle.png'),digest('orbit-end.png'),'native motion must continue to its target');
@@ -77,7 +92,8 @@ assert.notEqual(digest('close-hint.png'),digest('close-hint-fade.png'),'the comp
 assert.equal(digest('close-hint-gone.png'),digest('reveal-reference.png'),'the timed hint leaves no modal or overlay');
 const images=['home.png','details.png','appearance.png','browse.png','consoles.png','swipe.png','megadrive.png','display-shelf.png','display-shelf-page2.png','display-shelf-reopened.png','orbit-start.png','orbit-middle.png','orbit-end.png','orbit-reference.png','loading.png','prepared-cover.png','loading-motion.png','reveal-start.png','reveal-middle.png','reveal-end.png','reveal-reference.png','hold-middle.png','hold-cancelled.png','close-start.png','close-middle.png','settings-focus.png','layout-focus.png','launch-art.png','close-hint.png','close-hint-fade.png','close-hint-gone.png'];
 images.push('missing-monochrome.png','missing-setting.png','missing-full-colour.png');
+images.push('room-settings.png','room-intro.png','room-picture-fallback.png','room-clock.png','room-message.png','room-favourites.png','room-screen-off.png','shelf-swap-before.png','shelf-swap-start.png','shelf-swap-out.png','shelf-swap-in.png','shelf-swap-end.png','shelf-swap-reference.png');
 const output=[];
 for(const name of images){const filename=path.join(captures,name),bytes=fs.readFileSync(filename);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1080);assert.ok(bytes.length>(name.startsWith('loading')?1000:40000),name+' should contain its rendered frame');output.push({name,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
 fs.writeFileSync(path.join(root,'.cache/native-render-tests/latest.json'),JSON.stringify({directory,captures,processClosed:true,images:output},null,2)+'\n');
-console.log('PASS: native renderer, simulated SDL input, three layouts, optional monochrome persistence, Shelf pages, 52 images, carousel motion, transitions and Circle hold/cancel/fade in 34 captures. Full PS5 acceptance remains pending.');
+console.log(`PASS: native renderer, room displays, stationary room pixels, console-only page swaps, three layouts, persistence, 52 icons and Circle hold/cancel/fade in ${images.length} captures. Full PS5 acceptance remains pending.`);

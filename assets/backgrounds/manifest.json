@@ -2,34 +2,73 @@
   "schema": 1,
   "assets": [
     {
-      "id": "display-shelf-v1",
-      "role": "display shelf row",
-      "local": "assets/backgrounds/display-shelf-v1.png",
-      "bytes": 1973421,
-      "sha256": "48f4c9de7a98e4ce6ae67b3e744aac995ae1d0c7adab64ef0228497e69db9694",
-      "width": 2172,
-      "height": 724,
-      "tool": "OpenAI built-in image_gen",
-      "prompt": "display-shelf-v1.prompt.txt",
-      "shelfContactY": 0.74,
-      "revision": 2,
-      "woodPlaneY": [
-        0.43,
-        0.755
-      ],
-      "editPrompt": "display-shelf-v1-depth-edit.prompt.txt",
-      "originalSHA256": "65ca9f106f5842438dfea99cc5f8c783eb457dda6a34b9362e15e7a5065d04c1"
-    },
-    {
-      "id": "gallery-room-v1",
-      "role": "global gallery background",
-      "local": "assets/backgrounds/gallery-room-v1.png",
-      "bytes": 2191330,
-      "sha256": "ac05056899dbb25294d2659ee894c2db4099377f1939ee4572b8f7d47f5542fb",
+      "id": "gamer-lounge-v1",
+      "role": "full living-room background",
+      "local": "assets/backgrounds/gamer-lounge-v1.png",
+      "bytes": 2202593,
+      "sha256": "3676b8b6185abce899a22ec7e7b90a6bc7647726818cea3aca379f71bd669511",
       "width": 1672,
       "height": 941,
       "tool": "OpenAI built-in image_gen",
-      "prompt": "gallery-room-v1.prompt.txt"
+      "prompt": "gamer-lounge-v1.prompt.txt"
+    },
+    {
+      "id": "gamer-lounge-deep-v1",
+      "role": "integrated deep Shelf room",
+      "local": "assets/backgrounds/gamer-lounge-deep-v1.png",
+      "bytes": 2027324,
+      "sha256": "f92fc6aac3ecefd20c3e5ba89b14db8788b87692008628b798b80e207a894bd2",
+      "width": 1672,
+      "height": 941,
+      "tool": "OpenAI built-in image_gen",
+      "prompt": "gamer-lounge-deep-v1.prompt.txt",
+      "inputs": [
+        "assets/backgrounds/gamer-lounge-standard-v1.png"
+      ]
     }
-  ]
+  ],
+  "alternatives": [
+    {
+      "id": "gamer-lounge-standard-v1",
+      "role": "alternative standard-depth room",
+      "local": "assets/backgrounds/gamer-lounge-standard-v1.png",
+      "bytes": 2129477,
+      "sha256": "83cdd0b2436df7cd7d2bdb2300ac8a537146132af0160325d4a7d56854025176",
+      "width": 1672,
+      "height": 941,
+      "tool": "OpenAI built-in image_gen",
+      "prompt": "gamer-lounge-standard-v1.prompt.txt",
+      "inputs": [
+        "assets/backgrounds/gamer-lounge-layout-guide.svg",
+        "assets/backgrounds/gamer-lounge-v1.png"
+      ]
+    }
+  ],
+  "scene": {
+    "width": 1672,
+    "height": 941,
+    "base": "assets/backgrounds/gamer-lounge-v1.png",
+    "shelf": "assets/backgrounds/gamer-lounge-deep-v1.png",
+    "left": 220,
+    "right": 1535,
+    "columns": 4,
+    "tv": {"x": 1045, "y": 75, "width": 497, "height": 258},
+    "rows": [
+      {
+        "woodTop": 360,
+        "woodEnd": 449,
+        "feet": 441,
+        "label": 452,
+        "artHeight": 128
+      },
+      {
+        "woodTop": 525,
+        "woodEnd": 615,
+        "feet": 607,
+        "label": 618,
+        "artHeight": 128
+      }
+    ]
+  },
+  "legacyScenery": "The earlier gallery and boxed-shelf assets are retained in source history; they are not used by this room layout."
 }

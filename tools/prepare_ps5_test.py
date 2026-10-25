@@ -56,7 +56,7 @@ def main():
     scenery = json.loads((ROOT / "assets/backgrounds/manifest.json").read_text(encoding="utf-8"))
     require(scenery.get("schema") == 1 and len(scenery.get("assets", [])) == 2, "Expected two reviewed scenery assets")
     require({item["local"] for item in scenery["assets"]} == {
-        "assets/backgrounds/display-shelf-v1.png", "assets/backgrounds/gallery-room-v1.png"}, "Unexpected scenery paths")
+        "assets/backgrounds/gamer-lounge-v1.png", "assets/backgrounds/gamer-lounge-deep-v1.png"}, "Unexpected scenery paths")
     for item in scenery["assets"]:
         source = ROOT / item["local"]
         raw = source.read_bytes()
@@ -113,8 +113,15 @@ Use the existing trusted ShadowMount procedure to expose this new app tile, with
 Keep firmware 12.20 and decline system update prompts. This folder contains no firmware updater.
 
 First test: open Shelf; check the picture, D-pad/stick, Cross/Circle and Options.
-Square cycles Grid, Swipe and Shelf. Shelf shows eight consoles across two lit display tiers;
-Down moves to the next tier. Sort, visibility and favourite settings apply to all three views.
+Square cycles Grid, Swipe and Shelf. Shelf shows eight consoles on the room's two deep display counters;
+L1/R1 swaps pages with only the consoles moving; Down continues between tiers.
+Sort & filter -> Shelf pages also offers one curated display of up to eight consoles,
+chosen in Consoles. Appearance -> Motion offers Reduced motion.
+Play room customises the TV: console artwork, personal text or PNG, clock, rotating
+favourite games, intro pictures (installed emulators or all consoles), or screen off.
+Triangle stars games in Shelf's library. Personal PNGs stay in /data/console-shelf:
+tv-image.png or intros/<console-id>.png, up to 2048 x 2048. Video is not supported.
+Sort, visibility and favourite settings apply to all three views.
 Appearance -> Missing emulator artwork chooses Black & white (default) or Full colour.
 Only systems without a detected emulator are desaturated; PS4/PS5 stay in colour.
 The choice is independent of console visibility and survives closing/reopening Shelf.

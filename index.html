@@ -11,6 +11,8 @@
   <script src="systems-data.js" defer></script>
   <script src="orbit.js" defer></script>
   <script src="assets/3d-icons/layout.js" defer></script>
+  <script src="assets/backgrounds/scene.js" defer></script>
+  <script src="room.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -29,7 +31,7 @@
       <section id="home">
         <div class="welcome">
           <p class="eyebrow">ONE HOME FOR YOUR SYSTEMS</p>
-          <h1>What do you want<br><em>to play today?</em></h1>
+          <h1 id="homeHeading">What do you want<br><em>to play today?</em></h1>
           <p class="intro">Your consoles, your way. Find a system, pick your emulator, and make room for the games you love.</p>
         </div>
 
@@ -45,7 +47,7 @@
               </button>
             </div>
           </div>
-          <div class="browse-summary"><span id="shelfSummary"></span><span class="count" id="systemCount" aria-live="polite"></span></div>
+          <div class="browse-summary"><span id="shelfSummary"></span><span id="shelfFocusStatus" hidden></span><span class="count" id="systemCount" aria-live="polite"></span></div>
         </div>
 
         <p class="inventory-note">Demo catalogue · 52 systems. Availability and game lists use the bundled snapshot; Switch 2 is a hardware reference. <a href="docs/SYSTEMS.md">About this preview</a>.</p>
@@ -60,6 +62,7 @@
         </div>
         <p id="swipeHint" class="swipe-hint" hidden>Find your next favourite. Move the stick, swipe or use ← →. Select the centre console to explore.</p>
         <div id="shelfStage" class="shelf-stage">
+          <div id="roomTv" class="room-tv" role="img" aria-label="Your play room TV" hidden></div>
           <div id="systems" class="systems-grid" role="list" aria-label="Systems"></div>
           <div id="carouselCaption" class="carousel-caption" hidden aria-live="polite" aria-atomic="true">
             <span id="carouselFamily" class="eyebrow"></span>
@@ -67,6 +70,11 @@
             <span id="carouselStatus" class="status-badge"></span>
             <button type="button" id="carouselOpen" class="carousel-open-hint">Explore this console <span aria-hidden="true">↗</span></button>
           </div>
+        </div>
+        <div id="shelfPages" class="shelf-page-controls" hidden aria-label="Shelf pages">
+          <button type="button" id="shelfPrev" aria-label="Previous shelf page">←</button>
+          <span id="shelfPageStatus" aria-live="polite"></span>
+          <button type="button" id="shelfNext" aria-label="Next shelf page">→</button>
         </div>
         <div id="emptySearch" class="empty-search" hidden><p id="emptyMessage">No systems match this view.</p><button type="button" id="reviewSettings" class="secondary">Review shelf settings</button></div>
       </section>
@@ -107,6 +115,7 @@
         <button type="button" id="tabAppearance" role="tab" aria-controls="panelAppearance" aria-selected="true" tabindex="0">Appearance</button>
         <button type="button" id="tabBrowse" role="tab" aria-controls="panelBrowse" aria-selected="false" tabindex="-1">Sort &amp; filter</button>
         <button type="button" id="tabConsoles" role="tab" aria-controls="panelConsoles" aria-selected="false" tabindex="-1">Consoles</button>
+        <button type="button" id="tabRoom" role="tab" aria-controls="panelRoom" aria-selected="false" tabindex="-1">Play room</button>
       </div>
       <div class="settings-body">
         <section id="panelAppearance" role="tabpanel" aria-labelledby="tabAppearance">
@@ -119,6 +128,7 @@
           <fieldset class="settings-field"><legend>Grid look</legend><div class="segmented" role="group" aria-label="Console look"><button type="button" id="lookImages" aria-pressed="true">3D system icons</button><button type="button" id="lookCards" aria-pressed="false">Classic cards</button></div><p class="field-help">Swipe and Shelf always use 3D console icons.</p></fieldset>
           <label class="settings-field select-block" for="iconStyle"><span>App icon</span><select id="iconStyle"><option value="gaming">Gaming · default</option><option value="classic">Classic mint</option><option value="jade">Jade</option></select></label>
           <fieldset class="settings-field"><legend>Missing emulator artwork</legend><div class="segmented" role="group" aria-label="Missing emulator artwork"><button type="button" id="missingMono" aria-pressed="true">Black &amp; white</button><button type="button" id="missingColour" aria-pressed="false">Full colour</button></div><p class="field-help">Installed emulators and built-in systems stay in colour. This changes the artwork, not which consoles are shown. Availability here uses the demo snapshot.</p></fieldset>
+          <label class="settings-field select-block" for="motionStyle"><span>Motion</span><select id="motionStyle"><option value="smooth">Smooth console transitions</option><option value="reduced">Reduced motion</option></select><span class="field-help">Reduced motion removes page sliding. Your device’s reduced-motion preference is also respected.</span></label>
         </section>
         <section id="panelBrowse" role="tabpanel" aria-labelledby="tabBrowse" hidden>
           <h3>Find your next favourite</h3><p class="settings-description">Set the order and narrow down your shelf.</p>
@@ -128,14 +138,32 @@
             <label class="settings-field select-block" for="availability"><span>PS5 status</span><select id="availability"><option value="all">All statuses</option><option value="tested">Game tested here</option><option value="native">Native on PS5</option><option value="mapped">RetroArch core listed</option><option value="app">Emulator app listed</option><option value="reference">Hardware reference only</option></select></label>
           </div>
           <button type="button" id="clearFilters" class="text-button">Clear brand and status filters</button>
+          <label class="settings-field select-block" for="shelfMode"><span>Shelf pages</span><select id="shelfMode"><option value="paged">Browse the collection in pages</option><option value="single">One curated shelf · up to 8 consoles</option></select><span class="field-help">L1/R1 or Page Up/Down changes pages. A curated shelf uses your choices in Consoles; Grid and Swipe keep the full collection. Smaller screens fit fewer consoles per page.</span></label>
         </section>
         <section id="panelConsoles" role="tabpanel" aria-labelledby="tabConsoles" hidden>
           <h3>A shelf that feels like yours</h3><p class="settings-description">Choose a view, then switch individual consoles on or off. Your games stay where they are.</p>
-          <fieldset class="settings-field"><legend>Show on my shelf</legend><div class="segmented" role="group" aria-label="Which consoles to show"><button type="button" id="scopeAll" aria-pressed="true">All consoles</button><button type="button" id="scopeAvailable" aria-pressed="false">Emulator or games</button></div><p class="field-help">Availability uses the bundled demo inventory. Your individual choices apply to both views.</p></fieldset>
+          <fieldset class="settings-field"><legend>Show on my shelf</legend><div class="segmented" role="group" aria-label="Which consoles to show"><button type="button" id="scopeAll" aria-pressed="true">All consoles</button><button type="button" id="scopeAvailable" aria-pressed="false">Emulator or games</button><button type="button" id="scopeFavorites" aria-pressed="false">Favourites</button></div><p class="field-help">Availability uses the bundled demo inventory.</p></fieldset>
+          <p id="consolePickerHelp" class="field-help"></p>
           <label class="search-wrap picker-search"><span class="sr-only">Find consoles to show or hide</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="consoleSearch" type="search" placeholder="Find a console or brand…" autocomplete="off"></label>
           <div class="picker-actions"><span id="visibleConsoleCount" class="count" aria-live="polite"></span><div><button type="button" id="showAllConsoles" class="text-button">Show all</button><button type="button" id="hideAllConsoles" class="text-button">Hide all</button></div></div>
           <div id="consolePicker" class="console-picker"></div>
           <p id="emptyPicker" class="field-help" hidden>No consoles match that search.</p>
+        </section>
+        <section id="panelRoom" role="tabpanel" aria-labelledby="tabRoom" hidden>
+          <h3>Your room, your screen</h3><p class="settings-description">A personal TV behind the glass. Available in Shelf layout.</p>
+          <label class="settings-field select-block" for="tvMode"><span>TV display</span><select id="tvMode"><option value="console">Selected console</option><option value="intro">Console intro picture</option><option value="picture">My picture</option><option value="clock">Clock &amp; Shelf logo</option><option value="message">My message</option><option value="favorites">Favourite games</option><option value="off">Screen off</option></select></label>
+          <label class="settings-field select-block" for="tvMessage"><span>Personal message or name</span><input id="tvMessage" type="text" maxlength="95" placeholder="Welcome to your play room" autocomplete="off"></label>
+          <div class="settings-columns">
+            <label class="settings-field select-block" for="tvInterval"><span>Rotate favourite games</span><select id="tvInterval"><option value="10">Every 10 seconds</option><option value="20">Every 20 seconds</option><option value="30">Every 30 seconds</option><option value="60">Every minute</option></select></label>
+            <label class="settings-field select-block" for="introScope"><span>Play console intros for</span><select id="introScope"><option value="installed">Installed emulators</option><option value="all">All consoles</option></select></label>
+          </div>
+          <p class="field-help">Mark favourite games with the star in a console’s game library. The TV rotates through them. This prototype uses intro pictures with console artwork as a fallback; it does not play intro videos.</p>
+          <label class="settings-field select-block" for="tvPicture"><span>Choose my TV picture</span><input id="tvPicture" type="file" accept="image/png"><span class="field-help">PNG, up to 2048 × 2048 and 8 MB. Stored in this browser only.</span></label>
+          <button type="button" id="removeTvPicture" class="text-button">Remove my picture</button>
+          <label class="settings-field select-block" for="introConsole"><span>Console intro picture</span><select id="introConsole"></select></label>
+          <label class="settings-field select-block" for="introPicture"><span>Choose that console’s intro picture</span><input id="introPicture" type="file" accept="image/png"></label>
+          <button type="button" id="removeIntroPicture" class="text-button">Remove this intro picture</button>
+          <p class="field-help">On PS5, place your own PNG in <code>/data/console-shelf/tv-image.png</code> or <code>/data/console-shelf/intros/&lt;console-id&gt;.png</code> over your existing local FTP connection, while Shelf is closed. No official intro files are bundled.</p>
         </section>
       </div>
       <footer class="settings-footer"><span><span class="saved-dot" aria-hidden="true"></span>Saved on this device</span><button type="button" id="doneSettings" class="primary">Done</button></footer>

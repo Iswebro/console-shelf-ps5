@@ -65,11 +65,15 @@ const manifest = require('../assets/3d-icons/manifest.json');
     assert.match(await missingImage.evaluate(image => getComputedStyle(image).filter), /grayscale\(1\)/, 'Shelf preserves the missing-emulator cue');
     assert.equal(await page.locator('.display-tier').count(), 13);
     assert.equal(await page.locator('.display-tier .card').count(), 52);
-    const shelfPlacement = await page.locator('.display-tier .card').evaluateAll(cards => cards.map(card => {
+    assert.equal(await page.locator('.display-tier:not([hidden])').count(), 2, 'one coherent room holds two visible tiers');
+    assert.equal(await page.locator('.display-tier').first().evaluate(tier => getComputedStyle(tier).backgroundImage), 'none', 'there is no pasted shelf-panel photograph');
+    const shelfPlacement = await page.locator('.display-tier:not([hidden]) .card').evaluateAll(cards => cards.map(card => {
       const art = shelfArtLayout[card.dataset.system], image = card.querySelector('img').getBoundingClientRect();
-      const tier = card.parentElement.getBoundingClientRect(), slot = card.getBoundingClientRect();
+      const slot = card.getBoundingClientRect();
+      const scene=window.shelfRoomScene, scale=Math.max(innerWidth/scene.width,innerHeight/scene.height);
+      const row=scene.rows[Number(card.parentElement.dataset.roomTier)];
       const [x, y, w, h] = art.bounds;
-      return { base: image.top + (art.supportY ?? y + h) * image.height / art.canvas[1], contact: tier.top + tier.height * .74,
+      return { base: image.top + (art.supportY ?? y + h) * image.height / art.canvas[1], contact: (innerHeight-scene.height*scale)/2+row.feet*scale,
         left: image.left + x * image.width / art.canvas[0], right: image.left + (x + w) * image.width / art.canvas[0],
         slotLeft: slot.left, slotRight: slot.right };
     }));
@@ -82,9 +86,25 @@ const manifest = require('../assets/3d-icons/manifest.json');
     assert.equal(await page.evaluate(() => document.activeElement.closest('.card').dataset.system), systems[4].id);
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.evaluate(() => document.activeElement.closest('.card').dataset.system), systems[5].id);
+    await page.keyboard.press('PageDown');
+    assert.equal(await page.locator('#shelfPageStatus').textContent(), '2 / 7');
+    assert.equal(await page.evaluate(() => document.activeElement.closest('.card').dataset.system), systems[13].id);
+    await page.keyboard.press('End');
+    assert.equal(await page.locator('#shelfNext').isDisabled(), true);
+    assert.equal(await page.evaluate(() => document.activeElement.closest('.card').dataset.system), systems.at(-1).id);
+    await page.keyboard.press('Home');
+    const reached=[];
+    while(true){
+      reached.push(...await page.locator('.display-tier:not([hidden]) .card').evaluateAll(cards=>cards.map(card=>card.dataset.system)));
+      if(await page.locator('#shelfNext').isDisabled()) break;
+      await page.click('#shelfNext');
+    }
+    assert.deepEqual(reached,systems.map(system=>system.id),'paging reaches every system once in order');
+    await page.locator('.display-tier:not([hidden]) .card-main').first().focus();
+    await page.keyboard.press('Home');
     await page.reload();
     assert.equal(await page.locator('#systems').getAttribute('class'), 'systems-shelf', 'third layout persists');
-    await page.setViewportSize({ width: 1440, height: 1150 });
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await capture(page, 'display-shelf-desktop.png');
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.click('#toggleLayout');
@@ -135,7 +155,7 @@ const manifest = require('../assets/3d-icons/manifest.json');
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.locator('#tabBrowse').getAttribute('aria-selected'), 'true');
     await page.keyboard.press('End');
-    assert.equal(await page.locator('#tabConsoles').getAttribute('aria-selected'), 'true');
+    assert.equal(await page.locator('#tabRoom').getAttribute('aria-selected'), 'true');
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#settingsDialog').isVisible(), false);
     assert.equal(await page.evaluate(() => document.activeElement.id), 'openAppearance');
@@ -285,7 +305,7 @@ const manifest = require('../assets/3d-icons/manifest.json');
     await openPanel('Appearance');
     await page.click('#layoutShelf');
     await closePanel();
-    assert.equal(await page.locator('.display-tier').first().locator('.card').count(), 2);
+    assert.equal(await page.locator('.display-tier:not([hidden])').first().locator('.card').count(), 2);
     assert.equal(await page.locator('.display-tier').count(), 26);
     await capture(page, 'display-shelf-mobile.png');
     await openPanel('Appearance');

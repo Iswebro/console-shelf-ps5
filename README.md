@@ -2,17 +2,19 @@
 
 A console-first library project for PS5 homebrew. This repository contains a **browser design preview**, a **native C++/SDL development build for PC**, and a cross-compiled PS5 executable. The installable PS5 prototype is still in development. Open [index.html](index.html) for the design preview, or follow the [native build instructions](native/README.md). Both default to offline use. [Read-only PS5 library discovery](docs/DISCOVERY.md) and four initial launch routes have been checked on the owner's firmware 12.20 console. The new Shelf visuals and final persistence/restart checks still need console acceptance.
 
-![Curved console collection with the selected system in front](previews/carousel-depth.png)
+![Shelf's integrated gaming room, deep console counters and personal TV](previews/display-shelf-desktop.png)
 
 ## What works in the preview
 
-- Browse 52 systems in Grid, a curved card-free Swipe carousel, or a lit display Shelf. Shelf places the console illustrations on walnut ledges, with a subtle selection light and a gallery backdrop. All layouts share sort, visibility and favourite choices. Grid can also use classic text cards.
+- Browse 52 systems in Grid, a curved card-free Swipe carousel, or a lit display Shelf. Shelf places the console illustrations directly on deep walnut counters in one continuous gaming-lounge scene, with a subtle selection light. It pages through the collection instead of stretching a shelf photograph into each row. All layouts share sort, visibility and favourite choices. Grid can also use classic text cards.
+- In Shelf, **L1/R1** (or Page Up/Down) swaps eight consoles at a time while the room stays still. **Sort & filter → Shelf pages** can instead show one curated display of up to eight consoles chosen in **Consoles**. All consoles, emulator/game availability, favourites, search and sorting apply to the collection. Small preview screens fit fewer systems per page.
+- **Play room** settings customise the TV with selected-console artwork, intro pictures, a personal PNG, a clock and Shelf logo, a personal message, or rotating favourite games. Mark a game with Triangle in the native library, or its star in the preview. TV content is clipped to the photographed screen with subtle glass reflections; the search bar ends before it. Intro pictures can apply to installed emulators or all systems. This prototype uses an artwork fallback and does not play video. [Room controls and personal pictures](docs/ROOM.md).
 - Missing emulators use black-and-white console artwork by default. Appearance → Missing emulator artwork can keep everything in full colour instead. This does not hide systems or change launch support; the browser uses its dated demo inventory, while the native app uses discovery.
 - In Swipe, the selected console sits forward in the centre; neighbours recede in size, depth and angle. Motion eases to a stop in 420 ms and retargets immediately when direction changes.
 - Loop through Swipe using the stick/D-pad on a standard-mapped controller, keyboard arrows, mouse dragging or touch. Click a side console to centre it, then select the centre console to explore. The browser honours reduced-motion preferences and remembers the selected system. The owner has confirmed basic native PS5 controls; full controller acceptance remains pending. Automated controller checks are simulated.
-- Switch between **All consoles** and **Emulator or games**. The latter shows systems with a recorded emulator route, built-in PS5/PS4 route, or example game in the bundled demo inventory. The selection persists in the browser.
+- Switch between **All consoles**, **Emulator or games**, and **Favourites**. Availability uses recorded emulator routes, built-in PS5/PS4 routes, or example games in the preview; the native app uses real discovery. Choices persist on the device.
 - Search, filter by brand or evidence level, sort in several ways, and save favorites.
-- Open compact toolbar icons for Appearance, Sort & filter and Consoles. Search the console picker, toggle individual systems or whole brands, and show/hide search results in one click. These choices persist on the device.
+- Open the settings gear for Appearance, Sort & filter, Consoles and Play room. Search the console picker, toggle individual systems or whole brands, and show/hide search results in one click. These choices persist on the device.
 - Open a console detail page, choose a preferred emulator, and view example games. The emulator button is a preview action only.
 - Choose among three generated app icons for the preview header and browser tab.
 

@@ -33,6 +33,8 @@ struct LibraryGame {
     MediaKind kind = MediaKind::cartridge;
     std::uint64_t size = 0;
 };
+// Stable local preference identity; this is not a security or file-integrity hash.
+std::uint64_t game_favorite_key(const LibraryGame& game);
 struct ScanSummary {
     std::size_t roots_read = 0, roots_denied = 0, files_examined = 0, rejected = 0, missing_references = 0;
     bool complete = true, limit_reached = false;

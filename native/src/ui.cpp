@@ -32,15 +32,32 @@ void open_settings(UiState& state, SettingsTab tab) {
     state.tab = tab;
     state.settings_focus = 0;
 }
-void open_keyboard(UiState& state, bool consoles) {
+void open_keyboard(UiState& state, bool consoles, bool tv = false) {
     state.keyboard_return = state.page;
     state.keyboard_for_consoles = consoles;
+    state.keyboard_for_tv = tv;
     state.page = Page::keyboard;
     state.keyboard_focus = 0;
 }
 void changed(UiState& state) {
     state.changed = true;
     normalize_home(state);
+}
+bool picker_enabled(const Preferences& p, std::size_t id) {
+    return p.shelf_single ? p.shelf_selected[id] : !p.hidden[id];
+}
+void picker_set(UiState& state, std::size_t id, bool enabled) {
+    auto& p = state.settings.preferences;
+    if (!p.shelf_single) {
+        p.hidden[id] = !enabled;
+        return;
+    }
+    if (enabled && !p.shelf_selected[id] &&
+        static_cast<std::size_t>(std::count(p.shelf_selected.begin(), p.shelf_selected.end(), true)) >= shelf_capacity) {
+        std::snprintf(state.notice, sizeof(state.notice), "All 8 spaces are filled. Remove a console before adding another.");
+        return;
+    }
+    p.shelf_selected[id] = enabled;
 }
 void cycle(UiState& state, int direction) {
     auto& p = state.settings.preferences;
@@ -53,6 +70,8 @@ void cycle(UiState& state, int direction) {
             p.icon = static_cast<AppIcon>((static_cast<int>(p.icon) + direction + 3) % 3);
         if (state.settings_focus == 3)
             p.monochrome_missing = !p.monochrome_missing;
+        if (state.settings_focus == 4)
+            p.reduced_motion = !p.reduced_motion;
         changed(state);
     } else if (state.tab == SettingsTab::browse) {
         if (state.settings_focus == 0)
@@ -63,10 +82,20 @@ void cycle(UiState& state, int direction) {
                                          static_cast<int>(brands.size()));
         if (state.settings_focus == 2)
             p.filter = static_cast<SystemFilter>((static_cast<int>(p.filter) + direction + 5) % 5);
+        if (state.settings_focus == 3)
+            p.shelf_single = !p.shelf_single;
+        changed(state);
+    } else if (state.tab == SettingsTab::room) {
+        if (state.settings_focus == 0)
+            p.tv_mode = static_cast<TvMode>((static_cast<int>(p.tv_mode) + direction + 7) % 7);
+        if (state.settings_focus == 1) { open_keyboard(state, false, true); return; }
+        if (state.settings_focus == 2)
+            p.tv_period = static_cast<std::size_t>((static_cast<int>(p.tv_period) + direction + 4) % 4);
+        if (state.settings_focus == 3) p.intro_all = !p.intro_all;
         changed(state);
     } else {
         if (state.settings_focus == 0) {
-            p.scope = p.scope == Scope::all ? Scope::available : Scope::all;
+            p.scope = static_cast<Scope>((static_cast<int>(p.scope) + direction + 3) % 3);
             changed(state);
             return;
         }
@@ -77,7 +106,7 @@ void cycle(UiState& state, int direction) {
         const auto matches = picker_matches(state);
         if (state.settings_focus == 2 || state.settings_focus == 3) {
             for (std::size_t i = 0; i < matches.count; ++i)
-                p.hidden[matches.indices[i]] = state.settings_focus == 3;
+                picker_set(state, matches.indices[i], state.settings_focus == 2);
         } else {
             const auto entries = console_picker(state);
             const auto at = static_cast<std::size_t>(state.settings_focus - 4);
@@ -87,19 +116,19 @@ void cycle(UiState& state, int direction) {
             if (entry.group) {
                 bool all = true;
                 for (std::size_t i = 0; i < matches.count; ++i)
-                    if (catalog[matches.indices[i]].brand == brands[entry.index] && p.hidden[matches.indices[i]])
+                    if (catalog[matches.indices[i]].brand == brands[entry.index] && !picker_enabled(p, matches.indices[i]))
                         all = false;
                 for (std::size_t i = 0; i < matches.count; ++i)
                     if (catalog[matches.indices[i]].brand == brands[entry.index])
-                        p.hidden[matches.indices[i]] = all;
+                        picker_set(state, matches.indices[i], !all);
             } else
-                p.hidden[entry.index] = !p.hidden[entry.index];
+                picker_set(state, entry.index, !picker_enabled(p, entry.index));
         }
         changed(state);
     }
 }
 void erase_query(UiState& state) {
-    char* query = state.keyboard_for_consoles ? state.console_query : state.query;
+    char* query = state.keyboard_for_tv ? state.settings.tv_text : state.keyboard_for_consoles ? state.console_query : state.query;
     auto size = std::strlen(query);
     if (size) {
         --size;
@@ -107,7 +136,8 @@ void erase_query(UiState& state) {
             --size;
         query[size] = 0;
     }
-    normalize_home(state);
+    if (state.keyboard_for_tv) state.changed = true;
+    else normalize_home(state);
 }
 } // namespace
 
@@ -136,15 +166,16 @@ PickerList console_picker(const UiState& state) {
 void text_input(UiState& state, const char* utf8) {
     if (state.page != Page::keyboard)
         return;
-    char* query = state.keyboard_for_consoles ? state.console_query : state.query;
+    char* query = state.keyboard_for_tv ? state.settings.tv_text : state.keyboard_for_consoles ? state.console_query : state.query;
     const auto size = std::strlen(query), extra = std::strlen(utf8);
-    if (size + extra >= 128)
+    if (size + extra >= (state.keyboard_for_tv ? sizeof(state.settings.tv_text) : sizeof(state.query)))
         return;
     for (std::size_t i = 0; i < extra; ++i)
         if (static_cast<unsigned char>(utf8[i]) < 32)
             return;
     std::memcpy(query + size, utf8, extra + 1);
-    normalize_home(state);
+    if (state.keyboard_for_tv) state.changed = true;
+    else normalize_home(state);
 }
 
 void input(UiState& state, Action action) {
@@ -166,8 +197,9 @@ void input(UiState& state, Action action) {
         if (action == Action::erase)
             erase_query(state);
         if (action == Action::favorite) {
-            (state.keyboard_for_consoles ? state.console_query : state.query)[0] = 0;
-            normalize_home(state);
+            (state.keyboard_for_tv ? state.settings.tv_text : state.keyboard_for_consoles ? state.console_query : state.query)[0] = 0;
+            if (state.keyboard_for_tv) state.changed = true;
+            else normalize_home(state);
         }
         if (action == Action::confirm) {
             const auto key = keyboard_keys[static_cast<std::size_t>(state.keyboard_focus)];
@@ -176,8 +208,9 @@ void input(UiState& state, Action action) {
             else if (key == '<')
                 erase_query(state);
             else if (key == '!') {
-                (state.keyboard_for_consoles ? state.console_query : state.query)[0] = 0;
-                normalize_home(state);
+                (state.keyboard_for_tv ? state.settings.tv_text : state.keyboard_for_consoles ? state.console_query : state.query)[0] = 0;
+                if (state.keyboard_for_tv) state.changed = true;
+                else normalize_home(state);
             } else {
                 const char text[] = {key == '_' ? ' ' : key, 0};
                 text_input(state, text);
@@ -213,13 +246,13 @@ void input(UiState& state, Action action) {
         }
         if (action == Action::previous_tab || action == Action::next_tab) {
             state.tab =
-                static_cast<SettingsTab>((static_cast<int>(state.tab) + (action == Action::next_tab ? 1 : -1) + 3) % 3);
+                static_cast<SettingsTab>((static_cast<int>(state.tab) + (action == Action::next_tab ? 1 : -1) + 4) % 4);
             state.settings_focus = 0;
             return;
         }
         const int max_focus =
             state.tab == SettingsTab::consoles ? 3 + static_cast<int>(console_picker(state).count) :
-            state.tab == SettingsTab::appearance ? 3 : 2;
+            state.tab == SettingsTab::appearance ? 4 : 3;
         if (action == Action::up)
             state.settings_focus = clamp(state.settings_focus - 1, max_focus);
         if (action == Action::down)
@@ -322,6 +355,18 @@ void input(UiState& state, Action action) {
                 state.game_focus = clamp(state.game_focus - 8, maximum);
             if (action == Action::right)
                 state.game_focus = clamp(state.game_focus + 8, maximum);
+            if (action == Action::favorite && games.count) {
+                const auto key = game_favorite_key(state.library->games[games.indices[static_cast<std::size_t>(state.game_focus)]]);
+                auto& favorites = state.settings.game_favorites;
+                auto slot = std::find(favorites.begin(), favorites.end(), key);
+                if (slot != favorites.end()) *slot = 0;
+                else {
+                    slot = std::find(favorites.begin(), favorites.end(), 0);
+                    if (slot != favorites.end()) *slot = key;
+                    else std::snprintf(state.notice, sizeof(state.notice), "Your 64 favourite game spaces are full.");
+                }
+                state.changed = true;
+            }
             if (action == Action::confirm && games.count) {
                 const auto plan =
                     state.launch_connected
@@ -351,6 +396,19 @@ void input(UiState& state, Action action) {
         return;
     }
     auto shown = shown_systems(state);
+    if (state.settings.preferences.layout == Layout::shelf && shown.count &&
+        (action == Action::previous_tab || action == Action::next_tab)) {
+        const int size = static_cast<int>(shelf_capacity);
+        const int last_page = (static_cast<int>(shown.count) - 1) / size;
+        const int page = state.focus / size;
+        const int next = clamp(page + (action == Action::next_tab ? 1 : -1), last_page);
+        if (next != page) {
+            state.focus = std::min(next * size + state.focus % size, static_cast<int>(shown.count) - 1);
+            state.tools = false;
+            normalize_home(state);
+        }
+        return;
+    }
     if (state.tools || !shown.count) {
         state.tools = true;
         if (action == Action::up)
@@ -404,6 +462,7 @@ void input(UiState& state, Action action) {
         for (std::size_t i = 0; i < shown.count; ++i)
             if (shown.indices[i] == selected)
                 state.focus = static_cast<int>(i);
+        normalize_home(state);
     }
 }
 } // namespace shelf
