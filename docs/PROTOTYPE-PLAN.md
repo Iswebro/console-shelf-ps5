@@ -6,6 +6,7 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 
 - [x] Public repository, source license, project references and image credits.
 - [x] Console-first Grid and floating-icon Swipe design with 52 system illustrations.
+- [x] Curved carousel with centre emphasis, progressive depth, short wrap motion and timed native renderer checks.
 - [x] Compact settings icons opening Appearance, Sort & filter and Consoles panels.
 - [x] Searchable individual console switches, whole-brand controls, Show/Hide results and saved visibility.
 - [x] Original C++17 hardware catalogue and browsing model, compiled and tested on Windows with warnings treated as errors.

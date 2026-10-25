@@ -46,6 +46,12 @@ let selected = null;
 let toastTimer;
 let drag = null;
 let suppressCardClick = false;
+let carouselId = safeStorage.get('shelf-carousel-selection');
+let carouselCards = [];
+let carouselIndex = 0;
+let orbitFrame = 0;
+const orbitMotion = new ShelfOrbit.Motion();
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 function toast(message) {
   const node = $('toast');
@@ -74,6 +80,7 @@ function renderSettings() {
   $('availability').value = settings.availability;
   $('carouselControls').hidden = settings.layout !== 'carousel';
   $('swipeHint').hidden = settings.layout !== 'carousel';
+  $('carouselCaption').hidden = settings.layout !== 'carousel';
   $('lookImages').disabled = settings.layout === 'carousel';
   $('lookCards').disabled = settings.layout === 'carousel';
   $('systems').className = settings.layout === 'carousel' ? 'systems-carousel' : 'systems-grid';
@@ -239,7 +246,12 @@ function makeCard(system) {
   main.type = 'button';
   main.className = 'card-main';
   main.setAttribute('aria-label', 'Open ' + system.name);
-  main.onclick = () => { if (!suppressCardClick) openSystem(system.id); };
+  main.onclick = () => {
+    if (suppressCardClick) return;
+    if (settings.layout === 'carousel' && carouselId !== system.id) {
+      selectCarousel(carouselCards.indexOf(card));
+    } else openSystem(system.id);
+  };
 
   const art = document.createElement('span');
   art.className = 'console-art';
@@ -284,6 +296,7 @@ function makeCard(system) {
     if (favorites.has(system.id)) favorites.delete(system.id); else favorites.add(system.id);
     safeStorage.set('shelf-favorites', JSON.stringify([...favorites]));
     renderSystems();
+    if (settings.layout === 'carousel') selectCarousel(carouselIndex);
     toast(`${system.name} ${favorites.has(system.id) ? 'added to' : 'removed from'} favorites.`);
   };
   card.append(main, favorite);
@@ -296,39 +309,101 @@ function renderSystems() {
   $('emptySearch').hidden = shown.length !== 0;
   $('emptyMessage').textContent = hiddenSystems.size === systems.length ? 'Your shelf is empty. Switch on a few consoles to make it yours.' : 'No systems match this view. Try another search or review your settings.';
   $('systems').replaceChildren(...shown.map(makeCard));
-  $('systems').scrollLeft = 0;
+  cancelAnimationFrame(orbitFrame);
+  orbitFrame = 0;
+  carouselCards = [...$('systems').children];
+  const previous = shown.findIndex(system => system.id === carouselId);
+  carouselIndex = previous < 0 ? 0 : previous;
+  carouselId = shown[carouselIndex]?.id || null;
+  orbitMotion.position = orbitMotion.target = carouselIndex;
+  orbitMotion.active = false;
   updateCarouselPosition();
 }
 
 function updateCarouselPosition() {
   if (settings.layout !== 'carousel') return;
-  const track = $('systems');
-  const cards = [...track.children];
-  if (!cards.length) {
+  if (!carouselCards.length) {
     $('carouselPosition').textContent = '0 / 0';
     $('carouselPrev').disabled = true;
     $('carouselNext').disabled = true;
+    $('carouselCaption').hidden = true;
     return;
   }
-  const gap = parseFloat(getComputedStyle(track).gap) || 0;
-  const stride = cards[0].getBoundingClientRect().width + gap;
-  const index = Math.min(cards.length - 1, Math.max(0, Math.round(track.scrollLeft / stride)));
-  $('carouselPosition').textContent = `${index + 1} / ${cards.length}`;
-  $('carouselPrev').disabled = track.scrollLeft < 5;
-  $('carouselNext').disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 5;
+  const system = systems.find(item => item.id === carouselId);
+  $('carouselCaption').hidden = false;
+  $('carouselPosition').textContent = `${carouselIndex + 1} / ${carouselCards.length}`;
+  $('carouselPrev').disabled = $('carouselNext').disabled = carouselCards.length < 2;
+  $('carouselFamily').textContent = [system.family, yearText(system)].filter(Boolean).join(' / ');
+  $('carouselTitle').textContent = system.name;
+  $('carouselOpen').setAttribute('aria-label', 'Explore ' + system.name);
+  $('carouselStatus').textContent = statusLabels[system.status];
+  $('carouselStatus').className = `status-badge status-${system.status}`;
+  $('systems').style.setProperty('--selection-glow', system.color);
+  paintOrbit();
 }
 
 function moveCarousel(direction) {
+  selectCarousel(carouselIndex + direction);
+}
+
+function selectCarousel(index, focus = true) {
+  if (!carouselCards.length || settings.layout !== 'carousel') return;
+  carouselIndex = ShelfOrbit.wrap(index, carouselCards.length);
+  carouselId = carouselCards[carouselIndex].dataset.system;
+  safeStorage.set('shelf-carousel-selection', carouselId);
+  orbitMotion.select(carouselIndex, carouselCards.length, performance.now(), reducedMotion.matches);
+  updateCarouselPosition();
+  if (focus) carouselCards[carouselIndex].querySelector('.card-main').focus({ preventScroll: true });
+  if (!orbitFrame && orbitMotion.active) orbitFrame = requestAnimationFrame(animateOrbit);
+}
+
+function paintOrbit() {
   const track = $('systems');
-  const first = track.firstElementChild;
-  if (!first) return;
-  const stride = first.getBoundingClientRect().width + (parseFloat(getComputedStyle(track).gap) || 0);
-  track.scrollBy({ left: direction * stride, behavior: 'smooth' });
+  if (settings.layout !== 'carousel') return;
+  const width = track.clientWidth;
+  carouselCards.forEach((card, index) => {
+    const offset = ShelfOrbit.distance(index - orbitMotion.position, carouselCards.length);
+    const pose = ShelfOrbit.pose(offset, width);
+    card.style.transform = `translate3d(calc(-50% + ${pose.x}px), calc(-50% + ${pose.y}px), ${pose.z}px) rotateY(${pose.yaw}deg) scale(${pose.scale})`;
+    card.style.opacity = String(pose.opacity);
+    card.style.zIndex = String(Math.round(1000 - Math.abs(offset) * 100));
+    card.style.visibility = pose.visible ? 'visible' : 'hidden';
+    if (pose.visible) {
+      const art = shelfArtLayout[card.dataset.system];
+      const image = card.querySelector('.console-art img');
+      if (art && image) {
+        const [x,y,w,h] = art.bounds, fit = Math.min(card.offsetWidth / w, card.offsetHeight / h);
+        image.style.width = `${art.canvas[0] * fit}px`;
+        image.style.height = `${art.canvas[1] * fit}px`;
+        image.style.left = `${(card.offsetWidth - w * fit) / 2 - x * fit}px`;
+        image.style.top = `${(card.offsetHeight - h * fit) / 2 - y * fit}px`;
+      }
+    }
+    card.inert = !pose.visible;
+    card.setAttribute('aria-hidden', String(!pose.visible));
+    card.classList.toggle('is-selected', index === carouselIndex);
+    const main = card.querySelector('.card-main');
+    main.tabIndex = index === carouselIndex ? 0 : -1;
+    main.setAttribute('aria-current', String(index === carouselIndex));
+    card.querySelector('.favorite').tabIndex = index === carouselIndex ? 0 : -1;
+  });
+  track.dataset.activeSystem = carouselId || '';
+  track.dataset.animating = String(orbitMotion.active);
+}
+
+function animateOrbit(time) {
+  orbitFrame = 0;
+  if (settings.layout !== 'carousel') return;
+  orbitMotion.update(time);
+  paintOrbit();
+  if (orbitMotion.active) orbitFrame = requestAnimationFrame(animateOrbit);
 }
 
 function openSystem(id) {
   selected = systems.find(system => system.id === id);
   if (!selected) return;
+  carouselId = id;
+  safeStorage.set('shelf-carousel-selection', id);
   $('home').hidden = true;
   $('detail').hidden = false;
   $('hero').style.setProperty('--glow', selected.color);
@@ -445,31 +520,48 @@ $('iconStyle').onchange = event => {
 $('search').oninput = renderSystems;
 $('carouselPrev').onclick = () => moveCarousel(-1);
 $('carouselNext').onclick = () => moveCarousel(1);
-$('systems').onscroll = updateCarouselPosition;
+$('carouselOpen').onclick = () => { if (carouselId) openSystem(carouselId); };
 $('systems').onkeydown = event => {
   if (settings.layout !== 'carousel' || ['INPUT', 'SELECT'].includes(event.target.tagName)) return;
   if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
     event.preventDefault();
     moveCarousel(event.key === 'ArrowRight' ? 1 : -1);
+  } else if (event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    selectCarousel(event.key === 'Home' ? 0 : carouselCards.length - 1);
   }
 };
 $('systems').onpointerdown = event => {
-  if (settings.layout !== 'carousel' || event.pointerType !== 'mouse' || event.button !== 0) return;
-  drag = { x: event.clientX, left: $('systems').scrollLeft, moved: false };
+  if (settings.layout !== 'carousel' || event.button !== 0 || event.target.closest('.favorite')) return;
+  orbitMotion.update(performance.now());
+  drag = { id: event.pointerId, x: event.clientX, y: event.clientY, position: orbitMotion.position, index: carouselIndex, moved: false, distance: 0 };
 };
 $('systems').onpointermove = event => {
-  if (!drag) return;
+  if (!drag || drag.id !== event.pointerId) return;
   const distance = event.clientX - drag.x;
-  if (Math.abs(distance) > 6) drag.moved = true;
+  if (!drag.moved && Math.abs(event.clientY - drag.y) > Math.max(10, Math.abs(distance))) { drag = null; return; }
+  if (Math.abs(distance) > 8 && !drag.moved) {
+    drag.moved = true;
+    $('systems').setPointerCapture(event.pointerId);
+    cancelAnimationFrame(orbitFrame);
+    orbitFrame = 0;
+  }
   if (drag.moved) {
+    drag.distance = distance;
     $('systems').classList.add('dragging');
-    $('systems').scrollLeft = drag.left - distance;
+    orbitMotion.active = false;
+    orbitMotion.position = drag.position - distance / Math.min(280, $('systems').clientWidth * .42);
+    paintOrbit();
   }
 };
-function endDrag() {
+function endDrag(event) {
+  if (drag && event.pointerId !== drag.id) return;
   if (drag?.moved) {
     suppressCardClick = true;
     setTimeout(() => { suppressCardClick = false; }, 150);
+    const stride = Math.min(280, $('systems').clientWidth * .42);
+    const step = Math.round(-drag.distance / stride) || (Math.abs(drag.distance) > 36 ? -Math.sign(drag.distance) : 0);
+    selectCarousel(drag.index + (event.type === 'pointercancel' ? 0 : step));
   }
   drag = null;
   $('systems').classList.remove('dragging');
@@ -477,7 +569,55 @@ function endDrag() {
 window.addEventListener('pointerup', endDrag);
 window.addEventListener('pointercancel', endDrag);
 window.addEventListener('resize', updateCarouselPosition);
-$('back').onclick = () => { $('detail').hidden = true; $('home').hidden = false; selected = null; };
+reducedMotion.addEventListener('change', () => selectCarousel(carouselIndex, false));
+let wheelAt = 0;
+$('systems').addEventListener('wheel', event => {
+  if (settings.layout !== 'carousel' || (!event.shiftKey && Math.abs(event.deltaX) <= Math.abs(event.deltaY))) return;
+  const delta = event.deltaX || event.deltaY;
+  if (!delta) return;
+  event.preventDefault();
+  if (performance.now() - wheelAt > 180) { moveCarousel(Math.sign(delta)); wheelAt = performance.now(); }
+}, { passive: false });
+
+// Standard-mapped controller input. Poll only while a controller is present;
+// held sticks repeat at a deliberate pace and cannot accumulate a move queue.
+let gamepadFrame = 0, gamepadDirection = 0, gamepadRepeat = 0, gamepadButtons = [];
+function pollGamepad(time) {
+  gamepadFrame = 0;
+  let pad;
+  try { pad = [...(navigator.getGamepads?.() || [])].find(item => item?.connected && item.mapping === 'standard'); } catch { return; }
+  if (!pad || document.hidden) { gamepadDirection = 0; gamepadButtons = []; return; }
+  const buttons = pad.buttons.map(button => button.pressed);
+  if (!$('settingsDialog').open) {
+    if (settings.layout === 'carousel' && !$('home').hidden) {
+      const direction = buttons[14] ? -1 : buttons[15] ? 1 : Math.abs(pad.axes[0] || 0) > .55 ? Math.sign(pad.axes[0]) : 0;
+      if (direction && (direction !== gamepadDirection || time >= gamepadRepeat)) {
+        moveCarousel(direction);
+        gamepadRepeat = time + (direction === gamepadDirection ? 180 : 340);
+      }
+      gamepadDirection = direction;
+      if (buttons[0] && !gamepadButtons[0]) carouselCards[carouselIndex]?.querySelector('.card-main').click();
+      if (buttons[3] && !gamepadButtons[3]) carouselCards[carouselIndex]?.querySelector('.favorite').click();
+      if (buttons[9] && !gamepadButtons[9]) openSettings('Appearance');
+    } else if (!$('detail').hidden && buttons[1] && !gamepadButtons[1]) $('back').click();
+  } else {
+    gamepadDirection = 0;
+    if (buttons[1] && !gamepadButtons[1]) $('settingsDialog').close();
+  }
+  gamepadButtons = buttons;
+  gamepadFrame = requestAnimationFrame(pollGamepad);
+}
+function startGamepad() { if (!gamepadFrame) gamepadFrame = requestAnimationFrame(pollGamepad); }
+window.addEventListener('gamepadconnected', startGamepad);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) startGamepad(); });
+startGamepad();
+$('back').onclick = () => {
+  $('detail').hidden = true; $('home').hidden = false; selected = null;
+  requestAnimationFrame(() => {
+    updateCarouselPosition();
+    if (settings.layout === 'carousel') carouselCards[carouselIndex]?.querySelector('.card-main').focus({ preventScroll: true });
+  });
+};
 $('emulator').onchange = () => {
   safeStorage.set('shelf-emulator-' + selected.id, $('emulator').value);
   toast(`${$('emulator').value} saved as the preferred emulator for ${selected.name} in this preview.`);

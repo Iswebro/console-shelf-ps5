@@ -137,9 +137,67 @@ const manifest = require('../assets/3d-icons/manifest.json');
     assert.deepEqual(floating, { background: 'none', border: '0px', shadow: 'none', artBackground: 'none' });
     await page.evaluate(() => window.scrollTo({ top: document.querySelector('.shelf-heading').offsetTop - 24, behavior: 'instant' }));
     await capture(page, 'console-images-swipe.png');
+    const beforeMove = await page.locator('#systems').getAttribute('data-active-system');
     await page.click('#carouselNext');
-    await page.waitForTimeout(550);
-    assert.ok(await page.locator('#systems').evaluate(element => element.scrollLeft) > 0);
+    await page.waitForFunction(() => document.querySelector('#systems').dataset.animating === 'false');
+    assert.notEqual(await page.locator('#systems').getAttribute('data-active-system'), beforeMove);
+    const depth = await page.locator('#systems').evaluate(track => {
+      const bounds = track.getBoundingClientRect(), center = bounds.x + bounds.width / 2;
+      const cards = [...track.querySelectorAll('.card')].filter(card => getComputedStyle(card).visibility === 'visible').map(card => {
+        const b = card.getBoundingClientRect(); return { active: card.classList.contains('is-selected'), x: b.x + b.width / 2, width: b.width };
+      });
+      return { center, cards };
+    });
+    const mainConsole = depth.cards.find(card => card.active);
+    assert.ok(Math.abs(mainConsole.x - depth.center) < 2, 'selected console should settle exactly in the centre');
+    assert.ok(depth.cards.every(card => card.active || card.width < mainConsole.width * .85), 'selected console should clearly dominate its neighbours');
+    for (const direction of [-1, 1]) {
+      const side = depth.cards.filter(card => (card.x - depth.center) * direction > 5).sort((a,b) => Math.abs(a.x-depth.center)-Math.abs(b.x-depth.center));
+      assert.ok(side.length >= 2 && side[0].width > side[1].width, 'each side should step back in size');
+    }
+    await page.keyboard.press('Home');
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForFunction(() => document.querySelector('#systems').dataset.animating === 'false');
+    assert.equal(await page.locator('#carouselPosition').textContent(), '52 / 52', 'left from the first console loops to the last');
+    await page.keyboard.press('ArrowRight');
+    await page.waitForFunction(() => document.querySelector('#systems').dataset.animating === 'false');
+    assert.equal(await page.locator('#carouselPosition').textContent(), '1 / 52');
+    // Interrupted input retargets one animation rather than stacking a queue.
+    await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowLeft');
+    await page.waitForFunction(() => document.querySelector('#systems').dataset.animating === 'false');
+    assert.equal(await page.locator('#carouselPosition').textContent(), '2 / 52');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.click('#carouselNext');
+    assert.equal(await page.locator('#systems').getAttribute('data-animating'), 'false', 'reduced motion should settle immediately');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    const draggedFrom = await page.locator('#systems').getAttribute('data-active-system');
+    const stage = await page.locator('#systems').boundingBox();
+    await page.mouse.move(stage.x + stage.width / 2, stage.y + stage.height * .41);
+    await page.mouse.down(); await page.mouse.move(stage.x + stage.width / 2 - 130, stage.y + stage.height * .41, {steps:6}); await page.mouse.up();
+    await page.waitForFunction(() => document.querySelector('#systems').dataset.animating === 'false');
+    assert.notEqual(await page.locator('#systems').getAttribute('data-active-system'), draggedFrom, 'drag should select and snap to a new console');
+    // Exercise the actual preview polling path with a standard-mapped fake pad.
+    await page.evaluate(() => {
+      window.testShelfPad = {connected:true,mapping:'standard',axes:[.8,0],buttons:Array.from({length:17},()=>({pressed:false}))};
+      Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[window.testShelfPad]});
+      window.dispatchEvent(new Event('gamepadconnected'));
+    });
+    const beforePad = await page.locator('#systems').getAttribute('data-active-system');
+    await page.waitForFunction(id => document.querySelector('#systems').dataset.activeSystem !== id, beforePad);
+    await page.evaluate(() => { window.testShelfPad.axes[0]=0; window.testShelfPad.buttons[0].pressed=true; });
+    await page.waitForFunction(() => document.querySelector('#home').hidden);
+    await page.evaluate(() => { window.testShelfPad.buttons[0].pressed=false; window.testShelfPad.buttons[1].pressed=true; });
+    await page.waitForFunction(() => !document.querySelector('#home').hidden);
+    await page.evaluate(() => { delete navigator.getGamepads; delete window.testShelfPad; });
+    await page.fill('#search', 'Switch 2');
+    assert.equal(await page.locator('#carouselPrev').isDisabled(), true);
+    await page.fill('#search', 'no console matches this');
+    assert.equal(await page.locator('#carouselCaption').isVisible(), false);
+    await page.fill('#search', '');
+    await page.locator('#systems .is-selected img').dispatchEvent('error');
+    await page.click('#carouselNext');
+    await page.waitForFunction(() => document.querySelector('#systems').dataset.animating === 'false');
+    assert.deepEqual(errors, [], 'a failed artwork load should retain navigation and the symbol fallback');
     await page.reload();
     assert.equal(await page.locator('.icon-card').count(), 52);
     await openPanel('Appearance');
@@ -177,6 +235,6 @@ const manifest = require('../assets/3d-icons/manifest.json');
     const width = await page.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
     assert.ok(width.page <= width.viewport + 1, 'mobile page should not overflow horizontally');
     assert.deepEqual(errors, [], 'the page should have no JavaScript errors');
-    console.log('PASS: settings dialog, keyboard/focus, individual/brand/bulk console visibility, persistence, mobile layout, 52 icon hashes, sorting/filtering, floating Swipe and library routes.');
+    console.log('PASS: settings, visibility/persistence, mobile layout, 52 icons, curved carousel depth/centering, wrap, interrupted motion, reduced motion, drag, simulated standard gamepad and library routes.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

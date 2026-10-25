@@ -9,6 +9,8 @@
   <link id="appTouchIcon" rel="apple-touch-icon" href="assets/shelf-icon.png">
   <link rel="stylesheet" href="styles.css">
   <script src="systems-data.js" defer></script>
+  <script src="orbit.js" defer></script>
+  <script src="assets/3d-icons/layout.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -58,8 +60,16 @@
             <button type="button" id="carouselNext" aria-label="Next console">→</button>
           </div>
         </div>
-        <p id="swipeHint" class="swipe-hint" hidden>Floating console icons. Swipe sideways, drag with a mouse, or use the arrows to explore.</p>
-        <div id="systems" class="systems-grid" role="list" aria-label="Systems"></div>
+        <p id="swipeHint" class="swipe-hint" hidden>Find your next favourite. Move the stick, swipe or use ← →. Select the centre console to explore.</p>
+        <div id="shelfStage" class="shelf-stage">
+          <div id="systems" class="systems-grid" role="list" aria-label="Systems"></div>
+          <div id="carouselCaption" class="carousel-caption" hidden aria-live="polite" aria-atomic="true">
+            <span id="carouselFamily" class="eyebrow"></span>
+            <h3 id="carouselTitle"></h3>
+            <span id="carouselStatus" class="status-badge"></span>
+            <button type="button" id="carouselOpen" class="carousel-open-hint">Explore this console <span aria-hidden="true">↗</span></button>
+          </div>
+        </div>
         <div id="emptySearch" class="empty-search" hidden><p id="emptyMessage">No systems match this view.</p><button type="button" id="reviewSettings" class="secondary">Review shelf settings</button></div>
       </section>
 

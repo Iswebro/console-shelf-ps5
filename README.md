@@ -2,18 +2,19 @@
 
 A console-first library project for PS5 homebrew. This repository contains a **browser design preview** and a **native C++/SDL development build for PC**. The PS5 package is still in development. Open [index.html](index.html) in a browser for the design preview, or follow the [native build instructions](native/README.md) to run the C++ app on PC. Both currently work offline with no console launch connection.
 
-![Floating console icons in Swipe view](previews/console-images-swipe.png)
+![Curved console collection with the selected system in front](previews/carousel-depth.png)
 
 ## What works in the preview
 
-- Browse 52 console and platform cards in a Grid or a card-free, floating-icon Swipe view. Grid can use 3D-style system icons or classic text cards.
+- Browse 52 systems in Grid or a curved, card-free Swipe carousel. The selected console sits forward in the centre; neighbours recede in size, depth and angle. Motion eases to a stop in 420 ms and retargets immediately when direction changes. Grid can use 3D-style system icons or classic text cards.
+- Loop through Swipe using the stick/D-pad on a standard-mapped controller, keyboard arrows, mouse dragging or touch. Click a side console to centre it, then select the centre console to explore. The browser honours reduced-motion preferences and remembers the selected system. Physical controller/PS5 validation remains pending; automated controller checks are simulated.
 - Switch between **All consoles** and **Emulator or games**. The latter shows systems with a recorded emulator route, built-in PS5/PS4 route, or example game in the bundled demo inventory. The selection persists in the browser.
 - Search, filter by brand or evidence level, sort in several ways, and save favorites.
 - Open compact toolbar icons for Appearance, Sort & filter and Consoles. Search the console picker, toggle individual systems or whole brands, and show/hide search results in one click. These choices persist on the device.
 - Open a console detail page, choose a preferred emulator, and view example games. The emulator button is a preview action only.
 - Choose among three generated app icons for the preview header and browser tab.
 
-See the [mobile Swipe view](previews/mobile-swipe.png) and [Switch 2 icon](previews/switch2-3d-card.png). Nintendo's press photo informed the Switch 2 illustration but is **not** displayed or bundled.
+See the [mobile Swipe view](previews/carousel-mobile.png) and [Switch 2 icon](previews/switch2-3d-card.png). Nintendo's press photo informed the Switch 2 illustration but is **not** displayed or bundled.
 
 ## Inventory and compatibility
 

@@ -285,17 +285,20 @@ void input(UiState& state, Action action) {
         return;
     }
     const int stride = state.settings.preferences.layout == Layout::grid ? 4 : 1;
-    if (action == Action::up && state.focus < stride) {
+    const bool swipe = state.settings.preferences.layout == Layout::swipe;
+    if (action == Action::up && (swipe || state.focus < stride)) {
         state.tools = true;
         state.tool = 3;
     } else if (action == Action::up)
         state.focus -= stride;
-    if (action == Action::down)
+    if (action == Action::down && !swipe)
         state.focus = clamp(state.focus + stride, static_cast<int>(shown.count) - 1);
     if (action == Action::left)
-        state.focus = clamp(state.focus - 1, static_cast<int>(shown.count) - 1);
+        state.focus = swipe ? (state.focus + static_cast<int>(shown.count) - 1) % static_cast<int>(shown.count)
+                            : clamp(state.focus - 1, static_cast<int>(shown.count) - 1);
     if (action == Action::right)
-        state.focus = clamp(state.focus + 1, static_cast<int>(shown.count) - 1);
+        state.focus = swipe ? (state.focus + 1) % static_cast<int>(shown.count)
+                            : clamp(state.focus + 1, static_cast<int>(shown.count) - 1);
     normalize_home(state);
     if (action == Action::confirm) {
         state.page = Page::details;

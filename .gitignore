@@ -30,6 +30,8 @@ previews/*
 !previews/native-settings.png
 !previews/native-swipe.png
 !previews/native-megadrive.png
+!previews/carousel-depth.png
+!previews/carousel-mobile.png
 
 node_modules/
 .cache/

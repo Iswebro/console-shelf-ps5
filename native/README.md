@@ -30,13 +30,15 @@ The build fetches the official SDL2 2.32.10 Windows development ZIP into ignored
 
 The host app also accepts typed text while its search keyboard is open. A first press of Circle on the home screen opens an exit confirmation.
 
+Swipe is a curved carousel with a larger centre console, progressively smaller neighbours, subtle yaw and a quiet floor glow. Left/right loop at either end, while Up reaches the toolbar. Its 420 ms ease-out retargets from the current frame without queuing moves; drawing stops once it settles. Grid navigation stays bounded. Display sizing uses the visible illustration's bounds, keeping tall hardware intact and wide hardware readable without changing the PNG files.
+
 ## Verification
 
-`npm run test:native-renderer` builds the app and drives it through its SDL event loop without opening a visible window. It captures seven 1080p screens, changes visibility through an independent picker search, uses controller buttons to type on the search keyboard, reopens the executable to verify persistence, and walks all 52 system images. The test checks the vendored file hashes first. Captures and machine-readable reports remain under ignored `.cache/native-render-tests/`. These are **simulated SDL controller events**, not a physical DualSense or PS5 test.
+`npm run test:native-renderer` builds the app and drives it through its SDL event loop without opening a visible window. It captures eleven 1080p screens, changes visibility through an independent picker search, uses controller buttons to type on the search keyboard, reopens the executable to verify persistence, and walks all 52 system images. Timed carousel captures must change during motion and finish pixel-identically to a settled reference pose. The test checks the vendored file hashes first. Captures and machine-readable reports remain under ignored `.cache/native-render-tests/`. These are **simulated SDL controller events**, not a physical DualSense or PS5 test.
 
 Run `npm run test:native` for the model, persistence and navigation tests. On Windows it uses an existing Visual Studio C++ installation, configures that compiler only in its child process and writes to ignored `.cache/native-host/`. On Linux it uses an existing `c++` compiler with C++17 support. It installs no packages.
 
-The model tests also cover availability evidence, individual visibility, sorting, navigation, backup recovery, damaged settings and failed saves. All owned C++ sources compile with warnings treated as errors. The raster renderer keeps a bounded artwork cache and uses smaller font atlases for small text; it redraws when input or window state changes.
+The model tests also cover availability evidence, individual visibility, sorting, carousel wrap/depth/retargeting, navigation, backup recovery, damaged settings and failed saves. All owned C++ sources compile with warnings treated as errors. The raster renderer keeps a bounded artwork cache and uses smaller font atlases for small text; it redraws on changes and while a carousel movement is settling.
 
 ## PS5 cross-build
 

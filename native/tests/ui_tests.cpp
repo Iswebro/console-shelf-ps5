@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+#include "shelf/carousel.hpp"
 #include "shelf/ui.hpp"
 #include <cstdio>
 #include <cstdlib>
@@ -69,6 +70,30 @@ void test_ui() {
     input(detail_state, Action::back);
     check(detail_state.page == Page::details && detail_state.selected_system == find_system("ps4"),
           "global settings retain the console being viewed");
+    UiState carousel;
+    carousel.settings.preferences.layout = Layout::swipe;
+    input(carousel, Action::left);
+    check(carousel.focus == static_cast<int>(system_count) - 1, "Swipe loops left from the first console");
+    input(carousel, Action::right);
+    check(carousel.focus == 0, "Swipe loops right from the last console");
+    input(carousel, Action::up);
+    check(carousel.tools, "up from any Swipe position reaches the toolbar");
+    const auto center = orbit_pose(0, 1760), near = orbit_pose(1, 1760), far = orbit_pose(2, 1760);
+    check(center.scale > near.scale && near.scale > far.scale && center.z > near.z && near.z > far.z,
+          "carousel selection dominates a progressively receding collection");
+    check(center.x == 0 && near.x > 0 && orbit_pose(-1, 1760).x == -near.x,
+          "carousel has a centred and symmetrical arc");
+    OrbitMotion motion;
+    motion.select(static_cast<double>(system_count) - 1, system_count, 0, false);
+    motion.update(100);
+    check(motion.active && motion.position < 0 && motion.position > -1, "wrap animates by one slot");
+    const double interrupted = motion.position;
+    motion.select(1, system_count, 100, false);
+    check(motion.position == interrupted, "reversing input does not jump the current frame");
+    motion.update(520);
+    check(!motion.active && std::abs(motion.position - 1) < .0001, "animation settles at its most recent target");
+    motion.select(0, system_count, 600, true);
+    check(!motion.active && std::abs(motion.position) < .0001, "reduced motion settles immediately");
     std::puts("PASS: native controller navigation, settings tabs, independent searches, group visibility, honest "
               "unavailable routes and page return.");
 }

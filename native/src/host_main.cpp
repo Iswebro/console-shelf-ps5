@@ -111,6 +111,11 @@ bool mapped_button(Uint8 button, const shelf::UiState& state, shelf::Action& act
 bool script_event(const char* token) {
     if (std::strncmp(token, "shot:", 5) == 0 || std::strncmp(token, "report:", 7) == 0)
         return true;
+    if (std::strncmp(token, "frame:", 6) == 0) {
+        char* end = nullptr;
+        const auto value = std::strtoul(token + 6, &end, 10);
+        return token[6] && *end == 0 && value <= 2000;
+    }
     const char* names[] = {"up",      "down",     "left",     "right",        "confirm", "back",
                            "filters", "favorite", "settings", "previous-tab", "tab"};
     const Uint8 buttons[] = {SDL_CONTROLLER_BUTTON_DPAD_UP,
@@ -189,6 +194,7 @@ int main(int argc, char** argv) {
     const char* captures = nullptr;
     const char* script_arg = nullptr;
     bool headless = false;
+    bool animate_script = false;
 #ifndef SHELF_PS5
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--asset-root") == 0 && i + 1 < argc)
@@ -201,6 +207,8 @@ int main(int argc, char** argv) {
             script_arg = argv[++i];
         else if (std::strcmp(argv[i], "--headless") == 0)
             headless = true;
+        else if (std::strcmp(argv[i], "--animate-script") == 0)
+            animate_script = true;
         else {
             std::fprintf(stderr, "Unknown or incomplete host option: %s\n", argv[i]);
             return 1;
@@ -305,6 +313,7 @@ int main(int argc, char** argv) {
     Uint8 held_button = 0;
     bool redraw = true;
     int axis_x = 0, axis_y = 0;
+    unsigned script_time = 0;
     while (!state.exit_requested) {
         char* token = nullptr;
         if (scripting) {
@@ -322,6 +331,8 @@ int main(int argc, char** argv) {
                 result = 1;
                 break;
             }
+            if (std::strncmp(token, "frame:", 6) == 0)
+                script_time += static_cast<unsigned>(std::strtoul(token + 6, nullptr, 10));
             redraw = true;
         }
         SDL_Event event{};
@@ -444,8 +455,9 @@ int main(int argc, char** argv) {
             }
             state.changed = false;
         }
-        if (redraw) {
-            shelf::graphics_render(state);
+        if (redraw || shelf::graphics_animating()) {
+            shelf::graphics_render(state, animate_script ? script_time : SDL_GetTicks(),
+                                   animate_script || (!scripting && !headless));
             if (shelf::graphics_errors()) {
                 std::fprintf(stderr, "A packaged image/font or rendering resource failed to load.\n");
                 result = 1;

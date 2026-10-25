@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "shelf/graphics.hpp"
+#include "shelf/carousel.hpp"
 #include "shelf/memory.hpp"
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
@@ -32,10 +33,14 @@ struct Art {
     SDL_Texture* texture = nullptr;
     char name[256]{};
     int w = 0, h = 0;
+    SDL_Rect bounds{};
     unsigned age = 0;
 };
 std::array<Art, 12> art;
 unsigned art_age = 0;
+OrbitMotion orbit;
+bool orbit_visible = false;
+BrowseResult orbit_list{};
 const std::array<std::string_view, 8> sorts = {"Featured order",   "Name: A to Z",    "Name: Z to A",
                                                "Newest hardware",  "Oldest hardware", "Brand, then name",
                                                "Most games first", "Favorites first"};
@@ -201,6 +206,24 @@ Art* image(std::string_view name) {
     int channels = 0;
     unsigned char* data = stbi_load(filename, &slot->w, &slot->h, &channels, 4);
     if (data && slot->w > 0 && slot->h > 0 && slot->w <= 4096 && slot->h <= 4096) {
+        int left = slot->w, top = slot->h, right = -1, bottom = -1;
+        for (int y = 0; y < slot->h; ++y)
+            for (int x = 0; x < slot->w; ++x)
+                if (data[(static_cast<std::size_t>(y) * slot->w + x) * 4 + 3] > 8) {
+                    left = std::min(left, x);
+                    top = std::min(top, y);
+                    right = std::max(right, x);
+                    bottom = std::max(bottom, y);
+                }
+        if (right >= 0) {
+            left = std::max(0, left - 12);
+            top = std::max(0, top - 12);
+            right = std::min(slot->w - 1, right + 12);
+            bottom = std::min(slot->h - 1, bottom + 12);
+            slot->bounds = {left, top, right - left + 1, bottom - top + 1};
+        } else {
+            slot->bounds = {0, 0, slot->w, slot->h};
+        }
         slot->texture =
             SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, slot->w, slot->h);
         if (slot->texture) {
@@ -224,6 +247,29 @@ void picture(std::string_view name, int x, int y, int w, int h, Uint8 alpha = 25
     SDL_Rect dest{x + (w - dw) / 2, y + (h - dh) / 2, dw, dh};
     SDL_SetTextureAlphaMod(entry->texture, alpha);
     SDL_RenderCopy(renderer, entry->texture, nullptr, &dest);
+}
+void orbit_picture(std::string_view name, double cx, double cy, double w, double h, double yaw, Uint8 alpha) {
+    auto* entry = image(name);
+    if (!entry || !entry->texture)
+        return;
+    const auto& bounds = entry->bounds;
+    const double fit = std::min(w / bounds.w, h / bounds.h);
+    const double hw = bounds.w * fit / 2, hh = bounds.h * fit / 2;
+    const double angle = yaw * 3.141592653589793 / 180;
+    SDL_Vertex vertices[4]{};
+    for (int i = 0; i < 4; ++i) {
+        const double x = (i == 0 || i == 3) ? -hw : hw;
+        const double y = i < 2 ? -hh : hh;
+        const double projection = 1200 / (1200 + x * std::sin(angle));
+        vertices[i].position = {static_cast<float>(cx + x * std::cos(angle) * projection),
+                                static_cast<float>(cy + y * projection)};
+        vertices[i].color = {255, 255, 255, alpha};
+        vertices[i].tex_coord = {static_cast<float>(bounds.x + (i == 0 || i == 3 ? 0 : bounds.w)) / entry->w,
+                                 static_cast<float>(bounds.y + (i < 2 ? 0 : bounds.h)) / entry->h};
+    }
+    const int indices[] = {0, 1, 2, 0, 2, 3};
+    if (SDL_RenderGeometry(renderer, entry->texture, vertices, 4, indices, 6) < 0)
+        ++resource_errors;
 }
 SDL_Color accent(const SystemDefinition& s) {
     if (s.brand == "Nintendo")
@@ -344,21 +390,45 @@ void home(const UiState& state) {
                 text("*", x + 377, y + 12, 30, purple, true);
         }
     } else {
-        for (int offset = -2; offset <= 2; ++offset) {
-            const int at = state.focus + offset;
-            if (at < 0 || at >= static_cast<int>(shown.count))
-                continue;
-            const auto id = shown.indices[static_cast<std::size_t>(at)];
-            const auto& s = catalog[id];
-            const int cx = 960 + offset * 500;
-            glow(cx - 210, 490, 420, 390, accent(s), offset == 0 ? 130 : 50);
-            picture(s.image, cx - 230, 466, 460, 348, offset == 0 ? 255 : 160);
-            centered(s.name, cx, 824, offset == 0 ? 35 : 27, offset == 0 ? white : muted, true);
-            if (offset == 0) {
-                centered(availability(state.inventory[id]), cx, 880, 22, muted);
-                rounded(cx - 30, 933, 60, 4, 2, purple);
-            }
+        const auto& selected = catalog[state.selected_system];
+        glow(610, 742, 700, 130, accent(selected), 65);
+        // A quiet elliptical floor anchors the curved collection without cards.
+        for (int degree = 0; degree < 360; degree += 3) {
+            const double a = degree * 3.141592653589793 / 180;
+            const double b = (degree + 3) * 3.141592653589793 / 180;
+            line(960 + static_cast<int>(std::cos(a) * 770), 748 + static_cast<int>(std::sin(a) * 66),
+                 960 + static_cast<int>(std::cos(b) * 770), 748 + static_cast<int>(std::sin(b) * 66),
+                 {98, 101, 143, 19});
         }
+        struct Slot {
+            std::size_t id;
+            double offset;
+        };
+        std::array<Slot, 9> slots{};
+        std::size_t count = 0;
+        for (std::size_t i = 0; i < shown.count; ++i) {
+            const double offset =
+                orbit_distance(static_cast<double>(i) - orbit.position, static_cast<double>(shown.count));
+            if (std::abs(offset) < 4 && count < slots.size())
+                slots[count++] = {shown.indices[i], offset};
+        }
+        std::sort(slots.begin(), slots.begin() + count,
+                  [](const Slot& a, const Slot& b) { return std::abs(a.offset) > std::abs(b.offset); });
+        SDL_Rect clip{80, 432, 1760, 420};
+        SDL_RenderSetClipRect(renderer, &clip);
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto pose = orbit_pose(slots[i].offset, 1760);
+            const double projection = 1200 / (1200 - pose.z), scale = pose.scale * projection;
+            orbit_picture(catalog[slots[i].id].image, 960 + pose.x * projection, 630 + pose.y * projection, 320 * scale,
+                          310 * scale, pose.yaw, static_cast<Uint8>(255 * pose.opacity));
+        }
+        SDL_RenderSetClipRect(renderer, nullptr);
+        centered(selected.brand, 960, 845, 18, muted);
+        centered(selected.name, 960, 873, 38, white, true);
+        centered(availability(state.inventory[state.selected_system]), 960, 930, 21, muted);
+        char position[48];
+        std::snprintf(position, sizeof(position), "%d / %zu", state.focus + 1, shown.count);
+        text(position, 1730, 391, 20, muted);
     }
     footer(
         "D-pad  Browse    Cross  Open    Triangle  Favourite    Square  Filter    Options  Settings    Circle  Back");
@@ -531,7 +601,20 @@ bool graphics_init(SDL_Renderer* target, const char* asset_root) {
     }
     return background && halo && font(24, false) && font(27, true);
 }
-void graphics_render(const UiState& state) {
+void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
+    const bool show_orbit = state.page == Page::home && state.settings.preferences.layout == Layout::swipe;
+    if (show_orbit) {
+        const auto list = shown_systems(state);
+        if (!orbit_visible || list.count != orbit_list.count || list.indices != orbit_list.indices) {
+            orbit = {};
+            orbit.position = orbit.target = state.focus;
+            orbit_list = list;
+        }
+        orbit.select(state.focus, static_cast<double>(list.count), time_ms, !animate);
+        orbit.update(time_ms);
+    } else
+        orbit.active = false;
+    orbit_visible = show_orbit;
     SDL_SetRenderDrawColor(renderer, 11, 13, 28, 255);
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, background, nullptr, nullptr);
@@ -567,6 +650,9 @@ void graphics_render(const UiState& state) {
         centered(state.notice, 960, 948, 24, white);
     }
     SDL_RenderPresent(renderer);
+}
+bool graphics_animating() {
+    return orbit_visible && orbit.active;
 }
 bool graphics_capture(const char* path) {
     auto* pixels = static_cast<Uint32*>(allocate(static_cast<std::size_t>(width) * height * 4));
