@@ -87,7 +87,35 @@ int socket_error() {
     return errno;
 #endif
 }
-Socket connect_to(const char* host, unsigned short port, FtpDiagnostics& diagnostics, bool passive = false) {
+bool cancelled(const ReadOnlyFtp& client) {
+    return client.cancelled && client.cancelled(client.cancel_context);
+}
+bool wait_socket(Socket fd, bool write, ReadOnlyFtp& client) {
+    for (int attempt = 0; attempt < 60; ++attempt) {
+        if (cancelled(client)) {
+            client.diagnostics.failed("cancelled", 0);
+            return false;
+        }
+        fd_set ready, errors;
+        FD_ZERO(&ready);
+        FD_ZERO(&errors);
+        FD_SET(fd, &ready);
+        FD_SET(fd, &errors);
+        timeval slice{0, 50000};
+        const int result =
+            select(static_cast<int>(fd + 1), write ? nullptr : &ready, write ? &ready : nullptr, &errors, &slice);
+        if (result < 0 || FD_ISSET(fd, &errors)) {
+            client.diagnostics.failed("socket wait", socket_error());
+            return false;
+        }
+        if (result > 0 && FD_ISSET(fd, &ready))
+            return true;
+    }
+    client.diagnostics.failed("socket timeout", 0);
+    return false;
+}
+Socket connect_to(ReadOnlyFtp& client, unsigned short port, bool passive = false) {
+    auto& diagnostics = client.diagnostics;
     const char* operation = passive ? "data socket" : "control socket";
     const auto failed = [&](const char* stage, Socket fd, int error) {
         diagnostics.failed(stage, error);
@@ -97,6 +125,10 @@ Socket connect_to(const char* host, unsigned short port, FtpDiagnostics& diagnos
     Socket fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd == invalid_socket)
         return failed(operation, fd, socket_error());
+#ifndef _WIN32
+    if (fd >= FD_SETSIZE)
+        return failed("socket descriptor limit", fd, fd);
+#endif
 #ifdef _WIN32
     const DWORD timeout = 3000;
     setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&timeout), sizeof(timeout));
@@ -112,7 +144,7 @@ Socket connect_to(const char* host, unsigned short port, FtpDiagnostics& diagnos
 #endif
     address.sin_family = AF_INET;
     address.sin_port = htons(port);
-    if (inet_pton(AF_INET, host, &address.sin_addr) != 1) {
+    if (inet_pton(AF_INET, client.host, &address.sin_addr) != 1) {
         return failed("numeric address", fd, 0);
     }
 #ifdef _WIN32
@@ -120,6 +152,13 @@ Socket connect_to(const char* host, unsigned short port, FtpDiagnostics& diagnos
     if (ioctlsocket(fd, FIONBIO, &nonblocking)) {
         return failed("socket nonblocking", fd, socket_error());
     }
+#elif defined(SHELF_PS5)
+    // Native titles reject fcntl on sockets. The console's own socket option
+    // configures this mode without changing process or system permissions.
+    constexpr int native_nonblocking = 0x1200; // SO_NBIO
+    const int nonblocking = 1;
+    if (setsockopt(fd, SOL_SOCKET, native_nonblocking, &nonblocking, sizeof(nonblocking)))
+        return failed("socket nonblocking option", fd, socket_error());
 #else
     const int flags = fcntl(fd, F_GETFL, 0);
     if (fd >= FD_SETSIZE) {
@@ -141,16 +180,8 @@ Socket connect_to(const char* host, unsigned short port, FtpDiagnostics& diagnos
             return failed(passive ? "data connect" : "control connect", fd, socket_error());
         }
 #endif
-        fd_set writable, errors;
-        FD_ZERO(&writable);
-        FD_ZERO(&errors);
-        FD_SET(fd, &writable);
-        FD_SET(fd, &errors);
-        timeval wait{3, 0};
-        const int selected = select(static_cast<int>(fd + 1), nullptr, &writable, &errors, &wait);
-        if (selected <= 0 || FD_ISSET(fd, &errors)) {
-            return failed("socket wait", fd, selected == 0 ? 0 : socket_error());
-        }
+        if (!wait_socket(fd, true, client))
+            return failed("socket connect wait", fd, 0);
         int error = 0;
 #ifdef _WIN32
         int error_size = sizeof(error);
@@ -164,16 +195,7 @@ Socket connect_to(const char* host, unsigned short port, FtpDiagnostics& diagnos
         }
 #endif
     }
-#ifdef _WIN32
-    nonblocking = 0;
-    if (ioctlsocket(fd, FIONBIO, &nonblocking)) {
-        return failed("socket blocking restore", fd, socket_error());
-    }
-#else
-    if (fcntl(fd, F_SETFL, flags)) {
-        return failed("socket blocking restore", fd, socket_error());
-    }
-#endif
+    // Keep nonblocking mode. Bounded readiness waits also make startup cancellation responsive.
     return fd;
 }
 struct Connection {
@@ -182,6 +204,7 @@ struct Connection {
     int begin = 0, end = 0;
     bool clean_eof = false;
     FtpDiagnostics* diagnostics = nullptr;
+    ReadOnlyFtp* client = nullptr;
     ~Connection() {
         close_socket(data);
         close_socket(control);
@@ -191,7 +214,9 @@ struct Connection {
         clean_eof = false;
         while (used + 1 < cap) {
             if (begin == end) {
-                end = static_cast<int>(recv(control, buffer, sizeof(buffer), 0));
+                end = client && wait_socket(control, false, *client)
+                          ? static_cast<int>(recv(control, buffer, sizeof(buffer), 0))
+                          : -1;
                 begin = 0;
                 if (end <= 0) {
                     if (end < 0 && diagnostics)
@@ -240,6 +265,8 @@ struct Connection {
             return 0;
         int sent = 0;
         while (sent < size) {
+            if (!client || !wait_socket(control, true, *client))
+                return 0;
             const int n = static_cast<int>(send(control, request + sent, size - sent,
 #ifdef MSG_NOSIGNAL
                                                 MSG_NOSIGNAL
@@ -256,9 +283,10 @@ struct Connection {
         }
         return reply(result ? result : response, result ? cap : sizeof(response));
     }
-    bool open(ReadOnlyFtp& client) {
-        diagnostics = &client.diagnostics;
-        control = connect_to(client.host, client.port, *diagnostics);
+    bool open(ReadOnlyFtp& source) {
+        client = &source;
+        diagnostics = &source.diagnostics;
+        control = connect_to(source, source.port);
         if (control == invalid_socket)
             return false;
         char reply_text[2048];
@@ -280,7 +308,7 @@ struct Connection {
         ++diagnostics->connections;
         return true;
     }
-    bool passive(const ReadOnlyFtp& client) {
+    bool passive(ReadOnlyFtp& source) {
         char response[2048];
         unsigned port = 0;
         if (command("EPSV", nullptr, response, sizeof(response)) == 229) {
@@ -304,7 +332,7 @@ struct Connection {
             return false;
         }
         // Never follow a server-provided IP address or hostname.
-        data = connect_to(client.host, static_cast<unsigned short>(port), *diagnostics, true);
+        data = connect_to(source, static_cast<unsigned short>(port), true);
         return data != invalid_socket;
     }
 };
@@ -312,6 +340,8 @@ FsStatus transfer_status(int code) {
     return code == 550 ? FsStatus::missing : FsStatus::failed;
 }
 Directory* get_directory(ReadOnlyFtp& client, const char* path) {
+    if (cancelled(client))
+        return nullptr;
     for (auto* dir = static_cast<Directory*>(client.directories); dir; dir = dir->next)
         if (std::strcmp(dir->path, path) == 0)
             return dir;
@@ -483,6 +513,8 @@ FsStatus ftp_read(void* raw, const char* path, std::uint64_t offset, void* outpu
         return transfer_status(code);
     const auto need = static_cast<std::size_t>(std::min<std::uint64_t>(cap, stat.size - offset));
     while (used < need) {
+        if (!wait_socket(connection.data, false, client))
+            return FsStatus::failed;
         const int size = static_cast<int>(
             recv(connection.data, static_cast<char*>(output) + used, static_cast<int>(need - used), 0));
         if (size <= 0)

@@ -24,6 +24,8 @@ struct ReadOnlyFtp {
     std::size_t entry_count = 0, directory_count = 0;
     bool network_ready = false;
     FtpDiagnostics diagnostics;
+    bool (*cancelled)(void*) = nullptr;
+    void* cancel_context = nullptr;
     ReadOnlyFtp() = default;
     ReadOnlyFtp(const ReadOnlyFtp&) = delete;
     ReadOnlyFtp& operator=(const ReadOnlyFtp&) = delete;

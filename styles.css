@@ -35,6 +35,9 @@ a { color: #d8d0ff; }
 .header-actions, .browse-actions { display: flex; align-items: center; gap: 9px; }
 .icon-button { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 43px; height: 43px; padding: 10px; border: 1px solid #ffffff24; border-radius: 13px; background: #ffffff08; color: #cbc8e5; transition: background .15s ease, border-color .15s ease; }
 .icon-button:hover { color: white; background: #ffffff15; border-color: #c2b5ff75; }
+.layout-toggle { display: flex; gap: 8px; width: auto; padding-inline: 13px; font-size: 12px; }
+.layout-toggle[data-layout="grid"] .grid-view-icon, .layout-toggle[data-layout="carousel"] .swipe-view-icon { display: none; }
+.browse-actions .layout-toggle { width: auto; padding-inline: 13px; }
 .icon-button svg, .picker-search svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .icon-button circle { fill: #1a1b30; }
 .button-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; padding: 2px 4px; border-radius: 10px; background: #d4caff; color: #241c43; font-size: 10px; font-weight: 800; border: 2px solid #17182b; }

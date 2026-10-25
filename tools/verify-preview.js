@@ -24,8 +24,8 @@ const manifest = require('../assets/3d-icons/manifest.json');
     page.on('pageerror', error => errors.push(error.message));
     const capture = async (target, name) => { if (capturePreviews) await target.screenshot({ path: path.join(root, 'previews', name), animations: 'disabled' }); };
     const openPanel = async name => {
-      if (!await page.locator('#settingsDialog').isVisible()) await page.click({ Appearance: '#openAppearance', Browse: '#openBrowse', Consoles: '#openConsoles' }[name]);
-      else await page.click('#tab' + name);
+      if (!await page.locator('#settingsDialog').isVisible()) await page.click('#openAppearance');
+      await page.click('#tab' + name);
     };
     const closePanel = () => page.click('#doneSettings');
     await page.goto(pathToFileURL(path.join(root, 'index.html')).href);
@@ -35,6 +35,11 @@ const manifest = require('../assets/3d-icons/manifest.json');
     assert.equal(await page.locator('.card').count(), 52);
     assert.equal(await page.locator('#settingsDialog').isVisible(), false);
     assert.equal(await page.locator('#sort').isVisible(), false, 'settings stay out of the shelf');
+    assert.equal(await page.locator('#home [aria-haspopup="dialog"]').count(), 0, 'one header settings entry, no duplicate home settings buttons');
+    await page.click('#toggleLayout');
+    assert.equal(await page.locator('#systems').getAttribute('class'), 'systems-carousel');
+    assert.equal(await page.locator('#settingsDialog').isVisible(), false, 'layout switches directly');
+    await page.click('#toggleLayout');
 
     // Automatic availability and individual choices compose and survive a reload.
     await openPanel('Consoles');
@@ -114,7 +119,7 @@ const manifest = require('../assets/3d-icons/manifest.json');
     await page.selectOption('#family', 'Atari');
     await page.selectOption('#availability', 'mapped');
     assert.equal(await page.locator('.card').count(), 5);
-    assert.equal(await page.locator('#filterBadge').textContent(), '2');
+    assert.match(await page.locator('#shelfSummary').textContent(), /Atari/);
     await page.click('#clearFilters');
     assert.equal(await page.locator('.card').count(), 52);
     await closePanel();

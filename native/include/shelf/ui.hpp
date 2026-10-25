@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #pragma once
 #include "library.hpp"
+#include "presentation.hpp"
 #include "settings.hpp"
 
 namespace shelf {
@@ -20,7 +21,8 @@ enum class Action {
     previous_tab,
     next_tab,
     search,
-    erase
+    erase,
+    layout
 };
 inline constexpr std::string_view keyboard_keys = "QWERTYUIOPASDFGHJKL<ZXCVBNM0123456789_!^";
 struct PickerEntry {
@@ -32,6 +34,7 @@ struct PickerList {
     std::size_t count = 0;
 };
 struct UiState {
+    Presentation presentation;
     Settings settings;
     Inventory inventory{};
     const Library* library = nullptr;

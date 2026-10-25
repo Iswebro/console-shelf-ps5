@@ -36,7 +36,7 @@ function run(args) {
     child.on('error', reject); child.on('close', code => { clearTimeout(timeout); resolve({ code, stdout, stderr }); });
   });
 }
-async function scenario(pasv, malformed = false) {
+async function scenario(pasv, malformed = false, background = false) {
   const commands = [], sockets = new Set(), passiveServers = new Set();
   let failure;
   const server = net.createServer(socket => {
@@ -78,14 +78,17 @@ async function scenario(pasv, malformed = false) {
   files.set('/data/PCSX2/games', null);
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
-    const result = await run(['--library-ftp', '127.0.0.1', '--library-port', String(server.address().port), '--scan-only']);
+    const result = await run(['--library-ftp', '127.0.0.1', '--library-port', String(server.address().port),
+      ...(background ? ['--background-scan', '--script', 'shot:async-loading.png,wait:1000,frame:600,report:async-library.json'] : ['--scan-only'])]);
     if (failure) throw failure;
     assert.equal(result.code, malformed ? 2 : 0, result.stderr + result.stdout);
     assert.match(result.stdout, /2 games, 1 emulator\/core routes/);
     assert.match(result.stdout, /n64: 1 games, 1 routes/);
     assert.match(result.stdout, /ps5: 1 games, 0 routes/);
-    assert.match(result.stdout, malformed ? /first failure listing data \(226\)/ : /first failure none \(0\)/,
+    if (!background) assert.match(result.stdout, malformed ? /first failure listing data \(226\)/ : /first failure none \(0\)/,
       'the bounded diagnostic distinguishes a malformed transfer from successful discovery');
+    if (background) assert.equal(JSON.parse(fs.readFileSync(path.join(owned,'async-library.json'))).libraryGames,2,
+      'a finished worker commits its inventory to the interface');
     assert.ok(commands.some(c => c.verb === 'RETR'));
     if (pasv) assert.ok(commands.some(c => c.verb === 'PASV'), 'PASV fallback should use original peer, not advertised external IP');
   } finally {
@@ -94,8 +97,22 @@ async function scenario(pasv, malformed = false) {
     await new Promise(resolve => server.close(resolve));
   }
 }
+async function cancelledGreeting() {
+  const peers = new Set(); let accepted = 0;
+  const server = net.createServer(socket => { accepted++; peers.add(socket); socket.on('error',()=>{}); socket.on('close',()=>peers.delete(socket)); });
+  await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
+  try {
+    const start=Date.now();
+    const result=await run(['--library-ftp','127.0.0.1','--library-port',String(server.address().port),'--background-scan',
+      '--script','shot:cancel-loading.png,wait:150,circle-down,frame:2000,frame:2000,frame:400']);
+    assert.equal(result.code,0,result.stderr);
+    assert.ok(accepted>0,'the cancellation test reached a real socket waiting for its greeting');
+    assert.ok(Date.now()-start<2500,'Circle closure cancels a pending greeting before its 3-second network timeout');
+  } finally { for (const peer of peers) peer.destroy(); await new Promise(resolve=>server.close(resolve)); }
+}
 (async () => {
   await scenario(false); await scenario(true); await scenario(false, true);
+  await scenario(false,false,true); await cancelledGreeting();
   assert.equal((await run(['--library-ftp', 'example.com', '--scan-only'])).code, 1, 'no hostname resolution');
-  console.log('PASS: bounded read-only FTP, fragmented multiline replies, EPSV/PASV peer pinning, native metadata, malformed listing refusal and no hostname lookup.');
+  console.log('PASS: bounded read-only FTP, EPSV/PASV pinning, metadata, malformed listing refusal, background inventory commit, responsive scan cancellation and no hostname lookup.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

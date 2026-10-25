@@ -31,7 +31,7 @@ Use the owner's established local FTP transfer workflow, with no game or downloa
 After exposing the new tile through the already established ShadowMount procedure:
 
 1. Open **Console Shelf (UI test)** and check that the picture is stable and fits the TV.
-2. Test D-pad/stick, Cross/Circle, Options and the Grid/Swipe layout choice.
+2. Test D-pad/stick and Cross/Circle. Options opens the single settings panel; Square or the labelled layout button switches Grid/Swipe immediately. Hold Circle for four seconds, check its progress indicator and closing fade, then reopen Shelf. Check that its branded loading screen animates and fades into the library. Releasing a hold early should leave the current page open; a short tap remains Back.
 3. Select Nintendo 64 and its game library; check Mario Party and the other existing titles. Check PS1, PS2 and PS3 as well.
 4. Change a layout/visibility choice, close Shelf, then reopen it to check persistence.
 5. Report any black screen, crash, missing input or incorrect library count. Avoid repeated attempts after a console hang.

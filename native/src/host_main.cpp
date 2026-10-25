@@ -37,6 +37,82 @@ void startup(const char* stage, const char* detail = nullptr) {
     (void)detail;
 #endif
 }
+struct LibraryScan {
+    shelf::ReadOnlyFs source;
+    shelf::Library* library = nullptr;
+    SDL_atomic_t cancelled{0}, done{0};
+    SDL_Thread* thread = nullptr;
+    static bool stopping(void* raw) {
+        return SDL_AtomicGet(&static_cast<LibraryScan*>(raw)->cancelled) != 0;
+    }
+    static shelf::FsStatus list(void* raw, const char* path, shelf::EntryVisitor visit, void* destination) {
+        auto& scan = *static_cast<LibraryScan*>(raw);
+        return stopping(raw) ? shelf::FsStatus::failed
+                             : scan.source.list(scan.source.context, path, visit, destination);
+    }
+    static shelf::FsStatus stat(void* raw, const char* path, shelf::FileStat& result) {
+        auto& scan = *static_cast<LibraryScan*>(raw);
+        return stopping(raw) ? shelf::FsStatus::failed : scan.source.stat(scan.source.context, path, result);
+    }
+    static shelf::FsStatus read(void* raw, const char* path, std::uint64_t offset, void* out, std::size_t cap,
+                                std::size_t& used) {
+        auto& scan = *static_cast<LibraryScan*>(raw);
+        return stopping(raw) ? shelf::FsStatus::failed
+                             : scan.source.read(scan.source.context, path, offset, out, cap, used);
+    }
+    static int run(void* raw) {
+        auto& scan = *static_cast<LibraryScan*>(raw);
+        shelf::discover_library({raw, list, stat, read, scan.source.cached}, *scan.library);
+        SDL_AtomicSet(&scan.done, 1);
+        return 0;
+    }
+    bool start() {
+        thread = SDL_CreateThread(run, "Shelf library", this);
+        return thread != nullptr;
+    }
+    bool ready() {
+        return thread && SDL_AtomicGet(&done) != 0;
+    }
+    void stop() {
+        SDL_AtomicSet(&cancelled, 1);
+        if (thread) {
+            SDL_WaitThread(thread, nullptr);
+            thread = nullptr;
+        }
+    }
+    ~LibraryScan() {
+        stop();
+    }
+};
+void accept_library(shelf::UiState& state, shelf::Library& library, shelf::ReadOnlyFtp& ftp, bool scan_only) {
+    state.library = &library;
+    state.inventory = library.inventory;
+    startup(library.scan.complete ? "library scan complete" : "library scan partial");
+    char info[180];
+    std::snprintf(info, sizeof(info), "%zu games; %zu routes; %zu roots read; %zu unavailable", library.game_count,
+                  library.route_count, library.scan.roots_read, library.scan.roots_denied);
+    startup("library counts", info);
+    const auto& diag = ftp.diagnostics;
+    std::snprintf(info, sizeof(info), "%zu connections; %zu listings; %zu reads; first failure %s (%d)",
+                  diag.connections, diag.listings, diag.reads, diag.first_failure, diag.error);
+    startup("library connection", info);
+    if (scan_only)
+        std::printf("FTP diagnostics: %s\n", info);
+    std::printf("Read-only library: %zu games, %zu emulator/core routes; scan %s.\n", library.game_count,
+                library.route_count, library.scan.complete ? "complete" : "partial");
+    for (std::size_t i = 0; i < shelf::system_count; ++i)
+        if (state.inventory[i].game_count || state.inventory[i].emulator_count)
+            std::printf("  %.*s: %zu games, %zu routes\n", static_cast<int>(shelf::catalog[i].id.size()),
+                        shelf::catalog[i].id.data(), state.inventory[i].game_count, state.inventory[i].emulator_count);
+    shelf::clear_ftp_cache(ftp);
+    const auto shown = shelf::shown_systems(state);
+    state.focus = std::min(state.focus, std::max(0, static_cast<int>(shown.count) - 1));
+    if (shown.count)
+        state.selected_system = shown.indices[static_cast<std::size_t>(state.focus)];
+    if (!library.scan.complete && !state.notice[0])
+        std::snprintf(state.notice, sizeof(state.notice),
+                      "Library scan incomplete. Keep ftpsrv running and reopen Shelf to try again.");
+}
 #ifdef SHELF_PS5
 struct PlatformExit {
     ~PlatformExit() {
@@ -113,7 +189,9 @@ bool mapped_button(Uint8 button, const shelf::UiState& state, shelf::Action& act
         action = Action::back;
         break;
     case SDL_CONTROLLER_BUTTON_X:
-        action = state.page == shelf::Page::keyboard ? Action::erase : Action::filters;
+        if (state.page != shelf::Page::keyboard && state.page != shelf::Page::home)
+            return false;
+        action = state.page == shelf::Page::keyboard ? Action::erase : Action::layout;
         break;
     case SDL_CONTROLLER_BUTTON_Y:
         action = Action::favorite;
@@ -133,6 +211,23 @@ bool mapped_button(Uint8 button, const shelf::UiState& state, shelf::Action& act
     return true;
 }
 bool script_event(const char* token) {
+    if (std::strncmp(token, "wait:", 5) == 0) {
+        char* end = nullptr;
+        const auto delay = std::strtoul(token + 5, &end, 10);
+        if (!token[5] || *end || delay > 2000)
+            return false;
+        SDL_Delay(static_cast<Uint32>(delay));
+        return true;
+    }
+    if (std::strcmp(token, "loading") == 0 || std::strcmp(token, "reveal") == 0)
+        return true;
+    if (std::strcmp(token, "circle-down") == 0 || std::strcmp(token, "circle-up") == 0) {
+        SDL_Event event{};
+        event.type = std::strcmp(token, "circle-down") == 0 ? SDL_CONTROLLERBUTTONDOWN : SDL_CONTROLLERBUTTONUP;
+        event.cbutton.button = SDL_CONTROLLER_BUTTON_B;
+        SDL_PushEvent(&event);
+        return true;
+    }
     if (std::strncmp(token, "shot:", 5) == 0 || std::strncmp(token, "report:", 7) == 0)
         return true;
     if (std::strncmp(token, "frame:", 6) == 0) {
@@ -140,8 +235,8 @@ bool script_event(const char* token) {
         const auto value = std::strtoul(token + 6, &end, 10);
         return token[6] && *end == 0 && value <= 2000;
     }
-    const char* names[] = {"up",      "down",     "left",     "right",        "confirm", "back",
-                           "filters", "favorite", "settings", "previous-tab", "tab"};
+    const char* names[] = {"up",     "down",     "left",     "right",        "confirm", "back",
+                           "layout", "favorite", "settings", "previous-tab", "tab"};
     const Uint8 buttons[] = {SDL_CONTROLLER_BUTTON_DPAD_UP,
                              SDL_CONTROLLER_BUTTON_DPAD_DOWN,
                              SDL_CONTROLLER_BUTTON_DPAD_LEFT,
@@ -183,6 +278,8 @@ bool script_event(const char* token) {
     event.type = SDL_KEYDOWN;
     if (std::strcmp(token, "consoles") == 0)
         event.key.keysym.sym = SDLK_F3;
+    else if (std::strcmp(token, "filters") == 0)
+        event.key.keysym.sym = SDLK_F2;
     else if (std::strcmp(token, "search") == 0)
         event.key.keysym.sym = SDLK_F4;
     else if (std::strcmp(token, "erase") == 0)
@@ -197,7 +294,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-4 navigation and connection diagnostics");
+    startup("main entered", "ui-6 loading transition and Circle hold");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -228,6 +325,7 @@ int main(int argc, char** argv) {
     const char* library_root = nullptr;
     unsigned short library_port = 2121;
     bool scan_only = false;
+    bool background_requested = false;
 #ifndef SHELF_PS5
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--asset-root") == 0 && i + 1 < argc)
@@ -254,6 +352,8 @@ int main(int argc, char** argv) {
             library_port = static_cast<unsigned short>(port);
         } else if (std::strcmp(argv[i], "--scan-only") == 0)
             scan_only = true;
+        else if (std::strcmp(argv[i], "--background-scan") == 0)
+            background_requested = true;
         else {
             std::fprintf(stderr, "Unknown or incomplete host option: %s\n", argv[i]);
             return 1;
@@ -306,6 +406,8 @@ int main(int argc, char** argv) {
     } library;
     shelf::ReadOnlyFtp ftp;
     shelf::ReadOnlyTree tree;
+    LibraryScan scan;
+    const bool background_scan = !scan_only && (background_requested || (!headless && !script_arg));
     if (library_host || library_root) {
         const bool ready = library_host ? shelf::init_read_only_ftp(ftp, library_host, library_port)
                                         : shelf::init_read_only_tree(tree, library_root);
@@ -320,37 +422,18 @@ int main(int argc, char** argv) {
             return 1;
         }
         library.value = new (memory) shelf::Library{};
-        startup("library scan starting");
-        shelf::discover_library(library_host ? shelf::ftp_filesystem(ftp) : shelf::tree_filesystem(tree),
-                                *library.value);
-        state.library = library.value;
-        startup(library.value->scan.complete ? "library scan complete" : "library scan partial");
-        char scan_info[160];
-        std::snprintf(scan_info, sizeof(scan_info), "%zu games; %zu routes; %zu roots read; %zu unavailable",
-                      library.value->game_count, library.value->route_count, library.value->scan.roots_read,
-                      library.value->scan.roots_denied);
-        startup("library counts", scan_info);
-        if (library_host) {
-            char connection_info[180];
-            const auto& diag = ftp.diagnostics;
-            std::snprintf(connection_info, sizeof(connection_info),
-                          "%zu connections; %zu listings; %zu reads; first failure %s (%d)", diag.connections,
-                          diag.listings, diag.reads, diag.first_failure, diag.error);
-            startup("library connection", connection_info);
+        scan.source = library_host ? shelf::ftp_filesystem(ftp) : shelf::tree_filesystem(tree);
+        scan.library = library.value;
+        ftp.cancelled = LibraryScan::stopping;
+        ftp.cancel_context = &scan;
+        if (!background_scan) {
+            startup("library scan starting");
+            LibraryScan::run(&scan);
+            accept_library(state, *library.value, ftp, scan_only);
             if (scan_only)
-                std::printf("FTP diagnostics: %s\n", connection_info);
-        }
-        state.inventory = library.value->inventory;
-        std::printf("Read-only library: %zu games, %zu emulator/core routes; scan %s.\n", library.value->game_count,
-                    library.value->route_count, library.value->scan.complete ? "complete" : "partial");
-        for (std::size_t i = 0; i < shelf::system_count; ++i)
-            if (state.inventory[i].game_count || state.inventory[i].emulator_count)
-                std::printf("  %.*s: %zu games, %zu routes\n", static_cast<int>(shelf::catalog[i].id.size()),
-                            shelf::catalog[i].id.data(), state.inventory[i].game_count,
-                            state.inventory[i].emulator_count);
-        shelf::clear_ftp_cache(ftp);
-        if (scan_only)
-            return library.value->scan.complete ? 0 : 2;
+                return library.value->scan.complete ? 0 : 2;
+        } else
+            state.presentation.loading = true;
     } else if (scan_only)
         return 1;
     const auto loaded = shelf::load_settings(settings_path, state.settings);
@@ -432,8 +515,12 @@ int main(int argc, char** argv) {
     bool scripting = next != nullptr;
     int result = 0;
     shelf::NavigationInput navigation;
+    shelf::CloseGesture close_gesture;
     bool redraw = true;
     bool first_frame = true;
+    bool scan_started = false;
+    const auto opened_at = scripting ? 0u : SDL_GetTicks();
+    unsigned reveal_at = 0;
     unsigned measured_frames = 0, max_render_ms = 0, max_present_ms = 0;
     unsigned script_time = 0;
     while (!state.exit_requested) {
@@ -455,6 +542,22 @@ int main(int argc, char** argv) {
             }
             if (std::strncmp(token, "frame:", 6) == 0)
                 script_time += static_cast<unsigned>(std::strtoul(token + 6, nullptr, 10));
+            if (std::strcmp(token, "loading") == 0)
+                state.presentation.loading = true;
+            if (std::strcmp(token, "reveal") == 0) {
+                state.presentation.loading = false;
+                state.presentation.reveal = 0;
+                reveal_at = script_time;
+            }
+            redraw = true;
+        }
+        const unsigned now = scripting ? script_time : SDL_GetTicks();
+        if (scan.ready() && now - opened_at >= 450) {
+            scan.stop();
+            accept_library(state, *library.value, ftp, false);
+            state.presentation.loading = false;
+            state.presentation.reveal = 0;
+            reveal_at = now;
             redraw = true;
         }
         SDL_Event event{};
@@ -469,13 +572,25 @@ int main(int argc, char** argv) {
             } else if (event.type == SDL_WINDOWEVENT) {
                 if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
                     navigation.cancel();
+                if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+                    close_gesture.cancel();
                 redraw = true;
             } else if (event.type == SDL_CONTROLLERBUTTONDOWN) {
-                mapped = mapped_button(event.cbutton.button, state, action);
+                if (event.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
+                    close_gesture.press(event.cbutton.which, now);
+                    navigation.cancel();
+                    redraw = true;
+                } else
+                    mapped = mapped_button(event.cbutton.button, state, action);
                 if (mapped && shelf::NavigationInput::directional(action))
                     mapped = navigation.button(action, true, event.cbutton.which, SDL_GetTicks(), action);
             } else if (event.type == SDL_CONTROLLERBUTTONUP) {
-                if (mapped_button(event.cbutton.button, state, action) && shelf::NavigationInput::directional(action))
+                if (event.cbutton.button == SDL_CONTROLLER_BUTTON_B) {
+                    mapped = close_gesture.release(event.cbutton.which, now);
+                    action = shelf::Action::back;
+                    redraw = true;
+                } else if (mapped_button(event.cbutton.button, state, action) &&
+                           shelf::NavigationInput::directional(action))
                     navigation.button(action, false, event.cbutton.which, SDL_GetTicks(), action);
             } else if (event.type == SDL_CONTROLLERDEVICEADDED && !headless) {
                 for (auto& controller : controllers)
@@ -485,6 +600,7 @@ int main(int argc, char** argv) {
                     }
             } else if (event.type == SDL_CONTROLLERDEVICEREMOVED) {
                 navigation.disconnected(event.cdevice.which);
+                close_gesture.cancel(event.cdevice.which);
                 for (auto& controller : controllers)
                     if (controller &&
                         SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller)) == event.cdevice.which) {
@@ -540,15 +656,26 @@ int main(int argc, char** argv) {
                     mapped = false;
                 }
             }
-            if (mapped) {
+            if (mapped && !state.presentation.loading && !close_gesture.closing()) {
                 if (!shelf::NavigationInput::directional(action))
                     navigation.cancel();
                 shelf::input(state, action);
                 redraw = true;
             }
         }
+        close_gesture.update(now, state.presentation);
+        if (close_gesture.closing()) {
+            navigation.cancel();
+            SDL_AtomicSet(&scan.cancelled, 1);
+        }
+        if (close_gesture.finished(now))
+            state.exit_requested = true;
+        if (!state.presentation.loading && state.presentation.reveal < 1) {
+            const float progress = std::min(1.0f, (now - reveal_at) / 650.0f);
+            state.presentation.reveal = progress * progress * (3 - 2 * progress);
+        }
         shelf::Action repeated{};
-        if (!scripting && navigation.tick(SDL_GetTicks(), repeated)) {
+        if (!scripting && !state.presentation.loading && !close_gesture.closing() && navigation.tick(now, repeated)) {
             shelf::input(state, repeated);
             redraw = true;
         }
@@ -560,7 +687,8 @@ int main(int argc, char** argv) {
             }
             state.changed = false;
         }
-        if (redraw || shelf::graphics_animating()) {
+        if (redraw || shelf::graphics_animating() || state.presentation.loading || state.presentation.reveal < 1 ||
+            close_gesture.active()) {
             const auto frame_start = SDL_GetTicks();
             shelf::graphics_render(state, animate_script ? script_time : SDL_GetTicks(),
                                    animate_script || (!scripting && !headless));
@@ -598,6 +726,18 @@ int main(int argc, char** argv) {
                 startup("first frame submitted");
                 first_frame = false;
             }
+            if (state.presentation.loading && scan.library && !scan_started) {
+                scan_started = true;
+                startup("library scan starting", "background after first visible frame");
+                if (!scan.start()) {
+                    startup("library worker unavailable", SDL_GetError());
+                    library.value->scan.complete = false;
+                    accept_library(state, *library.value, ftp, false);
+                    state.presentation.loading = false;
+                    state.presentation.reveal = 0;
+                    reveal_at = now;
+                }
+            }
             redraw = false;
         }
         if (token && (std::strncmp(token, "shot:", 5) == 0 || std::strncmp(token, "report:", 7) == 0)) {
@@ -619,6 +759,7 @@ int main(int argc, char** argv) {
         if (!scripting)
             SDL_Delay(16);
     }
+    scan.stop();
     for (auto* controller : controllers)
         if (controller)
             SDL_GameControllerClose(controller);

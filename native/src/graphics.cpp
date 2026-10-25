@@ -305,15 +305,27 @@ void icon(int kind, int x, int y, SDL_Color tint = purple) {
             rounded(x - 13 + (a % 2) * 15, y - 13 + (a / 2) * 15, 10, 10, 3, tint);
     }
     if (kind == 3) {
-        for (int a = 0; a < 8; ++a) {
-            const double r = static_cast<double>(a) * 3.141592653589793 / 4;
-            line(x + static_cast<int>(std::cos(r) * 9), y + static_cast<int>(std::sin(r) * 9),
-                 x + static_cast<int>(std::cos(r) * 15), y + static_cast<int>(std::sin(r) * 15), tint);
+        // A continuous cog outline, not a sun/light-mode symbol.
+        int previous_x = 0, previous_y = 0;
+        for (int a = 0; a <= 32; ++a) {
+            const double angle = static_cast<double>(a) * 3.141592653589793 / 16;
+            const int radius = a % 4 == 0 || a % 4 == 3 ? 15 : 11;
+            const int px = x + static_cast<int>(std::cos(angle) * radius);
+            const int py = y + static_cast<int>(std::sin(angle) * radius);
+            if (a)
+                line(previous_x, previous_y, px, py, tint);
+            previous_x = px;
+            previous_y = py;
         }
         for (int a = 0; a < 360; a += 8) {
             const double r = static_cast<double>(a) * 3.141592653589793 / 180;
-            rect(x + static_cast<int>(std::cos(r) * 8), y + static_cast<int>(std::sin(r) * 8), 2, 2, tint);
+            rect(x + static_cast<int>(std::cos(r) * 5), y + static_cast<int>(std::sin(r) * 5), 2, 2, tint);
         }
+    }
+    if (kind == 4) {
+        rounded(x - 5, y - 13, 10, 26, 3, tint);
+        rounded(x - 15, y - 8, 6, 16, 2, tint);
+        rounded(x + 9, y - 8, 6, 16, 2, tint);
     }
 }
 void switch_control(int x, int y, bool on) {
@@ -330,7 +342,26 @@ void footer(std::string_view hint) {
     rect(0, 1015, width, 65, {9, 12, 26, 245});
     text(hint, 80, 1032, 21, muted);
 }
-std::string_view availability(const Availability& a) {
+void splash(float opacity, unsigned time_ms, bool loading) {
+    const auto alpha = static_cast<Uint8>(std::clamp(opacity, 0.0f, 1.0f) * 255);
+    rect(0, 0, width, height, {11, 13, 28, alpha});
+    picture(icon_files[0], 902, 347, 116, 116, alpha);
+    centered("Console Shelf", 960, 505, 48, {241, 240, 251, alpha}, true);
+    centered(loading ? "Finding your emulators and games" : "Your systems, together", 960, 578, 23,
+             {180, 174, 205, alpha});
+    if (loading) {
+        for (unsigned dot = 0; dot < 3; ++dot) {
+            const auto distance = (dot + 3 - time_ms / 340 % 3) % 3;
+            rounded(931 + static_cast<int>(dot) * 24, 639, 9, 9, 4,
+                    {194, 177, 255, static_cast<Uint8>(alpha / (distance + 1))});
+        }
+        centered("Hold Circle for 4 seconds to close", 960, 984, 19, {140, 140, 165, alpha});
+    }
+}
+std::string_view availability(const UiState& state, std::size_t id) {
+    const auto& a = state.inventory[id];
+    if (state.library && !state.library->scan.complete && !state.library->scan.roots_read)
+        return "Library connection unavailable";
     if (a.built_in)
         return "Built-in system";
     if (a.launch == LaunchCapability::direct_game)
@@ -347,14 +378,13 @@ void home(const UiState& state) {
     text("ONE HOME FOR YOUR SYSTEMS", 80, 119, 19, purple, true);
     text("What do you want", 80, 153, 59, white, true);
     text("to play today?", 80, 218, 59, purple, true);
-    box(80, 314, 1500, 66, state.tools && state.tool == 0);
+    box(80, 314, 1560, 66, state.tools && state.tool == 0);
     icon(0, 111, 346, muted);
     text(state.query[0] ? state.query : "Find a console, brand or core...", 143, 330, 24,
          state.query[0] ? white : muted);
-    for (int i = 1; i < 3; ++i) {
-        box(1603 + (i - 1) * 84, 314, 66, 66, state.tools && state.tool == i);
-        icon(i, 1636 + (i - 1) * 84, 347);
-    }
+    box(1664, 314, 180, 66, state.tools && state.tool == 1);
+    icon(p.layout == Layout::grid ? 4 : 2, 1696, 347);
+    text(p.layout == Layout::grid ? "Swipe" : "Grid", 1722, 331, 24, white, true);
     char summary[160];
     std::snprintf(summary, sizeof(summary), "%s  /  %.*s  /  %zu systems", p.layout == Layout::grid ? "Grid" : "Swipe",
                   static_cast<int>(sorts[static_cast<std::size_t>(p.sort)].size()),
@@ -385,7 +415,7 @@ void home(const UiState& state) {
                 text("CONSOLE", x + 22, y + 70, 38, muted, true);
             }
             text(s.name, x + 20, y + 173, 26, white, true, 374);
-            text(availability(state.inventory[id]), x + 20, y + 212, 19, muted, false, 374);
+            text(availability(state, id), x + 20, y + 212, 19, muted, false, 374);
             if (p.favorite[id])
                 text("*", x + 377, y + 12, 30, purple, true);
         }
@@ -425,13 +455,13 @@ void home(const UiState& state) {
         SDL_RenderSetClipRect(renderer, nullptr);
         centered(selected.brand, 960, 845, 18, muted);
         centered(selected.name, 960, 873, 38, white, true);
-        centered(availability(state.inventory[state.selected_system]), 960, 930, 21, muted);
+        centered(availability(state, state.selected_system), 960, 930, 21, muted);
         char position[48];
         std::snprintf(position, sizeof(position), "%d / %zu", state.focus + 1, shown.count);
         text(position, 1730, 391, 20, muted);
     }
-    footer(
-        "D-pad  Browse    Cross  Open    Triangle  Favourite    Square  Filter    Options  Settings    Circle  Back");
+    footer("D-pad / Stick  Browse    Cross  Open    Triangle  Favourite    Square  Grid/Swipe    Options  Settings    "
+           "Circle  Back");
 }
 void detail(const UiState& state) {
     const auto id = state.selected_system;
@@ -441,7 +471,7 @@ void detail(const UiState& state) {
     text(s.brand, 84, 275, 27, muted);
     glow(1190, 230, 640, 630, accent(s), 110);
     picture(s.image, 1160, 205, 640, 640);
-    text(availability(state.inventory[id]), 84, 366, 29, purple, true);
+    text(availability(state, id), 84, 366, 29, purple, true);
     char count[80];
     std::snprintf(count, sizeof(count), "%zu discovered games", state.inventory[id].game_count);
     text(count, 84, 415, 24, muted);
@@ -623,7 +653,8 @@ bool graphics_init(SDL_Renderer* target, const char* asset_root) {
     return background && halo && font(24, false) && font(27, true);
 }
 void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
-    const bool show_orbit = state.page == Page::home && state.settings.preferences.layout == Layout::swipe;
+    const bool show_orbit =
+        !state.presentation.loading && state.page == Page::home && state.settings.preferences.layout == Layout::swipe;
     if (show_orbit) {
         const auto list = shown_systems(state);
         if (!orbit_visible || list.count != orbit_list.count || list.indices != orbit_list.indices) {
@@ -639,36 +670,54 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
     SDL_SetRenderDrawColor(renderer, 11, 13, 28, 255);
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, background, nullptr, nullptr);
-    picture(icon_files[static_cast<std::size_t>(state.settings.preferences.icon)], 80, 30, 50, 50);
-    text("Console Shelf", 147, 36, 29, white, true);
+    if (!state.presentation.loading) {
+        picture(icon_files[static_cast<std::size_t>(state.settings.preferences.icon)], 80, 30, 50, 50);
+        text("Console Shelf", 147, 36, 29, white, true);
 #ifdef SHELF_PS5
-    text("PS5 / DEVELOPMENT BUILD", 1388, 42, 18, muted, true);
+        text("PS5 / DEVELOPMENT BUILD", 1388, 42, 18, muted, true);
 #else
-    text("NATIVE DEVELOPMENT BUILD / PC", 1388, 42, 18, muted, true);
+        text("NATIVE DEVELOPMENT BUILD / PC", 1388, 42, 18, muted, true);
 #endif
-    box(1786, 27, 58, 58, state.tools && state.tool == 3);
-    icon(3, 1815, 56);
-    line(80, 99, 1840, 99, {43, 48, 69, 255});
-    if (state.page == Page::home)
-        home(state);
-    else if (state.page == Page::details || state.page == Page::library)
-        detail(state);
-    else if (state.page == Page::settings)
-        settings(state);
-    else if (state.page == Page::keyboard) {
-        if (state.keyboard_for_consoles)
+        box(1786, 27, 58, 58, state.tools && state.tool == 2 && state.page == Page::home);
+        icon(3, 1815, 56);
+        line(80, 99, 1840, 99, {43, 48, 69, 255});
+        if (state.page == Page::home)
+            home(state);
+        else if (state.page == Page::details || state.page == Page::library)
+            detail(state);
+        else if (state.page == Page::settings)
             settings(state);
-        keyboard(state);
-    } else {
-        home(state);
-        rect(0, 0, width, height, {4, 6, 16, 180});
-        box(570, 367, 780, 310, false);
-        centered("Close Console Shelf?", 960, 413, 40, white, true);
-        centered("Cross: close     Circle: keep browsing", 960, 524, 25, muted);
+        else if (state.page == Page::keyboard) {
+            if (state.keyboard_for_consoles)
+                settings(state);
+            keyboard(state);
+        } else {
+            home(state);
+            rect(0, 0, width, height, {4, 6, 16, 180});
+            box(570, 367, 780, 310, false);
+            centered("Close Console Shelf?", 960, 413, 40, white, true);
+            centered("Cross: close     Circle: keep browsing", 960, 524, 25, muted);
+        }
+        if (state.notice[0] && state.presentation.hold <= 0) {
+            rounded(300, 931, 1320, 64, 16, {57, 46, 84, 255});
+            centered(state.notice, 960, 948, 24, white);
+        }
     }
-    if (state.notice[0]) {
-        rounded(300, 931, 1320, 64, 16, {57, 46, 84, 255});
-        centered(state.notice, 960, 948, 24, white);
+    if (state.presentation.loading)
+        splash(1, time_ms, true);
+    else if (state.presentation.reveal < 1)
+        splash(1 - state.presentation.reveal, time_ms, false);
+    if (state.presentation.hold > 0 && state.presentation.close == 0) {
+        rounded(660, 909, 600, 88, 18, {30, 30, 48, 245});
+        centered("Hold Circle to close Shelf", 960, 924, 24, white);
+        rounded(707, 969, 506, 5, 2, {64, 62, 83, 255});
+        rounded(707, 969, std::max(1, static_cast<int>(506 * state.presentation.hold)), 5, 2, purple);
+    }
+    if (state.presentation.close > 0) {
+        const auto alpha = static_cast<Uint8>(state.presentation.close * 255);
+        rect(0, 0, width, height, {9, 12, 26, alpha});
+        picture(icon_files[0], 916, 413, 88, 88, alpha);
+        centered("Closing Shelf", 960, 552, 29, {241, 240, 251, alpha});
     }
     SDL_RenderPresent(renderer);
 }

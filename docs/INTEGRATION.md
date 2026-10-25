@@ -2,7 +2,7 @@
 
 Console Shelf has an offline browser design preview, a native C++ UI running on PC and a cross-compiled PS5 development executable. Its original [read-only discovery adapter](DISCOVERY.md) has now scanned a real PS5 library from PC. It does not launch an emulator yet.
 
-The [first native prototype](PROTOTYPE-PLAN.md) is the main goal. Its C++17 renderer, catalogue/browsing model, navigation, recoverable settings and bounded discovery pass host checks. The PS5 display/memory backend cross-compiles and passes host-mocked failure/cleanup checks; on-console app behaviour remains unverified. Discovery inside the app sandbox, launch adapters and an installable package still need validation.
+The [first native prototype](PROTOTYPE-PLAN.md) is the main goal. Its C++17 renderer, catalogue/browsing model, navigation, recoverable settings and bounded discovery pass host checks. The owner has confirmed the grid and basic input on firmware 12.20, but requested simpler controls and more fluid navigation. Console-local discovery is not accepted: its journal identified a socket setup failure before FTP login. The revised controls and connection path still need a new console check. Launch adapters and a public installable package remain pending.
 
 The native app adapts [Jewel Case](https://github.com/SkaRift/JewelCase)'s platform integration; its discovery and launch architecture remains a reference, with [Estante](https://github.com/kauansilvalopes/estante) as a reference for native PS5/PS4 titles. Shelf keeps its original console-first Grid and Swipe UI. Both reference projects publish GPL source; see [credits](../THIRD_PARTY.md).
 

@@ -88,14 +88,12 @@ function renderSettings() {
   const sort = $('sort').selectedOptions[0].textContent;
   const view = settings.scope === 'all' ? 'All consoles' : 'Emulator or games';
   $('shelfSummary').textContent = [look, sort, view, settings.family !== 'all' ? settings.family : '', settings.availability !== 'all' ? statusLabels[settings.availability] : ''].filter(Boolean).join(' · ');
-  const filterCount = Number(settings.family !== 'all') + Number(settings.availability !== 'all');
-  $('filterBadge').textContent = String(filterCount);
-  $('filterBadge').hidden = filterCount === 0;
-  $('openBrowse').setAttribute('aria-label', `Sort and filter consoles${filterCount ? `, ${filterCount} filters active` : ''}`);
-  const omitted = systems.filter(system => hiddenSystems.has(system.id) || !inScope(system)).length;
-  $('consoleBadge').textContent = String(omitted);
-  $('consoleBadge').hidden = omitted === 0;
-  $('openConsoles').setAttribute('aria-label', `Choose visible consoles${omitted ? `, ${omitted} hidden` : ''}`);
+  const nextLayout = settings.layout === 'grid' ? 'Swipe' : 'Grid';
+  $('toggleLayout').dataset.layout = settings.layout;
+  $('toggleLayout').setAttribute('aria-label', `Switch to ${nextLayout} layout`);
+  $('toggleLayout').setAttribute('title', `Switch to ${nextLayout}`);
+  $('toggleLayout').setAttribute('aria-pressed', String(settings.layout === 'carousel'));
+  $('layoutToggleLabel').textContent = nextLayout;
   if (selected) {
     const showImage = settings.layout === 'carousel' || settings.look === 'images';
     $('heroImage').hidden = !showImage;
@@ -480,8 +478,7 @@ $('clearFilters').onclick = () => {
   renderSystems();
 };
 $('openAppearance').onclick = () => openSettings('Appearance');
-$('openBrowse').onclick = () => openSettings('Browse', 'sort');
-$('openConsoles').onclick = () => openSettings('Consoles', 'consoleSearch');
+$('toggleLayout').onclick = () => setChoice('layout', settings.layout === 'grid' ? 'carousel' : 'grid');
 $('reviewSettings').onclick = () => openSettings(hiddenSystems.size ? 'Consoles' : 'Browse');
 for (const tab of settingsTabs) $('tab' + tab).onclick = () => setSettingsTab(tab);
 $('settingsDialog').querySelector('.settings-tabs').onkeydown = event => {

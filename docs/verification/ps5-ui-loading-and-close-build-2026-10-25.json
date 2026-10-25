@@ -1,0 +1,57 @@
+{
+  "structuralCheck": "passed",
+  "hardwareTest": "new build not tested",
+  "firmware12_20": "full acceptance pending",
+  "elf": {
+    "bytes": 2655148,
+    "sha256": "41e2a3df59afd1726557fe693e0e448ef47110d983f8a5a4fa3f3d5079907bd7",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2545233,
+    "sha256": "466f6c14b6c26ef759a9be3fc9bb65237105a6220335cf66245a1415e4ba7556"
+  },
+  "verifiedOn": "2026-10-25",
+  "scope": "Private UI test 6: settings simplification, animated loading, background discovery and Circle hold closure",
+  "previousConsoleEvidence": {
+    "buildSelfSHA256": "47af9ef1fd86199477322a619507392d696e69b7f82d7252561b3c7fbe87009e",
+    "scan": "0 games, 0 routes, 0 roots read",
+    "firstFailure": "socket nonblocking (13) before FTP login",
+    "renderTiming": "max 37 ms render and 1 ms handoff over 15 samples; not displayed FPS",
+    "ownerFeedback": "Navigation awkward; three redundant settings buttons; sun icon misleading"
+  },
+  "changes": [
+    "One settings cog, direct Grid/Swipe toggle and Square shortcut",
+    "Spatial grid row boundaries",
+    "PS5 SO_NBIO replaces refused fcntl socket mode; hardware check pending",
+    "First branded loading frame precedes background library scan",
+    "650 ms reveal, four-second Circle hold progress, release cancellation and 360 ms closing fade",
+    "Bounded cancellable nonblocking I/O; no permission or network configuration changes"
+  ],
+  "sourceFingerprintSHA256": "ca23fdc768bbb64a3bab5940376d9e946d9484331b695d191be85edca5281af0",
+  "checks": {
+    "browser": "passed",
+    "nativeModelSettingsUiGestures": "passed",
+    "nativeRenderer": "21 captures passed; loading and hold screens visually inspected",
+    "readOnlyFtp": "EPSV/PASV, malformed listings, background inventory commit, cancellation of a stalled greeting before its 3-second timeout and hostname refusal passed",
+    "librarySources": "complete SDL Git tree plus both published source archive hashes verified",
+    "retainedObjectRelink": "17 app objects; exact reference raw ELF and SELF reproduced without app recompilation"
+  },
+  "publicRelease": "not published"
+}

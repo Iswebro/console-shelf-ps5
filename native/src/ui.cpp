@@ -193,7 +193,13 @@ void input(UiState& state, Action action) {
         if (state.page == Page::settings)
             state.page = state.return_page;
         else
-            open_settings(state, SettingsTab::appearance);
+            open_settings(state, state.tab);
+        return;
+    }
+    if (action == Action::layout && state.page == Page::home) {
+        auto& layout = state.settings.preferences.layout;
+        layout = layout == Layout::grid ? Layout::swipe : Layout::grid;
+        changed(state);
         return;
     }
     if (action == Action::filters) {
@@ -305,7 +311,7 @@ void input(UiState& state, Action action) {
         if (action == Action::left)
             state.tool = clamp(state.tool - 1, 3);
         if (action == Action::right)
-            state.tool = clamp(state.tool + 1, 3);
+            state.tool = clamp(state.tool + 1, 2);
         if (action == Action::down && shown.count) {
             state.tools = false;
             normalize_home(state);
@@ -313,10 +319,10 @@ void input(UiState& state, Action action) {
         if (action == Action::confirm) {
             if (state.tool == 0)
                 open_keyboard(state, false);
+            else if (state.tool == 1)
+                input(state, Action::layout);
             else
-                open_settings(state, state.tool == 1   ? SettingsTab::browse
-                                     : state.tool == 2 ? SettingsTab::consoles
-                                                       : SettingsTab::appearance);
+                open_settings(state, !shown.count ? SettingsTab::consoles : state.tab);
         }
         return;
     }
@@ -324,17 +330,18 @@ void input(UiState& state, Action action) {
     const bool swipe = state.settings.preferences.layout == Layout::swipe;
     if (action == Action::up && (swipe || state.focus < stride)) {
         state.tools = true;
-        state.tool = 3;
+        state.tool = swipe || state.focus < 3 ? 0 : 1;
     } else if (action == Action::up)
         state.focus -= stride;
     if (action == Action::down && !swipe)
         state.focus = clamp(state.focus + stride, static_cast<int>(shown.count) - 1);
     if (action == Action::left)
         state.focus = swipe ? (state.focus + static_cast<int>(shown.count) - 1) % static_cast<int>(shown.count)
-                            : clamp(state.focus - 1, static_cast<int>(shown.count) - 1);
+                            : std::max(state.focus - state.focus % stride, state.focus - 1);
     if (action == Action::right)
         state.focus = swipe ? (state.focus + 1) % static_cast<int>(shown.count)
-                            : clamp(state.focus + 1, static_cast<int>(shown.count) - 1);
+                            : std::min({state.focus + 1, state.focus - state.focus % stride + stride - 1,
+                                        static_cast<int>(shown.count) - 1});
     normalize_home(state);
     if (action == Action::confirm) {
         state.page = Page::details;

@@ -17,6 +17,18 @@ void test_ui() {
     UiState state;
     input(state, Action::right);
     check(state.selected_system == find_system("ps4"), "D-pad moves through console identities");
+    UiState spatial;
+    for (int i = 0; i < 4; ++i)
+        input(spatial, Action::right);
+    check(spatial.focus == 3, "grid right stops at its row edge instead of jumping down a row");
+    input(spatial, Action::up);
+    check(spatial.tools && spatial.tool == 1, "up from the last column reaches the layout action");
+    input(spatial, Action::confirm);
+    check(spatial.page == Page::home && spatial.settings.preferences.layout == Layout::swipe,
+          "layout button switches view directly without opening settings");
+    input(spatial, Action::right);
+    input(spatial, Action::confirm);
+    check(spatial.page == Page::settings, "the remaining toolbar action opens settings");
     input(state, Action::confirm);
     check(state.page == Page::details, "Cross opens a console");
     input(state, Action::confirm);

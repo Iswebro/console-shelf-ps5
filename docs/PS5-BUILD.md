@@ -1,6 +1,6 @@
 # PS5 cross-build status
 
-Shelf now cross-compiles its C++ UI, SDL event loop and read-only discovery adapter into a native PS5 executable. Its software renderer uses a PS5 VideoOut backend and a direct-memory allocator. This is a development build: **no on-console app test or firmware 12.20 compatibility claim has been made, and no installable prototype is released yet**. Discovery works from PC against real console folders; its console-local FTP connection and launch adapters still need hardware validation.
+Shelf now cross-compiles its C++ UI, SDL event loop and read-only discovery adapter into a native PS5 executable. Its software renderer uses a PS5 VideoOut backend and a direct-memory allocator. The owner has confirmed the grid and basic input on firmware 12.20. **Full hardware acceptance remains pending, and no installable prototype is released yet.** Discovery works from PC against real console folders; the console-local connection is being corrected after its journal recorded a refused socket-mode operation. Launch adapters still need implementation and validation.
 
 ## Build without a system-wide installation
 
@@ -12,6 +12,20 @@ npm run test:ps5-platform
 npm run verify:ps5
 npm run test:ps5-verifier
 ```
+
+## Linked sources and relinking
+
+`npm run prepare:ps5-sources` downloads and checks the complete sources for PS5 SDL 2.30.12, libiconv 1.17 and libsamplerate 0.2.2, plus their original PacBrew v0.40.2 build recipes. [Source pins](../tools/linked-sources.json) distinguish published recipe hashes from the SDL archive hash computed after matching its full Git tree. The linked SDL archive reports the same exact revision. The checker reads the complete compressed streams, validates member/link paths and reconstructs SDL's Git tree; it does not extract or execute upstream scripts.
+
+After a verified app build, retain its own object/library inputs in a new snapshot and test the default relink:
+
+```sh
+npm run relink:ps5 -- --capture-inputs --inputs .cache/ps5/relink-inputs-my-build
+```
+
+The tool checks all three original static archives against the pinned PacBrew tarball and all SDK stubs against the pinned SDK ZIP. It preserves seventeen application objects, source fingerprints and hashes. It then rebuilds the converter and links those objects into a separate output directory. Without a replacement library, both the raw executable and its SELF must reproduce the reference hashes exactly. `--libiconv`, `--sdl` and `--libsamplerate` accept replacement PS5 static libraries; these deliberately may change the result. They do not recompile Shelf or deploy anything.
+
+With reviewed source committed, `npm run prepare:ps5-source-kit -- --inputs .cache/ps5/relink-inputs-my-build` assembles the tracked source, notices, full library sources, original recipes and matching object/library snapshot. Its ZIP and every member are rechecked. `SOURCE-KIT.txt` documents relinking from the extracted folder and replacing libraries. First use can download the pinned public build dependencies. A cold relink from the extracted kit and full console/launch acceptance are still release gates; preparing the kit does not publish it.
 
 The first build downloads the pinned target dependencies and an isolated Clang 18 prefix into ignored `.cache/ps5/`. Subsequent builds verify and reuse those archives. Nothing is deployed. The output is `.cache/ps5/build/eboot.elf`, `eboot.bin`, and `structural-check.json`; it is **not** a ready-to-install app folder. Do not copy the executable over another app.
 

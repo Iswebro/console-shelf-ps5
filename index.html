@@ -37,13 +37,10 @@
           <div class="search-row">
             <label class="search-wrap"><span class="sr-only">Find a system</span><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find a system, brand or core…" autocomplete="off"></label>
             <div class="browse-actions">
-              <button type="button" id="openBrowse" class="icon-button" aria-label="Sort and filter consoles" title="Sort and filter" aria-haspopup="dialog">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg>
-                <span id="filterBadge" class="button-badge" hidden aria-hidden="true"></span>
-              </button>
-              <button type="button" id="openConsoles" class="icon-button" aria-label="Choose visible consoles" title="Choose consoles" aria-haspopup="dialog">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="m14 17 2.5 2.5L21 14.5"/></svg>
-                <span id="consoleBadge" class="button-badge" hidden aria-hidden="true"></span>
+              <button type="button" id="toggleLayout" class="icon-button layout-toggle" aria-label="Switch to Swipe layout" title="Switch to Swipe" aria-pressed="false" data-layout="grid">
+                <svg class="swipe-view-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="4" width="6" height="16" rx="2"/><path d="M5 7H3v10h2M19 7h2v10h-2"/></svg>
+                <svg class="grid-view-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+                <span id="layoutToggleLabel">Swipe</span>
               </button>
             </div>
           </div>

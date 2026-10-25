@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "shelf/navigation.hpp"
+#include "shelf/presentation.hpp"
 #include <cstdio>
 #include <cstdlib>
 namespace {
@@ -42,4 +43,24 @@ void test_navigation() {
           "a delayed frame emits one move and sustained holds accelerate without a backlog");
     std::puts(
         "PASS: physical gesture repeat, diagonal hysteresis, drift, page changes, device ownership and clock wrap.");
+    CloseGesture close;
+    Presentation view;
+    close.press(7, 100);
+    close.update(2099, view);
+    check(view.hold > .49f && view.hold < .51f && !close.closing(), "Circle shows actual hold progress");
+    check(!close.release(7, 2100), "an interrupted long hold cancels without navigating back");
+    close.update(2200, view);
+    check(view.hold == 0 && !close.finished(5000), "releasing before four seconds does not close");
+    close.press(7, 6000);
+    check(close.release(7, 6100), "a short Circle tap retains normal Back behaviour");
+    close.press(7, 7000);
+    check(!close.release(8, 7100), "another controller cannot end a hold");
+    close.update(10999, view);
+    check(!close.closing(), "four-second threshold is not rounded down");
+    close.update(11000, view);
+    check(close.closing() && !close.finished(11000), "four seconds starts a separate closing animation");
+    close.update(11180, view);
+    check(view.close > .49f && view.close < .51f, "close transition has an intermediate frame");
+    check(close.finished(11360), "close waits until the fade completes");
+    std::puts("PASS: four-second Circle hold, cancellation, ordinary Back taps and timed closing fade.");
 }

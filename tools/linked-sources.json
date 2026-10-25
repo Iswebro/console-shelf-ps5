@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "pacbrewRelease": "v0.40.2",
+  "libraries": [
+    {
+      "id": "SDL2",
+      "version": "2.30.12",
+      "license": "Zlib",
+      "revisionString": "SDL-2.30.12-ga47182a20",
+      "commit": "a47182a20e741e4735d1fcd41e8656bf338b0c72",
+      "gitTree": "13d02f0498068d913ee7d54d1291bde678d68883",
+      "source": {
+        "file": "SDL-a47182a20e741e4735d1fcd41e8656bf338b0c72.tar.gz",
+        "url": "https://codeload.github.com/ps5-payload-dev/SDL/tar.gz/a47182a20e741e4735d1fcd41e8656bf338b0c72",
+        "bytes": 7857575,
+        "sha256": "6bf2ea6ef41abdd3788aeeb94b9ea47080f9662c0b93730190c89d875db4dec7",
+        "evidence": "Archive SHA-256 computed after all 1762 Git blobs and the complete Git tree matched the pinned official commit; no publisher archive checksum or signature claimed"
+      },
+      "recipe": { "gitBlob": "00f99a77162808777609e62f176d10502a4e4564", "sha256": "f7940a8e1bf0c5a64557f4522a08dbd16287ace2385e56f5b5199953a3ad836d" }
+    },
+    {
+      "id": "libiconv",
+      "version": "1.17",
+      "license": "LGPL-2.1-or-later (library)",
+      "source": {
+        "file": "libiconv-1.17.tar.gz",
+        "url": "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz",
+        "bytes": 5413283,
+        "sha256": "8f74213b56238c85a50a5329f77e06198771e70dd9a739779f4c02f65d971313",
+        "evidence": "SHA-256 published in the pinned PacBrew release recipe; no signature verification claimed"
+      },
+      "recipe": { "gitBlob": "5e9f791d65a6bb11b4b67fd8bf7a329d19ae576b", "sha256": "de15803ffc2008a6ca83703cd0c92a1f40cb67aaac1c95905f399111fb35ba7d" }
+    },
+    {
+      "id": "libsamplerate",
+      "version": "0.2.2",
+      "license": "BSD-2-Clause",
+      "source": {
+        "file": "libsamplerate-0.2.2.tar.xz",
+        "url": "https://github.com/libsndfile/libsamplerate/releases/download/0.2.2/libsamplerate-0.2.2.tar.xz",
+        "bytes": 3319468,
+        "sha256": "3258da280511d24b49d6b08615bbe824d0cacc9842b0e4caf11c52cf2b043893",
+        "evidence": "SHA-256 published in the pinned PacBrew release recipe; no signature verification claimed"
+      },
+      "recipe": { "gitBlob": "05ce835f8438c68a432abfd70f6b66378bee5cd1", "sha256": "d05ae5f6a5e545dfe1b469e042c5b7d2e729429d16c6df4e70117edf5c513d3f" }
+    }
+  ]
+}
