@@ -1,0 +1,54 @@
+{
+  "sourceCommit": "33b16ad7ddd6dfb705e2c991729dba333a9429a6",
+  "sourceKitArchiveSHA256": "b5f3296d4676a951e57128b9bb26c8bc0204ec44a47182d4ef63e7022df21586",
+  "status": "passed",
+  "cleanBuildOutputDirectoryAbsent": true,
+  "applicationObjectsReused": false,
+  "portsArchive": {
+    "bytes": 346233940,
+    "sha256": "a85f65de418a8e6a898c6c3e3c870d50fff7618a200e4dd59ea9692af6ecec4d"
+  },
+  "consoleContacted": false,
+  "originalInstalledProgramChanged": false,
+  "expectedSelf": {
+    "bytes": 2771745,
+    "sha256": "2031865828a6068aa413b219c98e0bd5efb94decdf03706cd29043d9aaddaddb"
+  },
+  "exitCode": 0,
+  "elf": {
+    "bytes": 2890092,
+    "sha256": "ddac1e318fb0aaf702e50595aeff53c414e3b8043c6891e004ae5d700c671a80",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ],
+    "requiredShellImport": {
+      "name": "sceSystemServiceLoadExec",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    },
+    "requiredVisibilityImport": {
+      "name": "sceSystemServiceGetStatus",
+      "binding": "global",
+      "provider": "libSceSystemService",
+      "library": "libSceSystemService"
+    }
+  },
+  "self": {
+    "bytes": 2771745,
+    "sha256": "2031865828a6068aa413b219c98e0bd5efb94decdf03706cd29043d9aaddaddb"
+  },
+  "exactInstalledSelfMatch": true,
+  "exactReferenceElfMatch": true,
+  "sourceFingerprintExact": true,
+  "command": "node tools/build-ps5.js build_ps5.py --standard-helper-runtime",
+  "scope": "All application and helper sources recompiled inside the extracted source kit using the previously fresh compiler prefix. No physical acceptance claim."
+}
