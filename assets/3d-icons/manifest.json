@@ -26,8 +26,8 @@
   {
     "id": "ps2",
     "local": "assets/3d-icons/ps2.png",
-    "bytes": 1140352,
-    "sha256": "F42E7D0E3DD8435FD4F994ABE48B4A8FB22427CB1956C31DCCA36CD38987C1CF",
+    "bytes": 1083168,
+    "sha256": "42AA391CB0F4F245595AACDD540FBB907AEB46762AB98C4E8FFD03B393B8DF5A",
     "reference": "https://commons.wikimedia.org/wiki/File:Sony_PlayStation_2.png",
     "referenceType": "credited hardware photo"
   },

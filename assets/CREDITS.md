@@ -10,6 +10,8 @@ The shelf's second revision uses a deeper wood plane so the console body and a s
 
 ## Hardware references
 
+The PS2 illustration's bright blue base beneath the controller was changed to matte black with the built-in image generation tool on 25 October 2026. The PS2 lettering and controller button colours were retained. The [edit prompt](3d-icons/ps2-base-edit.prompt.txt) and [before/after hashes](3d-icons/ps2-base-edit.json) record that correction; its hardware reference and license remain as credited below.
+
 The first 18 icons were generated with the photographs credited below as visual references. The generated icons are changed, stylized illustrations. For icons based on CC BY-SA 3.0 photographs (PS3, Wii U, Super Nintendo, PSP and Dreamcast), the corresponding generated icon is offered under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) to the extent rights in the generated changes are held. Credit the photographers below and note the AI-assisted stylization if you reuse those icons. Other generated icons are offered under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) to the extent rights are held. The original source photographs are not distributed here. Console names and hardware designs belong to their respective owners.
 
 | Console | Image | Creator | License |

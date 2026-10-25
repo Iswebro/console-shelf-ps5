@@ -1,0 +1,12 @@
+{
+  "asset": "assets/3d-icons/ps2.png",
+  "edit": "Replace saturated blue base under/behind controller with matte black; retain PS2 lettering, controller colours and transparent background",
+  "tool": "OpenAI built-in image_gen",
+  "prompt": "ps2-base-edit.prompt.txt",
+  "originalSHA256": "f42e7d0e3dd8435fd4f994abe48b4a8fb22427cb1956c31dcca36cd38987c1cf",
+  "sha256": "42aa391cb0f4f245595aacdd540fbb907aeb46762ab98c4e8ffd03b393b8df5a",
+  "bytes": 1083168,
+  "width": 1254,
+  "height": 1254,
+  "sourcePNGUnmodifiedAfterGeneration": true
+}

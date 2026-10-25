@@ -48,13 +48,13 @@ const shelfArtLayout = {
       1254
     ],
     "bounds": [
-      172,
-      23,
-      812,
-      1207
+      171,
+      21,
+      815,
+      1209
     ],
     "supportY": 1217,
-    "sha256": "f42e7d0e3dd8435fd4f994abe48b4a8fb22427cb1956c31dcca36cd38987c1cf"
+    "sha256": "42aa391cb0f4f245595aacdd540fbb907aeb46762ab98c4e8ffd03b393b8df5a"
   },
   "ps1": {
     "canvas": [
