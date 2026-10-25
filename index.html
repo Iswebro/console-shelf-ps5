@@ -37,9 +37,10 @@
           <div class="search-row">
             <label class="search-wrap"><span class="sr-only">Find a system</span><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find a system, brand or core…" autocomplete="off"></label>
             <div class="browse-actions">
-              <button type="button" id="toggleLayout" class="icon-button layout-toggle" aria-label="Switch to Swipe layout" title="Switch to Swipe" aria-pressed="false" data-layout="grid">
+              <button type="button" id="toggleLayout" class="icon-button layout-toggle" aria-label="Switch to Swipe layout" title="Switch to Swipe" data-layout="grid" data-next-layout="carousel">
                 <svg class="swipe-view-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="4" width="6" height="16" rx="2"/><path d="M5 7H3v10h2M19 7h2v10h-2"/></svg>
                 <svg class="grid-view-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+                <svg class="shelf-view-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4v17M21 4v17M3 11h18M3 21h18M7 6v5M12 4v7M17 7v4M7 16v5M12 14v7M17 16v5"/></svg>
                 <span id="layoutToggleLabel">Swipe</span>
               </button>
             </div>
@@ -113,8 +114,9 @@
           <fieldset class="settings-field"><legend>Layout</legend><div class="layout-choices" role="group" aria-label="Shelf layout">
             <button type="button" id="layoutGrid" class="layout-choice" aria-pressed="true"><svg viewBox="0 0 32 24" aria-hidden="true"><rect x="2" y="2" width="11" height="8" rx="2"/><rect x="19" y="2" width="11" height="8" rx="2"/><rect x="2" y="14" width="11" height="8" rx="2"/><rect x="19" y="14" width="11" height="8" rx="2"/></svg><strong>Grid</strong><span>Everything at a glance</span></button>
             <button type="button" id="layoutCarousel" class="layout-choice" aria-pressed="false"><svg viewBox="0 0 32 24" aria-hidden="true"><rect x="9" y="2" width="14" height="20" rx="3"/><path d="M4 6H1v12h3M28 6h3v12h-3"/></svg><strong>Swipe</strong><span>Floating icons, one row</span></button>
+            <button type="button" id="layoutShelf" class="layout-choice" aria-pressed="false"><svg viewBox="0 0 32 24" aria-hidden="true"><path d="M2 2v20M30 2v20M2 12h28M2 22h28M8 6v6M16 3v9M24 7v5M8 17v5M16 15v7M24 17v5"/></svg><strong>Shelf</strong><span>Your collection on display</span></button>
           </div></fieldset>
-          <fieldset class="settings-field"><legend>Grid look</legend><div class="segmented" role="group" aria-label="Console look"><button type="button" id="lookImages" aria-pressed="true">3D system icons</button><button type="button" id="lookCards" aria-pressed="false">Classic cards</button></div><p class="field-help">Swipe always uses floating console icons.</p></fieldset>
+          <fieldset class="settings-field"><legend>Grid look</legend><div class="segmented" role="group" aria-label="Console look"><button type="button" id="lookImages" aria-pressed="true">3D system icons</button><button type="button" id="lookCards" aria-pressed="false">Classic cards</button></div><p class="field-help">Swipe and Shelf always use 3D console icons.</p></fieldset>
           <label class="settings-field select-block" for="iconStyle"><span>App icon</span><select id="iconStyle"><option value="gaming">Gaming · default</option><option value="classic">Classic mint</option><option value="jade">Jade</option></select></label>
         </section>
         <section id="panelBrowse" role="tabpanel" aria-labelledby="tabBrowse" hidden>

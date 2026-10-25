@@ -46,7 +46,7 @@ void cycle(UiState& state, int direction) {
     auto& p = state.settings.preferences;
     if (state.tab == SettingsTab::appearance) {
         if (state.settings_focus == 0)
-            p.layout = p.layout == Layout::grid ? Layout::swipe : Layout::grid;
+            p.layout = next_layout(p.layout, direction);
         if (state.settings_focus == 1 && p.layout == Layout::grid)
             p.grid_look = p.grid_look == GridLook::icons ? GridLook::cards : GridLook::icons;
         if (state.settings_focus == 2)
@@ -192,7 +192,7 @@ void input(UiState& state, Action action) {
     }
     if (action == Action::layout && state.page == Page::home) {
         auto& layout = state.settings.preferences.layout;
-        layout = layout == Layout::grid ? Layout::swipe : Layout::grid;
+        layout = next_layout(layout);
         changed(state);
         return;
     }
@@ -372,7 +372,7 @@ void input(UiState& state, Action action) {
         }
         return;
     }
-    const int stride = state.settings.preferences.layout == Layout::grid ? 4 : 1;
+    const int stride = state.settings.preferences.layout == Layout::swipe ? 1 : 4;
     const bool swipe = state.settings.preferences.layout == Layout::swipe;
     if (action == Action::up && (swipe || state.focus < stride)) {
         state.tools = true;

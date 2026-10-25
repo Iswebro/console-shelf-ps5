@@ -22,7 +22,14 @@ const manifest = require('../assets/3d-icons/manifest.json');
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    const capture = async (target, name) => { if (capturePreviews) await target.screenshot({ path: path.join(root, 'previews', name), animations: 'disabled' }); };
+    const capture = async (target, name) => {
+      if (!capturePreviews) return;
+      await target.locator('img').evaluateAll(images => Promise.all(images.map(image => {
+        image.loading = 'eager';
+        return image.decode().catch(() => {});
+      })));
+      await target.screenshot({ path: path.join(root, 'previews', name), animations: 'disabled' });
+    };
     const openPanel = async name => {
       if (!await page.locator('#settingsDialog').isVisible()) await page.click('#openAppearance');
       await page.click('#tab' + name);
@@ -40,6 +47,33 @@ const manifest = require('../assets/3d-icons/manifest.json');
     assert.equal(await page.locator('#systems').getAttribute('class'), 'systems-carousel');
     assert.equal(await page.locator('#settingsDialog').isVisible(), false, 'layout switches directly');
     await page.click('#toggleLayout');
+    assert.equal(await page.locator('#systems').getAttribute('class'), 'systems-shelf');
+    assert.equal(await page.locator('.display-tier').count(), 13);
+    assert.equal(await page.locator('.display-tier .card').count(), 52);
+    const shelfPlacement = await page.locator('.display-tier .card').evaluateAll(cards => cards.map(card => {
+      const art = shelfArtLayout[card.dataset.system], image = card.querySelector('img').getBoundingClientRect();
+      const tier = card.parentElement.getBoundingClientRect(), slot = card.getBoundingClientRect();
+      const [x, y, w, h] = art.bounds;
+      return { base: image.top + (y + h) * image.height / art.canvas[1], contact: tier.top + tier.height * .74,
+        left: image.left + x * image.width / art.canvas[0], right: image.left + (x + w) * image.width / art.canvas[0],
+        slotLeft: slot.left, slotRight: slot.right };
+    }));
+    for (const pose of shelfPlacement) {
+      assert.ok(Math.abs(pose.base - pose.contact) < 1, 'visible console base rests on the shelf surface');
+      assert.ok(pose.left >= pose.slotLeft && pose.right <= pose.slotRight, 'console art stays inside its display slot');
+    }
+    await page.locator('.card-main').first().focus();
+    await page.keyboard.press('ArrowDown');
+    assert.equal(await page.evaluate(() => document.activeElement.closest('.card').dataset.system), systems[4].id);
+    await page.keyboard.press('ArrowRight');
+    assert.equal(await page.evaluate(() => document.activeElement.closest('.card').dataset.system), systems[5].id);
+    await page.reload();
+    assert.equal(await page.locator('#systems').getAttribute('class'), 'systems-shelf', 'third layout persists');
+    await page.setViewportSize({ width: 1440, height: 1150 });
+    await capture(page, 'display-shelf-desktop.png');
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.click('#toggleLayout');
+    assert.equal(await page.locator('#systems').getAttribute('class'), 'systems-grid');
 
     // Automatic availability and individual choices compose and survive a reload.
     await openPanel('Consoles');
@@ -234,12 +268,18 @@ const manifest = require('../assets/3d-icons/manifest.json');
     await page.locator('input[data-console="n64"]').uncheck();
     await page.locator('input[data-console="n64"]').check();
     await openPanel('Appearance');
+    await page.click('#layoutShelf');
+    await closePanel();
+    assert.equal(await page.locator('.display-tier').first().locator('.card').count(), 2);
+    assert.equal(await page.locator('.display-tier').count(), 26);
+    await capture(page, 'display-shelf-mobile.png');
+    await openPanel('Appearance');
     await page.click('#layoutCarousel');
     await closePanel();
     await capture(page.locator('#systems'), 'mobile-swipe.png');
     const width = await page.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
     assert.ok(width.page <= width.viewport + 1, 'mobile page should not overflow horizontally');
     assert.deepEqual(errors, [], 'the page should have no JavaScript errors');
-    console.log('PASS: settings, visibility/persistence, mobile layout, 52 icons, curved carousel depth/centering, wrap, interrupted motion, reduced motion, drag, simulated standard gamepad and library routes.');
+    console.log('PASS: settings, visibility/persistence, three layouts, shelf contact alignment/spatial input/responsive tiers, 52 icons, curved carousel motion, simulated standard gamepad and library routes.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

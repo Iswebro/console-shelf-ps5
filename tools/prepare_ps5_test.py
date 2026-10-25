@@ -53,6 +53,17 @@ def main():
         copy(image, "assets/3d-icons/" + image.name)
     for image in ("shelf-icon.png", "shelf-icon-v1.png", "shelf-icon-premium-v2.png"):
         copy(ROOT / "assets" / image, "assets/" + image)
+    scenery = json.loads((ROOT / "assets/backgrounds/manifest.json").read_text(encoding="utf-8"))
+    require(scenery.get("schema") == 1 and len(scenery.get("assets", [])) == 2, "Expected two reviewed scenery assets")
+    require({item["local"] for item in scenery["assets"]} == {
+        "assets/backgrounds/display-shelf-v1.png", "assets/backgrounds/gallery-room-v1.png"}, "Unexpected scenery paths")
+    for item in scenery["assets"]:
+        source = ROOT / item["local"]
+        raw = source.read_bytes()
+        require(len(raw) == item["bytes"] and hashlib.sha256(raw).hexdigest() == item["sha256"], "Scenery digest mismatch")
+        require(raw[:8] == b"\x89PNG\r\n\x1a\n" and struct.unpack_from(">II", raw, 16) == (item["width"], item["height"]), "Scenery dimensions mismatch")
+        copy(source, item["local"])
+    copy(ROOT / "assets/backgrounds/manifest.json", "assets/backgrounds/manifest.json")
     for name in ("Poppins-Regular.ttf", "Poppins-SemiBold.ttf", "OFL.txt"):
         copy(ROOT / "native/assets/fonts" / name, "native/assets/fonts/" + name)
     for name in ("SDL2-PS5.txt", "libsamplerate-0.2.2.txt", "LGPL-2.1.txt", "LLVM-libcxx.txt"):
@@ -102,6 +113,8 @@ Use the existing trusted ShadowMount procedure to expose this new app tile, with
 Keep firmware 12.20 and decline system update prompts. This folder contains no firmware updater.
 
 First test: open Shelf; check the picture, D-pad/stick, Cross/Circle and Options.
+Square cycles Grid, Swipe and Shelf. Shelf shows eight consoles across two lit display tiers;
+Down moves to the next tier. Sort, visibility and favourite settings apply to all three views.
 The selection background is confirmed; opening still shows black before the grid.
 Check Nintendo 64's library and the PS1/PS2/PS3 counts, then save a layout/visibility choice.
 Close and reopen Shelf to check persistence. Report any blank screen, crash or incorrect input.

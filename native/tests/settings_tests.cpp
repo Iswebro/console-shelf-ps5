@@ -66,6 +66,11 @@ void test_settings() {
     std::strcpy(read.preferred_emulator[find_system("ps2")].data(), "../invalid");
     check(!save_settings(path, read), "invalid route identifier cannot enter settings");
     check(load_settings(path, read) == SettingsLoad::loaded, "rejected save preserves current settings");
+    read.preferences.layout = Layout::shelf;
+    check(save_settings(path, read), "save third layout without changing the settings schema");
+    Settings displayed;
+    check(load_settings(path, displayed) == SettingsLoad::loaded && displayed.preferences.layout == Layout::shelf &&
+              displayed.preferences.favorite[find_system("n64")], "Shelf layout and existing choices survive reopen");
     check(!save_settings("missing-parent/does-not-exist/settings.ini", read), "unwritable save reports failure");
     char invalid[160];
     std::snprintf(invalid, sizeof(invalid), "%s/invalid.ini", directory);

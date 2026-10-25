@@ -11,8 +11,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 40% 30% at 85% 0%, #5a3da344, transparent 80%),
-    radial-gradient(ellipse 38% 30% at 2% 75%, #345fc82b, transparent 85%),
+    linear-gradient(90deg, #080d1838, #080d181a 60%, #080d182e),
+    url('assets/backgrounds/gallery-room-v1.png') center / cover fixed,
     #0b0c1c;
 }
 button, select, input { font: inherit; }
@@ -36,7 +36,10 @@ a { color: #d8d0ff; }
 .icon-button { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 43px; height: 43px; padding: 10px; border: 1px solid #ffffff24; border-radius: 13px; background: #ffffff08; color: #cbc8e5; transition: background .15s ease, border-color .15s ease; }
 .icon-button:hover { color: white; background: #ffffff15; border-color: #c2b5ff75; }
 .layout-toggle { display: flex; gap: 8px; width: auto; padding-inline: 13px; font-size: 12px; }
-.layout-toggle[data-layout="grid"] .grid-view-icon, .layout-toggle[data-layout="carousel"] .swipe-view-icon { display: none; }
+.layout-toggle svg { display: none; }
+.layout-toggle[data-next-layout="grid"] .grid-view-icon,
+.layout-toggle[data-next-layout="carousel"] .swipe-view-icon,
+.layout-toggle[data-next-layout="shelf"] .shelf-view-icon { display: block; }
 .browse-actions .layout-toggle { width: auto; padding-inline: 13px; }
 .icon-button svg, .picker-search svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .icon-button circle { fill: #1a1b30; }
@@ -136,6 +139,37 @@ h2 { margin: 5px 0 0; font-size: 28px; letter-spacing: -.035em; }
 .systems-carousel .is-selected .favorite { opacity: .85; pointer-events: auto; }
 .systems-carousel .is-selected:focus-within .console-art img { filter: drop-shadow(0 24px 22px #01020bb3) drop-shadow(0 0 12px #c3b7ff24); }
 
+/* Each tier owns its scenery; real transparent console art shares one contact
+   line on the wood. No opaque per-console cards break the display cabinet. */
+.systems-shelf { display: grid; gap: 8px; padding-block: 2px 12px; }
+.display-tier { display: grid; grid-template-columns: repeat(var(--shelf-columns, 4), minmax(0, 1fr)); height: 300px; padding-inline: 2.6%; background: url('assets/backgrounds/display-shelf-v1.png') center / 100% 100% no-repeat; isolation: isolate; }
+.systems-shelf .card { height: 300px; overflow: visible; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.systems-shelf .card:hover, .systems-shelf .card:focus-within { transform: none; border-color: transparent; box-shadow: none; }
+.systems-shelf .card-main { display: block; height: 100%; text-align: center; border-radius: 0; }
+.systems-shelf .card-main:focus-visible { outline: none; }
+.systems-shelf .console-art { position: absolute; inset: 0 0 auto; display: block; height: 222px; width: 100%; margin: 0; overflow: visible; border-radius: 0; background: none; }
+.systems-shelf .console-art::before { content: ""; position: absolute; left: 7%; right: 7%; bottom: -2px; height: 180px; background: radial-gradient(ellipse at 50% 70%, #7fdac832, transparent 68%); opacity: 0; transition: opacity .25s ease; }
+.systems-shelf .console-art::after { z-index: -1; left: 18%; width: 64%; height: 14px; bottom: -5px; background: #010408b5; filter: blur(5px); }
+.systems-shelf .console-art img { inset: auto; max-width: none; object-fit: fill; filter: none; transform: none; transform-origin: var(--art-foot-x, 50%) var(--art-foot-y, 100%); transition: transform .24s cubic-bezier(.2,.65,.3,1), filter .24s ease; }
+.systems-shelf .card:is(:hover, :focus-within) .console-art img { transform: scale(1.045); filter: brightness(1.08); }
+.systems-shelf .card:is(:hover, :focus-within) .console-art::before { opacity: 1; }
+.systems-shelf .card-copy { position: absolute; top: 237px; left: 8px; right: 8px; padding: 0; }
+.systems-shelf .card-topline, .systems-shelf .card-meta { display: none; }
+.systems-shelf .card-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; font-size: clamp(17px, 1.5vw, 23px); font-weight: 650; letter-spacing: -.03em; text-shadow: 0 2px 5px #000b; }
+.systems-shelf .status-badge { margin-top: 7px; padding: 0; border: 0; border-radius: 0; color: #b3c3d3; background: none; font-size: 10px; font-weight: 500; letter-spacing: .02em; }
+.systems-shelf .card:is(:hover, :focus-within) .card-title { color: #e5fff5; }
+.systems-shelf .card:focus-within .card-copy::before { content: ""; position: absolute; left: calc(50% - 22px); top: -11px; width: 44px; height: 2px; border-radius: 2px; background: #a7f5db; box-shadow: 0 0 9px #8deaca88; }
+.systems-shelf .favorite { top: 17px; right: 10px; opacity: 0; transition: opacity .2s ease; }
+.systems-shelf .card:is(:hover, :focus-within) .favorite, .systems-shelf .favorite[aria-pressed="true"] { opacity: 1; }
+@media (max-width: 600px) {
+  .display-tier, .systems-shelf .card { height: 255px; }
+  .systems-shelf .console-art { height: 188.7px; }
+  .systems-shelf .card-copy { top: 201px; left: 3px; right: 3px; }
+  .systems-shelf .card-title { font-size: 16px; }
+  .systems-shelf .status-badge { font-size: 9px; margin-top: 6px; }
+  .layout-choices { gap: 7px; }
+}
+
 .back { margin: 30px 0 9px; padding: 10px 15px; border: 1px solid #ffffff22; border-radius: 11px; background: #ffffff13; color: #e5e3fa; }
 .back:hover { background: #ffffff23; }
 .hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(260px, .8fr); gap: 28px; min-height: 405px; margin-top: 18px; border: 1px solid #ffffff24; border-radius: 28px; background: radial-gradient(circle at 82% 22%, var(--glow), transparent 45%), linear-gradient(125deg, #22243d, #141629); overflow: hidden; }
@@ -189,7 +223,7 @@ body.settings-open { overflow: hidden; }
 .field-help { color: #929cbe; font-size: 12px; line-height: 1.6; }
 .settings-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
 .settings-field select { min-height: 45px; background: #1b1e35; }
-.layout-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.layout-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .layout-choice { display: flex; flex-direction: column; align-items: start; gap: 7px; min-height: 125px; padding: 17px; border: 1px solid #ffffff25; border-radius: 15px; background: #ffffff04; color: #cbd0e6; text-align: left; }
 .layout-choice svg { width: 32px; height: 25px; margin-bottom: 5px; fill: none; stroke: currentColor; stroke-width: 1.5; }
 .layout-choice strong { font-size: 14px; }

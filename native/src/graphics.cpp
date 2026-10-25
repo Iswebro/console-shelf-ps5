@@ -296,6 +296,7 @@ Art* image(std::string_view name) {
         if (slot->texture) {
             SDL_UpdateTexture(slot->texture, nullptr, data, slot->w * 4);
             SDL_SetTextureBlendMode(slot->texture, SDL_BLENDMODE_BLEND);
+            SDL_SetTextureScaleMode(slot->texture, SDL_ScaleModeLinear);
         }
     }
     stbi_image_free(data);
@@ -314,6 +315,18 @@ void picture(std::string_view name, int x, int y, int w, int h, Uint8 alpha = 25
     SDL_Rect dest{x + (w - dw) / 2, y + (h - dh) / 2, dw, dh};
     SDL_SetTextureAlphaMod(entry->texture, alpha);
     SDL_RenderCopy(renderer, entry->texture, nullptr, &dest);
+}
+void shelf_picture(std::string_view name, int cx, int base, int w, int h, bool selected) {
+    auto* entry = image(name);
+    if (!entry || !entry->texture)
+        return;
+    const auto& bounds = entry->bounds;
+    const float fit = std::min(static_cast<float>(w) / bounds.w, static_cast<float>(h) / bounds.h) *
+                      (selected ? 1.045f : 1.f);
+    const int dw = static_cast<int>(bounds.w * fit), dh = static_cast<int>(bounds.h * fit);
+    SDL_Rect dest{cx - dw / 2, base - dh, dw, dh};
+    SDL_SetTextureAlphaMod(entry->texture, selected ? 255 : 235);
+    SDL_RenderCopy(renderer, entry->texture, &bounds, &dest);
 }
 void orbit_picture(std::string_view name, double cx, double cy, double w, double h, double yaw, Uint8 alpha) {
     auto* entry = image(name);
@@ -456,9 +469,9 @@ void home(const UiState& state) {
          state.query[0] ? white : muted);
     box(1664, 314, 180, 66, state.tools && state.tool == 1);
     icon(p.layout == Layout::grid ? 4 : 2, 1696, 347);
-    text(p.layout == Layout::grid ? "Swipe" : "Grid", 1722, 331, 24, white, true);
+    text(layout_labels[static_cast<std::size_t>(next_layout(p.layout))], 1722, 331, 24, white, true);
     char summary[160];
-    std::snprintf(summary, sizeof(summary), "%s  /  %.*s  /  %zu systems", p.layout == Layout::grid ? "Grid" : "Swipe",
+    std::snprintf(summary, sizeof(summary), "%s  /  %.*s  /  %zu systems", layout_labels[static_cast<std::size_t>(p.layout)].data(),
                   static_cast<int>(sorts[static_cast<std::size_t>(p.sort)].size()),
                   sorts[static_cast<std::size_t>(p.sort)].data(), shown.count);
     text(summary, 84, 391, 20, muted);
@@ -491,6 +504,42 @@ void home(const UiState& state) {
             if (p.favorite[id])
                 text("*", x + 377, y + 12, 30, purple, true);
         }
+    } else if (p.layout == Layout::shelf) {
+        const int first = (state.focus / 8) * 8;
+        auto* row = image("assets/backgrounds/display-shelf-v1.png");
+        for (int tier = 0; tier < 2; ++tier) {
+            if (first + tier * 4 >= static_cast<int>(shown.count))
+                break;
+            const int y = 428 + tier * 278, contact = y + 207;
+            if (row && row->texture) {
+                SDL_Rect surface{80, y, 1760, 280};
+                SDL_SetTextureAlphaMod(row->texture, 255);
+                SDL_RenderCopy(renderer, row->texture, nullptr, &surface);
+            }
+            for (int col = 0; col < 4; ++col) {
+                const int at = first + tier * 4 + col;
+                if (at >= static_cast<int>(shown.count))
+                    break;
+                const auto id = shown.indices[static_cast<std::size_t>(at)];
+                const auto& system = catalog[id];
+                const int cx = 300 + col * 440;
+                const bool active = !state.tools && at == state.focus;
+                if (active)
+                    glow(cx - 165, y + 38, 330, 188, {125, 223, 211, 255}, 85);
+                glow(cx - 111, contact - 11, 222, 22, {0, 0, 0, 255}, 225);
+                shelf_picture(system.image, cx, contact, 302, 181, active);
+                if (active)
+                    rounded(cx - 31, contact + 8, 62, 3, 1, {150, 235, 219, 255});
+                centered(system.name, cx, y + 220, 23, active ? white : SDL_Color{219, 225, 238, 255}, true);
+                centered(availability(state, id), cx, y + 251, 17, active ? SDL_Color{158, 220, 210, 255} : muted);
+                if (p.favorite[id])
+                    text("*", cx + 175, y + 24, 28, purple, true);
+            }
+        }
+        char position[64];
+        std::snprintf(position, sizeof(position), "%d-%d / %zu", first + 1,
+                      std::min(first + 8, static_cast<int>(shown.count)), shown.count);
+        text(position, 1670, 391, 20, muted);
     } else {
         const auto& selected = catalog[state.selected_system];
         glow(610, 742, 700, 130, accent(selected), 65);
@@ -532,7 +581,7 @@ void home(const UiState& state) {
         std::snprintf(position, sizeof(position), "%d / %zu", state.focus + 1, shown.count);
         text(position, 1730, 391, 20, muted);
     }
-    footer("D-pad / Stick  Browse    Cross  Open    Triangle  Favourite    Square  Grid/Swipe    Options  Settings    "
+    footer("D-pad / Stick  Browse    Cross  Open    Triangle  Favourite    Square  Layout    Options  Settings    "
            "Circle  Back");
 }
 void detail(const UiState& state) {
@@ -603,12 +652,13 @@ void settings(const UiState& state) {
     const auto& p = state.settings.preferences;
     if (state.tab == SettingsTab::appearance) {
         text("Your shelf, your style", 394, 338, 34, white, true);
-        text("Browse as a grid or a row of floating console icons.", 394, 388, 24, muted);
-        label(394, 452, "Layout", p.layout == Layout::grid ? "Grid" : "Swipe", state.settings_focus == 0);
-        label(394, 563, "Grid look", p.grid_look == GridLook::icons ? "3D console icons" : "Classic cards",
+        text("Choose Grid, curved Swipe, or a lit display Shelf.", 394, 388, 24, muted);
+        label(394, 452, "Layout", layout_labels[static_cast<std::size_t>(p.layout)], state.settings_focus == 0);
+        label(394, 563, "Grid look", p.layout != Layout::grid ? "Available in Grid layout" :
+              p.grid_look == GridLook::icons ? "3D console icons" : "Classic cards",
               state.settings_focus == 1);
         label(394, 674, "Shelf logo", icon_names[static_cast<std::size_t>(p.icon)], state.settings_focus == 2);
-        text("Swipe always uses floating icons without cards.", 400, 802, 22, muted);
+        text("Swipe and Shelf always use your 3D console icons.", 400, 802, 22, muted);
     } else if (state.tab == SettingsTab::browse) {
         text("Find your next favourite", 394, 338, 34, white, true);
         text("Choose an order and narrow down your collection.", 394, 388, 24, muted);
@@ -707,6 +757,40 @@ bool graphics_init(SDL_Renderer* target, const char* asset_root) {
                        b = static_cast<Uint32>(28 + glow_amount * 28);
             pixels[y * width + x] = 0xff000000u | (b << 16) | (g << 8) | r;
         }
+    // Bake the gallery once. The software renderer then copies one screen-sized
+    // texture, rather than resampling the large backdrop on every controller frame.
+    char gallery_path[2304];
+    std::snprintf(gallery_path, sizeof(gallery_path), "%s/assets/backgrounds/gallery-room-v1.png", root);
+    int gw = 0, gh = 0, channels = 0;
+    unsigned char* gallery = stbi_load(gallery_path, &gw, &gh, &channels, 4);
+    if (gallery && gw > 0 && gh > 0 && gw <= 4096 && gh <= 4096) {
+        const float fit = std::max(static_cast<float>(width) / gw, static_cast<float>(height) / gh);
+        const float ox = (gw - width / fit) / 2, oy = (gh - height / fit) / 2;
+        for (int y = 0; y < height; ++y)
+            for (int x = 0; x < width; ++x) {
+                const float sx = std::clamp(ox + (x + .5f) / fit - .5f, 0.f, static_cast<float>(gw - 1));
+                const float sy = std::clamp(oy + (y + .5f) / fit - .5f, 0.f, static_cast<float>(gh - 1));
+                const int ix = static_cast<int>(sx), iy = static_cast<int>(sy);
+                const int nx = std::min(ix + 1, gw - 1), ny = std::min(iy + 1, gh - 1);
+                const float fx = sx - ix, fy = sy - iy;
+                const float visibility = .88f - .12f * static_cast<float>(y) / height;
+                Uint32 output = 0xff000000u;
+                for (int channel = 0; channel < 3; ++channel) {
+                    const auto sample = [&](int px, int py) {
+                        return gallery[(static_cast<std::size_t>(py) * gw + px) * 4 + channel];
+                    };
+                    const float top = sample(ix, iy) * (1 - fx) + sample(nx, iy) * fx;
+                    const float bottom = sample(ix, ny) * (1 - fx) + sample(nx, ny) * fx;
+                    const auto base = (pixels[y * width + x] >> (channel * 8)) & 255;
+                    const auto value = static_cast<Uint32>((top * (1 - fy) + bottom * fy) * visibility +
+                                                           base * (1 - visibility));
+                    output |= value << (channel * 8);
+                }
+                pixels[y * width + x] = output;
+            }
+    } else
+        ++resource_errors;
+    stbi_image_free(gallery);
     background = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STATIC, width, height);
     if (background)
         SDL_UpdateTexture(background, nullptr, pixels, width * 4);

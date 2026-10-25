@@ -14,7 +14,7 @@
 
 namespace shelf {
 namespace {
-constexpr std::array<const char*, 2> layout_names = {"grid", "swipe"};
+constexpr std::array<const char*, 3> layout_names = {"grid", "swipe", "shelf"};
 constexpr std::array<const char*, 2> look_names = {"icons", "cards"};
 constexpr std::array<const char*, 2> scope_names = {"all", "available"};
 constexpr std::array<const char*, 8> sort_names = {"featured", "az",    "za",    "newest",

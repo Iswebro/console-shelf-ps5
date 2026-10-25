@@ -168,7 +168,7 @@ bool report(const char* path, const shelf::UiState& state) {
         static_cast<int>(state.page), static_cast<int>(state.tab), state.settings_focus,
         static_cast<int>(shelf::catalog[state.selected_system].id.size()),
         shelf::catalog[state.selected_system].id.data(), shown.count,
-        p.layout == shelf::Layout::grid ? "grid" : "swipe");
+        p.layout == shelf::Layout::grid ? "grid" : p.layout == shelf::Layout::swipe ? "swipe" : "shelf");
     bool comma = false;
     for (std::size_t i = 0; i < shelf::system_count; ++i)
         if (p.hidden[i]) {
@@ -311,7 +311,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-15 SystemService launch flow and read-only focus observation; Circle hint retained");
+    startup("main entered", "ui-16 display Shelf and gallery backdrop; UI-15 SystemService helper unchanged");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);

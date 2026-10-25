@@ -34,6 +34,9 @@ previews/*
 !previews/native-megadrive.png
 !previews/carousel-depth.png
 !previews/carousel-mobile.png
+!previews/display-shelf-desktop.png
+!previews/display-shelf-mobile.png
+!previews/native-display-shelf.png
 
 node_modules/
 .cache/

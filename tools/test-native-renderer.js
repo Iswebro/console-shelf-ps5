@@ -40,6 +40,12 @@ assert.equal(keyboardBefore.page,4);assert.equal(keyboardBefore.queryLength,2);a
 const walked=JSON.parse(fs.readFileSync(path.join(captures,'all-systems.json')));assert.equal(walked.shown,52);assert.equal(walked.selected,catalogue.at(-1).id);
 assert.match(run('unknown-action',allData,1).stderr,/Unknown scripted action/);
 const motionData=path.join(directory,'motion-data');fs.mkdirSync(motionData);
+const shelfData=path.join(directory,'shelf-data');fs.mkdirSync(shelfData);
+run('layout,layout,shot:display-shelf.png,down,right,right,right,down,shot:display-shelf-page2.png,report:display-shelf.json',shelfData);
+const displayed=JSON.parse(fs.readFileSync(path.join(captures,'display-shelf.json')));
+assert.equal(displayed.layout,'shelf');assert.equal(displayed.shown,52);assert.equal(displayed.selected,catalogue[11].id);
+run('shot:display-shelf-reopened.png,report:display-shelf-reopened.json',shelfData);
+assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'display-shelf-reopened.json'))).layout,'shelf');
 run('settings,confirm,back,right,shot:orbit-start.png,frame:120,shot:orbit-middle.png,frame:400,shot:orbit-end.png',motionData,0,true);
 run('right,shot:orbit-reference.png',motionData);
 const digest=name=>crypto.createHash('sha256').update(fs.readFileSync(path.join(captures,name))).digest('hex');
@@ -63,8 +69,8 @@ run('back,frame:250,shot:close-hint.png,report:close-hint.json,frame:2000,frame:
 assert.equal(JSON.parse(fs.readFileSync(path.join(captures,'close-hint.json'))).page,0,'a Circle tap keeps the home page');
 assert.notEqual(digest('close-hint.png'),digest('close-hint-fade.png'),'the compact hint fades away');
 assert.equal(digest('close-hint-gone.png'),digest('reveal-reference.png'),'the timed hint leaves no modal or overlay');
-const images=['home.png','details.png','appearance.png','browse.png','consoles.png','swipe.png','megadrive.png','orbit-start.png','orbit-middle.png','orbit-end.png','orbit-reference.png','loading.png','prepared-cover.png','loading-motion.png','reveal-start.png','reveal-middle.png','reveal-end.png','reveal-reference.png','hold-middle.png','hold-cancelled.png','close-start.png','close-middle.png','settings-focus.png','layout-focus.png','launch-art.png','close-hint.png','close-hint-fade.png','close-hint-gone.png'];
+const images=['home.png','details.png','appearance.png','browse.png','consoles.png','swipe.png','megadrive.png','display-shelf.png','display-shelf-page2.png','display-shelf-reopened.png','orbit-start.png','orbit-middle.png','orbit-end.png','orbit-reference.png','loading.png','prepared-cover.png','loading-motion.png','reveal-start.png','reveal-middle.png','reveal-end.png','reveal-reference.png','hold-middle.png','hold-cancelled.png','close-start.png','close-middle.png','settings-focus.png','layout-focus.png','launch-art.png','close-hint.png','close-hint-fade.png','close-hint-gone.png'];
 const output=[];
 for(const name of images){const filename=path.join(captures,name),bytes=fs.readFileSync(filename);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1080);assert.ok(bytes.length>(name.startsWith('loading')?1000:40000),name+' should contain its rendered frame');output.push({name,bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});}
 fs.writeFileSync(path.join(root,'.cache/native-render-tests/latest.json'),JSON.stringify({directory,captures,processClosed:true,images:output},null,2)+'\n');
-console.log('PASS: native renderer, simulated SDL input, spatial toolbar, persistence, 52 images, timed carousel, covered preparation, opening transition, launch artwork and Circle hold/cancel/fade in 28 captures. Full PS5 acceptance remains pending.');
+console.log('PASS: native renderer, simulated SDL input, spatial toolbar, three-layout persistence and Shelf pages, 52 images, timed carousel, covered preparation, opening transition, launch artwork and Circle hold/cancel/fade in 31 captures. Full PS5 acceptance remains pending.');

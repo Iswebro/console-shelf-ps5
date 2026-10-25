@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "scope": "Private owner test build; PS5SX2 menu foreground accepted; other launch routes pending; no public binary",
+  "scope": "Private owner test build; PSXS5, PS5SX2, PS5SX3 foreground and RetroArch selected-game launch accepted; no public binary",
   "sourceCommit": "18917ef0522873695fa71d10630eb8fed13ffbcc",
   "titleId": "PPSA99541",
   "contentVersion": "00.100.014",
@@ -34,8 +34,8 @@
     "transferPreflight": "Initial NLST preflight stopped before program writes because the FTP server does not implement that command. Bounded LIST parsing confirmed the added notice path absent before staging and again before rename.",
     "preferences": "unchanged",
     "helperExecutedByInstaller": false,
-    "physicalForegroundTest": "owner confirmed PS5SX2 appears directly on screen after Shelf closes",
-    "remainingHardwareTests": "PSXS5, PS5SX3 and RetroArch selected-game routes; final settings/restart checks"
+    "physicalForegroundTest": "Owner confirmed PSXS5, PS5SX2 and PS5SX3 open directly on screen, and Mario Party 3 starts directly through RetroArch",
+    "remainingHardwareTests": "Final closing, settings persistence and restart/reopen checks; new Shelf visual build requires its own acceptance"
   },
   "sourceKit": {
     "sourceCommit": "18917ef0522873695fa71d10630eb8fed13ffbcc",

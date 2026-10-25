@@ -23,7 +23,7 @@ def public_nid(name):
 def source_fingerprint():
     inputs = []
     for directory in ("native/src", "native/include", "native/ps5", "native/third_party/stb",
-                      "native/third_party/ps5-runtime", "native/third_party/cjson"):
+                      "native/third_party/ps5-runtime", "native/third_party/cjson", "assets/backgrounds"):
         inputs.extend(p for p in (ROOT / directory).rglob("*") if p.is_file())
     inputs += [ROOT / "tools" / name for name in ("build_ps5.py", "bootstrap_ps5_toolchain.py", "fetch_ps5_deps.py",
                                                    "ps5_common.py", "verify_ps5_build.py", "build_launch_helper.py",

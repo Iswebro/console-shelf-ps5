@@ -25,7 +25,7 @@ function savedChoice(key, allowed, fallback) {
 }
 const settings = {
   look: savedChoice('shelf-look', ['images', 'cards'], 'images'),
-  layout: savedChoice('shelf-layout', ['grid', 'carousel'], 'grid'),
+  layout: savedChoice('shelf-layout', ['grid', 'carousel', 'shelf'], 'grid'),
   scope: savedChoice('shelf-scope', ['all', 'available'], 'all'),
   sort: savedChoice('shelf-sort', ['featured', 'az', 'za', 'newest', 'oldest', 'brand', 'games', 'favorites'], 'featured'),
   family: savedChoice('shelf-family', ['all', 'PlayStation', 'Nintendo', 'Sega', 'Sammy', 'Atari', 'NEC', 'SNK', 'Bandai', '3DO', 'Arcade', 'Commodore', 'Computer'], 'all'),
@@ -49,6 +49,9 @@ let suppressCardClick = false;
 let carouselId = safeStorage.get('shelf-carousel-selection');
 let carouselCards = [];
 let carouselIndex = 0;
+let shelfColumns = 4;
+const layouts = ['grid', 'carousel', 'shelf'];
+const layoutNames = { grid: 'Grid', carousel: 'Swipe', shelf: 'Shelf' };
 let orbitFrame = 0;
 const orbitMotion = new ShelfOrbit.Motion();
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -73,6 +76,7 @@ function renderSettings() {
   $('lookCards').setAttribute('aria-pressed', String(settings.look === 'cards'));
   $('layoutGrid').setAttribute('aria-pressed', String(settings.layout === 'grid'));
   $('layoutCarousel').setAttribute('aria-pressed', String(settings.layout === 'carousel'));
+  $('layoutShelf').setAttribute('aria-pressed', String(settings.layout === 'shelf'));
   $('scopeAll').setAttribute('aria-pressed', String(settings.scope === 'all'));
   $('scopeAvailable').setAttribute('aria-pressed', String(settings.scope === 'available'));
   $('sort').value = settings.sort;
@@ -81,21 +85,22 @@ function renderSettings() {
   $('carouselControls').hidden = settings.layout !== 'carousel';
   $('swipeHint').hidden = settings.layout !== 'carousel';
   $('carouselCaption').hidden = settings.layout !== 'carousel';
-  $('lookImages').disabled = settings.layout === 'carousel';
-  $('lookCards').disabled = settings.layout === 'carousel';
-  $('systems').className = settings.layout === 'carousel' ? 'systems-carousel' : 'systems-grid';
-  const look = settings.layout === 'carousel' ? 'Swipe' : settings.look === 'images' ? '3D icons · Grid' : 'Classic cards · Grid';
+  $('lookImages').disabled = settings.layout !== 'grid';
+  $('lookCards').disabled = settings.layout !== 'grid';
+  $('systems').className = settings.layout === 'carousel' ? 'systems-carousel' : settings.layout === 'shelf' ? 'systems-shelf' : 'systems-grid';
+  const look = settings.layout !== 'grid' ? layoutNames[settings.layout] : settings.look === 'images' ? '3D icons · Grid' : 'Classic cards · Grid';
   const sort = $('sort').selectedOptions[0].textContent;
   const view = settings.scope === 'all' ? 'All consoles' : 'Emulator or games';
   $('shelfSummary').textContent = [look, sort, view, settings.family !== 'all' ? settings.family : '', settings.availability !== 'all' ? statusLabels[settings.availability] : ''].filter(Boolean).join(' · ');
-  const nextLayout = settings.layout === 'grid' ? 'Swipe' : 'Grid';
+  const next = layouts[(layouts.indexOf(settings.layout) + 1) % layouts.length];
+  const nextLayout = layoutNames[next];
   $('toggleLayout').dataset.layout = settings.layout;
+  $('toggleLayout').dataset.nextLayout = next;
   $('toggleLayout').setAttribute('aria-label', `Switch to ${nextLayout} layout`);
   $('toggleLayout').setAttribute('title', `Switch to ${nextLayout}`);
-  $('toggleLayout').setAttribute('aria-pressed', String(settings.layout === 'carousel'));
   $('layoutToggleLabel').textContent = nextLayout;
   if (selected) {
-    const showImage = settings.layout === 'carousel' || settings.look === 'images';
+    const showImage = settings.layout !== 'grid' || settings.look === 'images';
     $('heroImage').hidden = !showImage;
     $('heroSymbol').hidden = showImage;
   }
@@ -234,7 +239,7 @@ function sortedSystems() {
 
 function makeCard(system) {
   const card = document.createElement('article');
-  card.className = 'card ' + (settings.layout === 'carousel' || settings.look === 'images' ? 'icon-card' : 'classic-card');
+  card.className = 'card ' + (settings.layout !== 'grid' || settings.look === 'images' ? 'icon-card' : 'classic-card');
   card.setAttribute('role', 'listitem');
   card.style.setProperty('--glow', system.color);
   card.dataset.symbol = system.symbol;
@@ -306,16 +311,72 @@ function renderSystems() {
   $('systemCount').textContent = `${shown.length} of ${systems.length} systems`;
   $('emptySearch').hidden = shown.length !== 0;
   $('emptyMessage').textContent = hiddenSystems.size === systems.length ? 'Your shelf is empty. Switch on a few consoles to make it yours.' : 'No systems match this view. Try another search or review your settings.';
-  $('systems').replaceChildren(...shown.map(makeCard));
+  const cards = shown.map(makeCard);
+  if (settings.layout === 'shelf') {
+    shelfColumns = shelfColumnCount();
+    const tiers = [];
+    for (let i = 0; i < cards.length; i += shelfColumns) {
+      const tier = document.createElement('div');
+      tier.className = 'display-tier';
+      tier.setAttribute('role', 'presentation');
+      tier.style.setProperty('--shelf-columns', shelfColumns);
+      tier.append(...cards.slice(i, i + shelfColumns));
+      tiers.push(tier);
+    }
+    $('systems').replaceChildren(...tiers);
+    placeShelfIcons();
+  } else $('systems').replaceChildren(...cards);
   cancelAnimationFrame(orbitFrame);
   orbitFrame = 0;
-  carouselCards = [...$('systems').children];
+  carouselCards = settings.layout === 'carousel' ? cards : [];
   const previous = shown.findIndex(system => system.id === carouselId);
   carouselIndex = previous < 0 ? 0 : previous;
   carouselId = shown[carouselIndex]?.id || null;
   orbitMotion.position = orbitMotion.target = carouselIndex;
   orbitMotion.active = false;
   updateCarouselPosition();
+}
+
+function shelfColumnCount() {
+  const width = $('systems').clientWidth;
+  return width < 560 ? 2 : width < 950 ? 3 : 4;
+}
+
+function placeShelfIcons() {
+  if (settings.layout !== 'shelf' || $('home').hidden) return;
+  $('systems').querySelectorAll('.card').forEach(card => {
+    const bounds = shelfArtLayout[card.dataset.system];
+    const surface = card.querySelector('.console-art');
+    const image = surface.querySelector('img');
+    if (!bounds || !image || !surface.clientWidth) return;
+    const [x, y, w, h] = bounds.bounds;
+    const fit = Math.min((surface.clientWidth - 30) / w, (surface.clientHeight - 23) / h);
+    image.style.width = `${bounds.canvas[0] * fit}px`;
+    image.style.height = `${bounds.canvas[1] * fit}px`;
+    image.style.left = `${(surface.clientWidth - w * fit) / 2 - x * fit}px`;
+    image.style.top = `${surface.clientHeight - h * fit - y * fit}px`;
+    surface.style.setProperty('--art-foot-x', `${(x + w / 2) * fit}px`);
+    surface.style.setProperty('--art-foot-y', `${(y + h) * fit}px`);
+  });
+}
+
+function moveShelf(key, current = document.activeElement) {
+  if (settings.layout !== 'shelf') return false;
+  const cards = [...$('systems').querySelectorAll('.card')];
+  const at = cards.indexOf(current?.closest('.card'));
+  if (at < 0) return false;
+  let next = at;
+  if (key === 'ArrowLeft') next = at % shelfColumns ? at - 1 : at;
+  else if (key === 'ArrowRight') next = at % shelfColumns < shelfColumns - 1 ? Math.min(at + 1, cards.length - 1) : at;
+  else if (key === 'ArrowUp') {
+    if (at < shelfColumns) { $('toggleLayout').focus(); return true; }
+    next = at - shelfColumns;
+  } else if (key === 'ArrowDown') next = Math.min(at + shelfColumns, cards.length - 1);
+  else if (key === 'Home') next = 0;
+  else if (key === 'End') next = cards.length - 1;
+  else return false;
+  cards[next]?.querySelector('.card-main').focus();
+  return true;
 }
 
 function updateCarouselPosition() {
@@ -420,10 +481,10 @@ function openSystem(id) {
   const image = $('heroImage');
   image.src = selected.image;
   image.alt = selected.name + ' console';
-  image.hidden = settings.layout !== 'carousel' && settings.look !== 'images';
+  image.hidden = settings.layout === 'grid' && settings.look !== 'images';
   image.onerror = () => { image.hidden = true; $('heroSymbol').hidden = false; };
   $('heroSymbol').textContent = selected.symbol;
-  $('heroSymbol').hidden = settings.layout === 'carousel' || settings.look === 'images';
+  $('heroSymbol').hidden = settings.layout !== 'grid' || settings.look === 'images';
   const menu = $('emulator');
   menu.replaceChildren(...selected.emulators.map(emulator => new Option(emulator, emulator)));
   const saved = safeStorage.get('shelf-emulator-' + id);
@@ -464,6 +525,7 @@ $('lookImages').onclick = () => setChoice('look', 'images');
 $('lookCards').onclick = () => setChoice('look', 'cards');
 $('layoutGrid').onclick = () => setChoice('layout', 'grid');
 $('layoutCarousel').onclick = () => setChoice('layout', 'carousel');
+$('layoutShelf').onclick = () => setChoice('layout', 'shelf');
 $('scopeAll').onclick = () => setChoice('scope', 'all');
 $('scopeAvailable').onclick = () => setChoice('scope', 'available');
 $('sort').onchange = event => setChoice('sort', event.target.value);
@@ -478,7 +540,7 @@ $('clearFilters').onclick = () => {
   renderSystems();
 };
 $('openAppearance').onclick = () => openSettings('Appearance');
-$('toggleLayout').onclick = () => setChoice('layout', settings.layout === 'grid' ? 'carousel' : 'grid');
+$('toggleLayout').onclick = () => setChoice('layout', layouts[(layouts.indexOf(settings.layout) + 1) % layouts.length]);
 $('reviewSettings').onclick = () => openSettings(hiddenSystems.size ? 'Consoles' : 'Browse');
 for (const tab of settingsTabs) $('tab' + tab).onclick = () => setSettingsTab(tab);
 $('settingsDialog').querySelector('.settings-tabs').onkeydown = event => {
@@ -519,6 +581,7 @@ $('carouselPrev').onclick = () => moveCarousel(-1);
 $('carouselNext').onclick = () => moveCarousel(1);
 $('carouselOpen').onclick = () => { if (carouselId) openSystem(carouselId); };
 $('systems').onkeydown = event => {
+  if (settings.layout === 'shelf' && moveShelf(event.key, event.target)) { event.preventDefault(); return; }
   if (settings.layout !== 'carousel' || ['INPUT', 'SELECT'].includes(event.target.tagName)) return;
   if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
     event.preventDefault();
@@ -565,7 +628,15 @@ function endDrag(event) {
 }
 window.addEventListener('pointerup', endDrag);
 window.addEventListener('pointercancel', endDrag);
-window.addEventListener('resize', updateCarouselPosition);
+window.addEventListener('resize', () => {
+  updateCarouselPosition();
+  if (settings.layout !== 'shelf' || $('home').hidden) return;
+  const focused = document.activeElement.closest('.card')?.dataset.system;
+  if (shelfColumnCount() !== shelfColumns) {
+    renderSystems();
+    if (focused) $('systems').querySelector(`.card[data-system="${focused}"] .card-main`)?.focus({ preventScroll: true });
+  } else placeShelfIcons();
+});
 reducedMotion.addEventListener('change', () => selectCarousel(carouselIndex, false));
 let wheelAt = 0;
 $('systems').addEventListener('wheel', event => {
@@ -596,6 +667,19 @@ function pollGamepad(time) {
       if (buttons[0] && !gamepadButtons[0]) carouselCards[carouselIndex]?.querySelector('.card-main').click();
       if (buttons[3] && !gamepadButtons[3]) carouselCards[carouselIndex]?.querySelector('.favorite').click();
       if (buttons[9] && !gamepadButtons[9]) openSettings('Appearance');
+    } else if (settings.layout === 'shelf' && !$('home').hidden) {
+      const direction = buttons[12] ? 'ArrowUp' : buttons[13] ? 'ArrowDown' : buttons[14] ? 'ArrowLeft' : buttons[15] ? 'ArrowRight' :
+        Math.abs(pad.axes[1] || 0) > .55 ? (pad.axes[1] < 0 ? 'ArrowUp' : 'ArrowDown') :
+        Math.abs(pad.axes[0] || 0) > .55 ? (pad.axes[0] < 0 ? 'ArrowLeft' : 'ArrowRight') : '';
+      if (direction && (direction !== gamepadDirection || time >= gamepadRepeat)) {
+        if (!$('systems').contains(document.activeElement)) $('systems').querySelector('.card-main')?.focus();
+        else moveShelf(direction);
+        gamepadRepeat = time + (direction === gamepadDirection ? 180 : 340);
+      }
+      gamepadDirection = direction;
+      if (buttons[0] && !gamepadButtons[0]) document.activeElement.closest('.card')?.querySelector('.card-main').click();
+      if (buttons[3] && !gamepadButtons[3]) document.activeElement.closest('.card')?.querySelector('.favorite').click();
+      if (buttons[9] && !gamepadButtons[9]) openSettings('Appearance');
     } else if (!$('detail').hidden && buttons[1] && !gamepadButtons[1]) $('back').click();
   } else {
     gamepadDirection = 0;
@@ -612,6 +696,10 @@ $('back').onclick = () => {
   $('detail').hidden = true; $('home').hidden = false; selected = null;
   requestAnimationFrame(() => {
     updateCarouselPosition();
+    if (settings.layout === 'shelf') {
+      if (shelfColumnCount() !== shelfColumns) renderSystems(); else placeShelfIcons();
+      $('systems').querySelector(`.card[data-system="${carouselId}"] .card-main`)?.focus();
+    }
     if (settings.layout === 'carousel') carouselCards[carouselIndex]?.querySelector('.card-main').focus({ preventScroll: true });
   });
 };

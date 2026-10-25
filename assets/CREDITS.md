@@ -1,6 +1,12 @@
 # Console icon references and credits
 
-The Shelf includes 52 newly generated, transparent 3D-style system icons in [`3d-icons/`](3d-icons/). The Switch 2 card and detail view both show the revised generated icon. The icons are stylized illustrations, **not photographs or rotatable 3D models**, and small details may differ from the real hardware. The original Wikimedia Commons photographs are linked below, not bundled in the public repository. Grid view can also show text cards; Swipe view always shows floating icons.
+The Shelf includes 52 newly generated, transparent 3D-style system icons in [`3d-icons/`](3d-icons/). The Switch 2 card and detail view both show the revised generated icon. The icons are stylized illustrations, **not photographs or rotatable 3D models**, and small details may differ from the real hardware. The original Wikimedia Commons photographs are linked below, not bundled in the public repository. Grid view can also show text cards; Swipe and Shelf always use the console illustrations.
+
+## Gallery and display shelves
+
+The [gallery backdrop](backgrounds/gallery-room-v1.png) and [empty display shelf](backgrounds/display-shelf-v1.png) were generated for this project with OpenAI's built-in image generation tool on 25 October 2026, from text prompts without external reference images. They are illustrative scenery. Consoles are rendered separately using the credited system illustrations; they are not baked into the shelves. The original generated PNGs are retained unchanged. Dimensions, SHA-256 and the shelf contact line are recorded in the [scenery manifest](backgrounds/manifest.json). Exact prompts: [gallery](backgrounds/gallery-room-v1.prompt.txt), [shelf](backgrounds/display-shelf-v1.prompt.txt). These two generated scenery assets are offered under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) to the extent rights are held; credit Console Shelf / Iswebro and note the AI-assisted generation.
+
+## Hardware references
 
 The first 18 icons were generated with the photographs credited below as visual references. The generated icons are changed, stylized illustrations. For icons based on CC BY-SA 3.0 photographs (PS3, Wii U, Super Nintendo, PSP and Dreamcast), the corresponding generated icon is offered under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) to the extent rights in the generated changes are held. Credit the photographers below and note the AI-assisted stylization if you reuse those icons. Other generated icons are offered under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) to the extent rights are held. The original source photographs are not distributed here. Console names and hardware designs belong to their respective owners.
 

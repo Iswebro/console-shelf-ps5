@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "assets": [
+    {
+      "id": "display-shelf-v1",
+      "role": "display shelf row",
+      "local": "assets/backgrounds/display-shelf-v1.png",
+      "bytes": 2183137,
+      "sha256": "65ca9f106f5842438dfea99cc5f8c783eb457dda6a34b9362e15e7a5065d04c1",
+      "width": 2172,
+      "height": 724,
+      "tool": "OpenAI built-in image_gen",
+      "prompt": "display-shelf-v1.prompt.txt",
+      "shelfContactY": 0.74
+    },
+    {
+      "id": "gallery-room-v1",
+      "role": "global gallery background",
+      "local": "assets/backgrounds/gallery-room-v1.png",
+      "bytes": 2191330,
+      "sha256": "ac05056899dbb25294d2659ee894c2db4099377f1939ee4572b8f7d47f5542fb",
+      "width": 1672,
+      "height": 941,
+      "tool": "OpenAI built-in image_gen",
+      "prompt": "gallery-room-v1.prompt.txt"
+    }
+  ]
+}

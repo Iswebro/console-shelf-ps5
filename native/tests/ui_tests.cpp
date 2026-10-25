@@ -100,6 +100,21 @@ void test_ui() {
     check(carousel.focus == 0, "Swipe loops right from the last console");
     input(carousel, Action::up);
     check(carousel.tools, "up from any Swipe position reaches the toolbar");
+    UiState display;
+    input(display, Action::layout);
+    input(display, Action::layout);
+    check(display.settings.preferences.layout == Layout::shelf, "Square includes the new Shelf layout");
+    input(display, Action::down);
+    check(display.focus == 4, "Shelf Down moves to the same column on the next tier");
+    input(display, Action::up);
+    check(display.focus == 0, "Shelf Up returns to the previous tier");
+    input(display, Action::left);
+    check(display.focus == 0, "Shelf does not wrap left onto another tier");
+    input(display, Action::layout);
+    check(display.settings.preferences.layout == Layout::grid, "the three-layout cycle returns to Grid");
+    input(display, Action::settings);
+    input(display, Action::left);
+    check(display.settings.preferences.layout == Layout::shelf, "settings can cycle layouts in reverse");
     const auto center = orbit_pose(0, 1760), near = orbit_pose(1, 1760), far = orbit_pose(2, 1760);
     check(center.scale > near.scale && near.scale > far.scale && center.z > near.z && near.z > far.z,
           "carousel selection dominates a progressively receding collection");

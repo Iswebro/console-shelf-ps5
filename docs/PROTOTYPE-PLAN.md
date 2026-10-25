@@ -5,7 +5,7 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 ## Current progress
 
 - [x] Public repository, source license, project references and image credits.
-- [x] Console-first Grid and floating-icon Swipe design with 52 system illustrations.
+- [x] Console-first Grid, floating-icon Swipe and lit display Shelf designs with 52 system illustrations; Shelf hardware visual acceptance pending.
 - [x] Curved carousel with centre emphasis, progressive depth, short wrap motion and timed native renderer checks.
 - [x] One settings entry with Appearance, Sort & filter and Consoles tabs; a separate direct layout toggle.
 - [x] Searchable individual console switches, whole-brand controls, Show/Hide results and saved visibility.
@@ -19,7 +19,7 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Read-only emulator/core and game discovery in configured existing library locations, checked from PC against the owner's console.
 - [x] The same configured discovery inside the PS5 app sandbox, with complete scan evidence.
 - [ ] Further dedicated-emulator and library-layout adapters.
-- [ ] Verified launch adapters and firmware 12.20 console tests.
+- [x] Four initial firmware 12.20 launch tests on UI-15: PSXS5/PS5SX2/PS5SX3 menus foreground; Mario Party 3 through RetroArch starts directly.
 - [x] Complete linked-library sources and a private source/object kit, cold-relinked to the earlier UI-only executable.
 - [x] Matching complete source/relink materials for UI-15's embedded launcher and SDK runtime; cold relink reproduces its executable exactly.
 - [ ] Source-linked prototype ZIP, SHA-256, install/rollback instructions and first release.
@@ -34,7 +34,7 @@ The `native/` model uses only hardware metadata and suggested core names. Instal
 
 ## First prototype acceptance
 
-1. **Open and navigate:** launch, browse, open settings, choose a console, back out and close cleanly using the DualSense. Test Grid and Swipe on a television, including a normal console restart and reopen.
+1. **Open and navigate:** launch, browse, open settings, choose a console, back out and close cleanly using the DualSense. Test Grid, Swipe and Shelf on a television, including a normal console restart and reopen.
 2. **Personalise:** persist layout, sort, filters, favorites, per-console visibility and preferred emulator in Shelf-owned storage using atomic writes. Recover gracefully from missing or damaged settings.
 3. **Discover real libraries:** identify installed emulators and native titles; scan verified existing game roots and playlists. Exclude app dependencies, BIOS, keys, saves, temporary files and incomplete downloads from the game list. Deduplicate without moving game files.
 4. **Launch honestly:** distinguish a verified direct-game route, an emulator-menu route and an unavailable route. Validate the loader and destination title before issuing a request. Start with the existing N64/RetroArch, PS1, PS2 and PS3 libraries. Add other adapters when their contracts are verified. Reference-only hardware remains browseable in All consoles and has no launch action.

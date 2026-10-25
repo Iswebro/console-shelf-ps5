@@ -3,7 +3,11 @@
 #include "catalog.generated.hpp"
 
 namespace shelf {
-enum class Layout { grid, swipe };
+enum class Layout { grid, swipe, shelf };
+inline constexpr std::array<std::string_view, 3> layout_labels = {"Grid", "Swipe", "Shelf"};
+inline constexpr Layout next_layout(Layout layout, int direction = 1) {
+    return static_cast<Layout>((static_cast<int>(layout) + direction % 3 + 3) % 3);
+}
 enum class GridLook { icons, cards };
 enum class Scope { all, available };
 enum class Sort { featured, name_asc, name_desc, newest, oldest, brand, games, favorites };
