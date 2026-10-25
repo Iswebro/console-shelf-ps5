@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "revision": "UI-24",
+  "programSourceCommit": "5c34e67aba3e51ca209d56215f97b586ff58c1e5",
+  "selfSHA256": "9834451dc2ca0f59f6fe487900ebe3ab55f08b23f53fb9aabf16faaac2eda88e",
+  "packageManifestSHA256": "baedb6e622ba571e3d5ff9f12cbcd34707aec9744d3f612226f5a055ecc1621b",
+  "status": "TV-logo switching passed on the console; final functional acceptance pending",
+  "basis": "Visual review of the owner's PS5 screenshot and complete 14.83-second recording, decoded successfully and sampled every half second, with enlarged header and TV badge comparisons",
+  "captureEvidence": {
+    "screenshot": {
+      "bytes": 288577,
+      "sha256": "719ab71b6e79418369283575aedb3a27592620ef7c60ee84e3737af9878961b4"
+    },
+    "video": {
+      "bytes": 20905984,
+      "sha256": "3bc40d115121fc656126221be1e755e75944dbc5ceae90ae7ec30742cddaca09",
+      "durationSeconds": 14.831483,
+      "sampledFrames": 30
+    }
+  },
+  "observed": [
+    "Settings cycles Vector, Gaming, Classic mint, Jade and back to Vector",
+    "The header and bundled TV intro badge change together for those choices",
+    "Returning to the room restores the unobscured TV with Vector selected"
+  ],
+  "earlierReport": "The unchanged-TV-logo report is preserved in ui24-owner-checks-2026-10-26.json; this later recording demonstrates that switching works",
+  "freshRuntimeReadback": "Raw installed program SHA-256 matches the UI-24 candidate; the latest startup marker identifies UI-24",
+  "writesToProgramOrSettings": false,
+  "finalRestartLayoutsPersistenceAndLaunchChecks": "The recording does not show these; outcome requested separately",
+  "privateCapturesPublished": false,
+  "publicBinaryRelease": "not published"
+}
