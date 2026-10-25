@@ -1,0 +1,31 @@
+{
+  "verifiedOn": "2026-10-25",
+  "scope": "Owned UI-only source folder transferred; manual registration and hardware test pending",
+  "titleId": "PPSA99541",
+  "sourceCommit": "159fc2fa688480cead132c894b62fd96a637a93a",
+  "fileCount": 74,
+  "bytes": 83805016,
+  "fullRawReadbacks": "all matched SHA-256 and size",
+  "selfReadModeResponse": "226 SELF transfer mode disabled",
+  "eboot": {
+    "path": "eboot.bin",
+    "bytes": 2536113,
+    "sha256": "4ecb081367e082c5f879c9902b97e7d5b4b76f040bb0d0ccd82f010008814acd"
+  },
+  "runtime": {
+    "path": "sce_module/libc.prx",
+    "bytes": 1284674,
+    "sha256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036"
+  },
+  "localZipSHA256": "5ab15d3bfbc9bec21a98b2f7a6c2a7b4c114535983656f06dbb784157bcfe841",
+  "hardwareTest": "awaiting owner display/controller/library check",
+  "payloadLaunch": "none",
+  "settingsChanges": "none",
+  "firmwareChanges": "none",
+  "publicRelease": "not published",
+  "releaseStillRequires": [
+    "hardware acceptance",
+    "validated launch routes",
+    "complete corresponding source and relinking kit"
+  ]
+}

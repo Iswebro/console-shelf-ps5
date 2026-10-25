@@ -11,7 +11,7 @@ Build Console Shelf as a native PS5 app and publish the first downloadable proto
 - [x] Searchable individual console switches, whole-brand controls, Show/Hide results and saved visibility.
 - [x] Original C++17 hardware catalogue and browsing model, compiled and tested on Windows with warnings treated as errors.
 - [x] Pinned project-local PS5 SDK/SDL/Clang toolchain and successful native executable cross-build.
-- [ ] Separate package identity, collision check and installable folder assembly.
+- [x] Separate unofficial identity, collision check, local UI-only test folder/ZIP, and full raw console file readbacks.
 - [x] Native C++/SDL renderer, navigation model and settings persistence exercised on PC.
 - [x] Simulated SDL controller event tests and 1080p renderer captures with persisted reopen.
 - [x] PS5 VideoOut/direct-memory integration, host-mocked failure/cleanup checks and executable structure validation.
@@ -44,4 +44,4 @@ The native C++ renderer and settings flow now run on Windows with the existing V
 
 The PS5 executable now cross-compiles using verified public SDK/PacBrew releases and a Clang 18 prefix extracted from pinned, signed-metadata-verified Ubuntu packages. Everything stays under the project cache; no apt, sudo or global configuration change is required. The clean-room runtime rebuilds twice to the reference hashes. Host mocks cover native display/memory failure paths, and the executable passes container integrity and independent ELF structure checks; see [build evidence scope](PS5-BUILD.md).
 
-Read-only discovery now works from PC against existing console libraries, with bounded metadata parsing, core evidence, disc reference handling and real native game lists. Next, implement verified launch helpers, choose/check the package identity, assemble the test folder and validate the shared UI/scanner inside the actual PS5 app. Finish corresponding source and relinking materials before releasing a binary. Keep local PS5 evidence separate from public source. There is no prototype download until the acceptance steps above are met.
+Read-only discovery now works from PC against existing console libraries, with bounded metadata parsing, core evidence, disc reference handling and real native game lists. A separate UI-only folder has been assembled and transferred to the owner's console; every file matched its full raw readback. The owner has been asked to check the display, controls and console-local scanner. Next, record those results, implement verified launch helpers, and finish corresponding source/relinking materials before releasing a binary. Keep local PS5 evidence separate from public source. There is no public prototype download until the acceptance steps above are met.
