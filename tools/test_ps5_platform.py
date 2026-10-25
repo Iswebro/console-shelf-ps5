@@ -8,7 +8,7 @@ flags, link = host_options(prefix)
 output = CACHE / "platform-tests"
 output.mkdir(parents=True, exist_ok=True)
 objects = []
-for name in ("alloc", "vout"):
+for name in ("alloc", "vout", "lifecycle"):
     obj = output / (name + ".o")
     run([prefix / "usr/bin/clang-18", *flags, "-std=c11", "-O1", "-Wall", "-Wextra", "-Werror",
          "-DGS_NATIVE", "-c", ROOT / "native/ps5/platform" / (name + ".c"), "-o", obj], env=env)

@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include <cassert>
+#include <csetjmp>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -21,6 +22,8 @@ void gs_free(void*);
 const char* gs_vout_init();
 void gs_vout_present(const void*, int);
 void gs_vout_shutdown();
+int gs_request_close();
+[[noreturn]] void gs_wait_for_close();
 }
 
 namespace {
@@ -36,6 +39,9 @@ bool expect_pixels = false;
 std::atomic<int> flips{0};
 std::array<int, 4> indices{};
 void* registered[2]{};
+std::jmp_buf shell_replaced;
+bool closing_probe = false;
+int close_calls = 0, close_status = 0, close_waits = 0;
 } // namespace
 
 extern "C" {
@@ -91,7 +97,14 @@ int sceKernelReleaseDirectMemory(std::int64_t physical, std::size_t size) {
     return -1;
 }
 int sceKernelUsleep(std::uint32_t) {
+    if (closing_probe && ++close_waits == 2)
+        std::longjmp(shell_replaced, 1);
     return 0;
+}
+int sceSystemServiceLoadExec(const char* path, const char* const* args) {
+    assert(std::strcmp(path, "exit") == 0 && args == nullptr);
+    ++close_calls;
+    return close_status;
 }
 int sceSystemServiceHideSplashScreen() {
     return 0;
@@ -183,6 +196,14 @@ int main() {
     fail = 0;
     gs_vout_shutdown();
     assert(outstanding == 0 && mappings == 0 && opens == 0);
+    assert(gs_request_close() == 0 && close_calls == 1);
+    closing_probe = true;
+    if (setjmp(shell_replaced) == 0)
+        gs_wait_for_close();
+    assert(close_calls == 1 && close_waits == 2); // An accepted async request must not reach CRT exit.
+    closing_probe = false;
+    close_status = -1;
+    assert(gs_request_close() == -1 && close_calls == 2); // No implicit second launch or raw-exit fallback.
     std::puts("PASS: PS5 platform host mocks: allocator overflow/preservation, five display failure paths, first "
-              "back-buffer selection, joined cleanup and failed-close memory retention.");
+              "back-buffer selection, joined cleanup, failed-close memory retention and asynchronous shell exit.");
 }

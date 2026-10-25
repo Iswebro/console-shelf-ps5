@@ -1,0 +1,46 @@
+{
+  "structuralCheck": "passed",
+  "hardwareTest": "diagnostic update not yet tested",
+  "firmware12_20": "unverified",
+  "elf": {
+    "bytes": 2655220,
+    "sha256": "197759a9a26042ecb133412b1b7ca7b694ec96042538f686badf51a311958b88",
+    "programHeaders": 14,
+    "loadSegments": 5,
+    "neededModules": [
+      "libSceAudioOut.prx",
+      "libSceLibcInternal.prx",
+      "libScePad.prx",
+      "libSceSystemService.prx",
+      "libSceUserService.prx",
+      "libSceVideoOut.prx",
+      "libkernel.prx"
+    ]
+  },
+  "self": {
+    "bytes": 2537953,
+    "sha256": "435019c99d1582b75f7837aeb0a721ee8949874c8ea60fa96c13a11f0dbd53b4"
+  },
+  "verifiedOn": "2026-10-25",
+  "scope": "Diagnostic UI update after first hardware startup failure; no corrected hardware acceptance yet",
+  "firstTrial": {
+    "ebootSHA256": "4ecb081367e082c5f879c9902b97e7d5b4b76f040bb0d0ccd82f010008814acd",
+    "result": "startup returned early; app crash; console responsive",
+    "signal": "SIGSYS",
+    "backtrace": "_start return address after CRT exit call",
+    "originalEarlyFailure": "not identified yet"
+  },
+  "changes": [
+    "asynchronous shell-exit wait prevents returning into CRT exit",
+    "owned startup stage journal",
+    "frame pointers retained for diagnostics"
+  ],
+  "sourceFingerprintSHA256": "a41df9e614b48586fd98a5b8ee14bb7299e45df2b484690b3e2c58a75c9a8ffa",
+  "checks": {
+    "asyncShellExitRegression": "passed",
+    "allocatorVideoOutMocks": "passed",
+    "nativeRendererCaptures": 11,
+    "damagedExecutableRejectionFixtures": 8
+  },
+  "publicRelease": "not published"
+}

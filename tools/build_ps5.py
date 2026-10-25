@@ -69,13 +69,13 @@ def build():
     print("Clean-room runtime rebuilt twice with the exact reference SHA-256.", flush=True)
     common = ["-target", "x86_64-sie-ps5", "-fvisibility-nodllstorageclass=default", "-isysroot", sdk,
               "-isystem", sdk / "target/include/c++/v1", "-isystem", sdk / "target/include",
-              "-fno-stack-protector", "-fno-plt", "-femulated-tls", "-O2", "-ffunction-sections", "-fdata-sections",
+              "-fno-stack-protector", "-fno-plt", "-femulated-tls", "-O2", "-fno-omit-frame-pointer", "-ffunction-sections", "-fdata-sections",
               "-DSHELF_PS5", "-DGS_NATIVE", "-DNDEBUG", "-D_REENTRANT", "-D_THREAD_SAFE",
               "-I", ROOT / "native/include", "-I", ROOT / "native/ps5", "-I", ROOT / "native/third_party",
               "-I", ports / "include/SDL2", "-I", ports / "include"]
     sources = [ROOT / "native/src" / (name + ".cpp") for name in ("model", "settings", "ui", "graphics", "codecs", "library", "filesystem", "metadata", "ftp", "host_main")]
     sources += [ROOT / "native/src/json.c"]
-    sources += [ROOT / "native/ps5/platform" / name for name in ("alloc.c", "vout.c", "shims.c")]
+    sources += [ROOT / "native/ps5/platform" / name for name in ("alloc.c", "vout.c", "shims.c", "lifecycle.c")]
     sources += [runtime / "app_crt.cpp", runtime / "app_cpp_runtime.cpp"]
     objects = []
     for source in sources:

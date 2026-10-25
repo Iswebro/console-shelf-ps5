@@ -23,12 +23,28 @@
 #include <sys/stat.h>
 #endif
 namespace {
+void startup(const char* stage, const char* detail = nullptr) {
+#ifdef SHELF_PS5
+    // Owned diagnostic file only: no account values or game paths are logged.
+    if (FILE* file = std::fopen("/data/console-shelf/startup.log", "ab")) {
+        std::fprintf(file, "%s%s%s\n", stage, detail ? ": " : "", detail ? detail : "");
+        std::fflush(file);
+        std::fclose(file);
+    }
+#else
+    (void)stage;
+    (void)detail;
+#endif
+}
 #ifdef SHELF_PS5
 struct PlatformExit {
     ~PlatformExit() {
         gs_vout_shutdown();
-        if (sceSystemServiceLoadExec)
-            sceSystemServiceLoadExec("exit", nullptr);
+        const int status = gs_request_close();
+        char message[48];
+        std::snprintf(message, sizeof(message), "0x%08x", static_cast<unsigned>(status));
+        startup("shell close requested", message);
+        gs_wait_for_close();
     }
 };
 #endif
@@ -180,18 +196,23 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
+    startup("main entered");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
+        startup("missing imports", missing);
         char message[1200];
         std::snprintf(message, sizeof(message), "Shelf cannot start: missing console functions: %s", missing);
         std::fprintf(stderr, "%s\n", message);
         gs_notify(message);
         return 1;
     }
+    startup("imports ready");
     if (SDL_SetMemoryFunctions(gs_malloc, gs_calloc, gs_realloc, gs_free) != 0) {
+        startup("SDL allocator rejected", SDL_GetError());
         gs_notify("Shelf could not initialise its memory allocator.");
         return 1;
     }
+    startup("SDL allocator ready");
     const char* assets = "/app0";
     const char* data = "/data/console-shelf";
 #else
@@ -253,6 +274,9 @@ int main(int argc, char** argv) {
         return 1;
     }
     if (!directory(data)) {
+        char error[64];
+        std::snprintf(error, sizeof(error), "errno=%d", errno);
+        startup("owned directory unavailable", error);
         std::fprintf(stderr, "Cannot create the requested owned data directory.\n");
 #ifdef SHELF_PS5
         gs_notify("Shelf cannot access its own settings folder: /data/console-shelf.");
@@ -262,9 +286,11 @@ int main(int argc, char** argv) {
     if (!captures)
         captures = data;
     if (std::strlen(captures) > 2000 || !directory(captures)) {
+        startup("capture directory unavailable");
         std::fprintf(stderr, "Cannot create capture directory.\n");
         return 1;
     }
+    startup("owned data ready");
     char settings_path[2304];
     std::snprintf(settings_path, sizeof(settings_path), "%s/settings.ini", data);
     shelf::UiState state;
@@ -283,6 +309,7 @@ int main(int argc, char** argv) {
         const bool ready = library_host ? shelf::init_read_only_ftp(ftp, library_host, library_port)
                                         : shelf::init_read_only_tree(tree, library_root);
         if (!ready) {
+            startup("library source init failed");
             std::fprintf(stderr, "Library source could not initialise.\n");
             return 1;
         }
@@ -292,9 +319,11 @@ int main(int argc, char** argv) {
             return 1;
         }
         library.value = new (memory) shelf::Library{};
+        startup("library scan starting");
         shelf::discover_library(library_host ? shelf::ftp_filesystem(ftp) : shelf::tree_filesystem(tree),
                                 *library.value);
         state.library = library.value;
+        startup(library.value->scan.complete ? "library scan complete" : "library scan partial");
         state.inventory = library.value->inventory;
         std::printf("Read-only library: %zu games, %zu emulator/core routes; scan %s.\n", library.value->game_count,
                     library.value->route_count, library.value->scan.complete ? "complete" : "partial");
@@ -319,25 +348,31 @@ int main(int argc, char** argv) {
                       "Library scan incomplete. Keep ftpsrv running and reopen Shelf to try again.");
     SDL_SetMainReady();
 #ifdef SHELF_PS5
+    startup("video starting");
     SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, "0");
     const char* video_error = gs_vout_init();
     if (video_error) {
+        startup("video failed", video_error);
         gs_notify(video_error);
         return 1;
     }
+    startup("video ready");
 #else
     if (headless)
         SDL_setenv("SDL_VIDEODRIVER", "dummy", 1);
 #endif
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    startup("SDL starting");
     if (SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS
 #ifndef SHELF_PS5
                  | SDL_INIT_VIDEO
 #endif
                  ) < 0) {
+        startup("SDL failed", SDL_GetError());
         std::fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
         return 1;
     }
+    startup("SDL ready");
     SDL_Window* window = nullptr;
 #ifndef SHELF_PS5
     window = headless
@@ -352,7 +387,9 @@ int main(int argc, char** argv) {
 #endif
     SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, 1920, 1080, 32, SDL_PIXELFORMAT_ABGR8888);
     SDL_Renderer* renderer = surface ? SDL_CreateSoftwareRenderer(surface) : nullptr;
+    startup("graphics starting");
     if (!renderer || !shelf::graphics_init(renderer, assets)) {
+        startup("graphics failed", SDL_GetError());
         std::fprintf(stderr, "Native renderer or packaged fonts could not load.\n");
         if (renderer)
             SDL_DestroyRenderer(renderer);
@@ -363,6 +400,7 @@ int main(int argc, char** argv) {
         SDL_Quit();
         return 1;
     }
+    startup("graphics ready");
     std::array<SDL_GameController*, 8> controllers{};
     if (!headless)
         for (int i = 0; i < SDL_NumJoysticks() && i < 8; ++i)
@@ -383,6 +421,7 @@ int main(int argc, char** argv) {
     int held_kind = 0;
     Uint8 held_button = 0;
     bool redraw = true;
+    bool first_frame = true;
     int axis_x = 0, axis_y = 0;
     unsigned script_time = 0;
     while (!state.exit_requested) {
@@ -530,6 +569,7 @@ int main(int argc, char** argv) {
             shelf::graphics_render(state, animate_script ? script_time : SDL_GetTicks(),
                                    animate_script || (!scripting && !headless));
             if (shelf::graphics_errors()) {
+                startup("render resource failed");
                 std::fprintf(stderr, "A packaged image/font or rendering resource failed to load.\n");
                 result = 1;
                 break;
@@ -544,6 +584,10 @@ int main(int argc, char** argv) {
 #ifdef SHELF_PS5
             gs_vout_present(surface->pixels, surface->pitch);
 #endif
+            if (first_frame) {
+                startup("first frame submitted");
+                first_frame = false;
+            }
             redraw = false;
         }
         if (token && (std::strncmp(token, "shot:", 5) == 0 || std::strncmp(token, "report:", 7) == 0)) {
