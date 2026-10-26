@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "shelf/json.hpp"
 #include "shelf/library.hpp"
+#include "shelf/artwork.hpp"
 #include "shelf/ui.hpp"
 #include <algorithm>
 #include <cstdio>
@@ -188,6 +189,38 @@ void test_library() {
               psswan_library->route_count == 1 && psswan_library->game_count == 2 &&
               psswan_library->inventory[find_system("ps1")].game_count == 2,
           "PSSwanStation is a PS1 emulator, with app-local and external games, not a native game tile");
+    Tree covers;
+    covers.file("/data/PSXS5/games/Exact/Exact.cue", "FILE \"Exact.bin\" BINARY\n");
+    covers.file("/data/PSXS5/games/Exact/Exact.bin", "TRACK");
+    covers.file("/data/PSXS5/library.txt", "Exact\tSLES-12345\t1\t/data/PSXS5/games/Exact/Exact.cue\tExact\n");
+    covers.file("/data/PSXS5/covers/3d/SLES-12345.png", "IMAGE");
+    covers.file("/data/PSXS5/covers/boxart/SLES-12345.png", "FRONT");
+    covers.file("/data/PSXS5/covers/3d/SLES-00000.png", "WRONG GAME");
+    covers.file("/data/PCSX2/games/PS2.iso", iso);
+    covers.file("/data/PCSX2/chd-serials.txt", "/data/PCSX2/games/PS2.iso\t32776\t1\tSLUS-12345\n");
+    covers.file("/data/PCSX2/covers/SLUS-12345.jpg", "FRONT");
+    auto cover_library = std::make_unique<Library>();
+    discover_library(covers.fs(), *cover_library);
+    check(cover_library->game_count == 2 && cover_library->artwork.found == 2 && cover_library->scan.complete,
+          "serial-indexed PS1 and size-checked PS2 covers are optional read-only metadata");
+    for (std::size_t i = 0; i < cover_library->game_count; ++i)
+        check(std::strstr(cover_library->games[i].artwork, "12345") && !cover_library->games[i].artwork_ready,
+              "only the exact game's artwork is selected; discovery does not claim decoded artwork");
+    for (std::size_t i = 0; i < cover_library->game_count; ++i)
+        if (cover_library->games[i].system == find_system("ps1"))
+            check(std::strstr(cover_library->games[i].artwork, "/boxart/"), "flat front artwork takes priority over a 3D case");
+    covers.file("/data/PCSX2/chd-serials.txt", "/data/PCSX2/games/PS2.iso\t1\t1\tSLUS-12345\n");
+    discover_library(covers.fs(), *cover_library);
+    check(cover_library->artwork.found == 1, "a stale PS2 serial row with the wrong game size cannot assign art");
+    covers.file("/data/PSXS5/library.txt", "Exact\tSLES-12345\t1\t/data/PSXS5/games/Exact/Exact.cue\tExact\nExact\tSLES-23456\t1\t/data/PSXS5/games/Exact/Exact.cue\tExact\n");
+    discover_library(covers.fs(), *cover_library);
+    check(cover_library->artwork.found == 0, "conflicting game-to-serial rows cannot choose a cover");
+    check(valid_artwork_source("/user/app/PPSA12345/sce_sys/icon0.png") &&
+              valid_artwork_source("/data/homebrew/PPSA99303/rpcs3/games/Own Game/PS3_GAME/ICON0.PNG"),
+          "registered native icons and PS3 game icons are eligible artwork");
+    for (const char* path : {"/data/PSXS5/retroachievements.ini", "/data/PSXS5/covers/../profile.png",
+                             "/data/PCSX2/settings/account.png", "/user/app/PPSA12345/other.png"})
+        check(!valid_artwork_source(path), "artwork reads cannot reach account files or escape a cover directory");
     UiState state;
     state.library = result.get();
     state.inventory = result->inventory;

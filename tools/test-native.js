@@ -15,7 +15,7 @@ const uiTests = path.join(root, 'native/tests/ui_tests.cpp');
 const navigationTests = path.join(root, 'native/tests/navigation_tests.cpp');
 const launchTests = path.join(root, 'native/tests/launch_tests.cpp');
 const includes = path.join(root, 'native/include');
-const librarySources = ['library.cpp','filesystem.cpp','metadata.cpp','json.c'].map(file=>path.join(root,'native/src',file));
+const librarySources = ['library.cpp','artwork_sources.cpp','filesystem.cpp','metadata.cpp','json.c'].map(file=>path.join(root,'native/src',file));
 const libraryTests = path.join(root, 'native/tests/library_tests.cpp');
 const output = path.join(build, process.platform === 'win32' ? 'model-tests.exe' : 'model-tests');
 function run(command, args, options = {}) {

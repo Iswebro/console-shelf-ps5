@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "shelf/library.hpp"
+#include "shelf/artwork.hpp"
 #include "shelf/json.hpp"
 #include "shelf/memory.hpp"
 #include <algorithm>
@@ -702,6 +703,7 @@ void discover_library(const ReadOnlyFs& fs, Library& out) {
     scanner.scan("/data/homebrew/PPSA99248/games", find_system("ps1"));
     scanner.scan("/data/psswanstation/games", find_system("ps1"));
     ps3_folder(checked, out, "/data/homebrew/PPSA99303/rpcs3/games");
+    discover_artwork(fs, out);
     for (std::size_t i = 0; i < out.game_count; ++i)
         ++out.inventory[out.games[i].system].game_count;
     std::sort(out.games.begin(), out.games.begin() + out.game_count, [](const LibraryGame& a, const LibraryGame& b) {

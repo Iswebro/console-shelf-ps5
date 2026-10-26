@@ -4,6 +4,7 @@
 #include "shelf/filesystem.hpp"
 #include "shelf/ftp.hpp"
 #include "shelf/graphics.hpp"
+#include "shelf/artwork.hpp"
 #include "shelf/launch_client.hpp"
 #include "shelf/memory.hpp"
 #include "shelf/navigation.hpp"
@@ -44,6 +45,7 @@ void startup(const char* stage, const char* detail = nullptr) {
 struct LibraryScan {
     shelf::ReadOnlyFs source;
     shelf::Library* library = nullptr;
+    const char* data_root = nullptr;
     SDL_atomic_t cancelled{0}, done{0};
     SDL_Thread* thread = nullptr;
     static bool stopping(void* raw) {
@@ -67,6 +69,7 @@ struct LibraryScan {
     static int run(void* raw) {
         auto& scan = *static_cast<LibraryScan*>(raw);
         shelf::discover_library({raw, list, stat, read, scan.source.cached}, *scan.library);
+        shelf::cache_artwork({raw, list, stat, read, scan.source.cached}, *scan.library, scan.data_root, stopping, raw);
         SDL_AtomicSet(&scan.done, 1);
         return 0;
     }
@@ -104,6 +107,10 @@ void accept_library(shelf::UiState& state, shelf::Library& library, shelf::ReadO
         std::printf("FTP diagnostics: %s\n", info);
     std::printf("Read-only library: %zu games, %zu emulator/core routes; scan %s.\n", library.game_count,
                 library.route_count, library.scan.complete ? "complete" : "partial");
+    std::snprintf(info, sizeof(info), "%zu sources; %zu cached; %zu missing; %zu unreadable", library.artwork.found,
+                  library.artwork.cached, library.artwork.missing, library.artwork.failed);
+    startup("library artwork", info);
+    std::printf("Library artwork: %s.\n", info);
     for (std::size_t i = 0; i < shelf::system_count; ++i)
         if (state.inventory[i].game_count || state.inventory[i].emulator_count)
             std::printf("  %.*s: %zu games, %zu routes\n", static_cast<int>(shelf::catalog[i].id.size()),
@@ -178,10 +185,12 @@ bool report(const char* path, const shelf::UiState& state) {
         }
     std::fprintf(file,
                  "],\"queryLength\":%zu,\"pickerQueryLength\":%zu,\"launchConnected\":%s,\"libraryGames\":%zu,"
-                 "\"libraryRoutes\":%zu,\"monochromeMissing\":%s,\"shelfSingle\":%s,\"reducedMotion\":%s,"
+                 "\"libraryRoutes\":%zu,\"artworkCached\":%zu,\"artworkMissing\":%zu,\"artworkFailed\":%zu,\"monochromeMissing\":%s,\"shelfSingle\":%s,\"reducedMotion\":%s,"
                  "\"shelfPage\":%d,\"shelfSelected\":%zu,\"tvMode\":%d,\"tvTextLength\":%zu,\"favoriteGames\":%zu}\n",
                  std::strlen(state.query), std::strlen(state.console_query), state.launch_connected ? "true" : "false",
                  state.library ? state.library->game_count : 0, state.library ? state.library->route_count : 0,
+                 state.library ? state.library->artwork.cached : 0, state.library ? state.library->artwork.missing : 0,
+                 state.library ? state.library->artwork.failed : 0,
                  p.monochrome_missing ? "true" : "false", p.shelf_single ? "true" : "false",
                  p.reduced_motion ? "true" : "false", state.focus / 8,
                  static_cast<std::size_t>(std::count(p.shelf_selected.begin(), p.shelf_selected.end(), true)),
@@ -318,7 +327,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-24 selected TV logo and registered home artwork; UI-15 helper unchanged");
+    startup("main entered", "ui-25 emulator artwork cache; dedicated PSSwanStation launch integration");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -451,6 +460,7 @@ int main(int argc, char** argv) {
         library.value = new (memory) shelf::Library{};
         scan.source = library_host ? shelf::ftp_filesystem(ftp) : shelf::tree_filesystem(tree);
         scan.library = library.value;
+        scan.data_root = data;
         ftp.cancelled = LibraryScan::stopping;
         ftp.cancel_context = &scan;
         if (!background_scan) {

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "shelf/graphics.hpp"
+#include "shelf/artwork.hpp"
 #include "shelf/carousel.hpp"
 #include "shelf/scene.generated.hpp"
 #include "shelf/memory.hpp"
@@ -318,14 +319,18 @@ Art* image(std::string_view name, bool monochrome = false) {
     slot->age = art_age;
     slot->monochrome = monochrome;
     char filename[2304];
-    const bool custom = name == "@room" || (name.size() > 7 && std::string_view(name.data(), 7) == "@intro/" &&
+    bool cover = name.size() == 23 && name.substr(0, 7) == "@cover/";
+    if (cover) for (char c : name.substr(7)) if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) cover = false;
+    const bool custom = cover || name == "@room" || (name.size() > 7 && std::string_view(name.data(), 7) == "@intro/" &&
                          find_system(std::string_view(name.data() + 7, name.size() - 7)) < system_count);
     if (name == "@room") std::snprintf(filename, sizeof(filename), "%s/tv-image.png", room_data);
+    else if (cover) std::snprintf(filename, sizeof(filename), "%s/covers/%s.png", room_data, slot->name + 7);
     else if (custom) std::snprintf(filename, sizeof(filename), "%s/intros/%s.png", room_data, slot->name + 7);
     else std::snprintf(filename, sizeof(filename), "%s/%s", root, slot->name);
     if (custom) {
         int iw = 0, ih = 0, ic = 0;
-        if (!room_data[0] || !stbi_info(filename, &iw, &ih, &ic) || iw < 1 || ih < 1 || iw > 2048 || ih > 2048)
+        const int limit = cover ? 960 : 2048;
+        if (!room_data[0] || !stbi_info(filename, &iw, &ih, &ic) || iw < 1 || ih < 1 || iw > limit || ih > limit)
             return slot;
     }
     int channels = 0;
@@ -726,7 +731,9 @@ void room_tv(const UiState& state) {
         }
         if (count) {
             const auto& game = state.library->games[games[(render_time / (tv_periods[p.tv_period] * 1000u)) % count]];
-            picture(catalog[game.system].image, x + w / 2 - 115, y + 15, 230, 150, 215);
+            char cover[32]; artwork_name(game, cover);
+            picture(game.artwork_ready ? std::string_view(cover) : catalog[game.system].image,
+                    x + w / 2 - 115, y + 15, 230, 150, 215);
             tv_lines(game.name, x + 35, y + 176, w - 70, 25, {233, 249, 246, 230});
             centered("FROM YOUR FAVOURITES", x + w / 2, y + h - 31, 15, {161, 207, 195, 210}, true);
         } else {
@@ -907,7 +914,9 @@ void detail(const UiState& state) {
     text("YOUR SYSTEM COLLECTION", 80, 145, 20, purple, true);
     text(s.name, 80, 194, 58, white, true, 1100);
     text(s.brand, 84, 275, 27, muted);
-    if (state.settings.preferences.layout == Layout::shelf) {
+    if (state.page == Page::library && state.inventory[id].game_count) {
+        // Selected-game artwork occupies this side of the library below.
+    } else if (state.settings.preferences.layout == Layout::shelf) {
         const auto& plane = room_scene::tiers[0];
         const int contact = room_y(static_cast<float>(plane.feet));
         shelf_picture(s.image, room_x(1320), contact, 310, static_cast<int>(plane.art_height * room_scale()), false,
@@ -951,7 +960,9 @@ void detail(const UiState& state) {
                 const auto& game = state.library->games[games.indices[static_cast<std::size_t>(start + row)]];
                 const int y = 546 + row * 52;
                 box(80, y, 1000, 46, !state.tools && state.game_focus == start + row);
-                text(game.name, 100, y + 7, 23, white, !state.tools && state.game_focus == start + row, 895);
+                char cover[32]; artwork_name(game, cover);
+                picture(game.artwork_ready ? std::string_view(cover) : s.image, 91, y + 2, 40, 42);
+                text(game.name, 147, y + 7, 23, white, !state.tools && state.game_focus == start + row, 850);
                 const auto key = game_favorite_key(game);
                 if (std::find(state.settings.game_favorites.begin(), state.settings.game_favorites.end(), key) != state.settings.game_favorites.end())
                     text("*", 1026, y + 9, 27, purple, true);
@@ -960,6 +971,16 @@ void detail(const UiState& state) {
                 char position[80];
                 std::snprintf(position, sizeof(position), "%d / %zu", state.game_focus + 1, games.count);
                 text(position, 84, 973, 19, muted);
+                const auto selected_index = std::min(games.count - 1, static_cast<std::size_t>(std::max(0, state.game_focus)));
+                const auto& selected = state.library->games[games.indices[selected_index]];
+                rounded(1150, 254, 690, 730, 28, {10, 18, 21, 255});
+                text("YOUR GAME COLLECTION", 1190, 281, 18, {170, 199, 190, 255}, true, 600);
+                glow(1220, 390, 540, 450, accent(s), 46);
+                char cover[32]; artwork_name(selected, cover);
+                picture(selected.artwork_ready ? std::string_view(cover) : s.image, 1190, 327, 610, 550);
+                text(selected.name, 1190, 916, 25, white, true, 600);
+                text(selected.artwork_ready ? "From your collection" : "Artwork not available yet",
+                     1190, 953, 18, muted, false, 600);
             }
         }
         char actions[240];

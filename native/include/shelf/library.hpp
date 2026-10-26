@@ -32,6 +32,13 @@ struct LibraryGame {
     char name[256]{}, path[path_capacity]{}, title_id[32]{};
     MediaKind kind = MediaKind::cartridge;
     std::uint64_t size = 0;
+    char artwork[path_capacity]{};
+    std::uint64_t artwork_bytes = 0;
+    std::int64_t artwork_modified = 0;
+    bool artwork_ready = false;
+};
+struct ArtworkSummary {
+    std::size_t found = 0, cached = 0, missing = 0, failed = 0;
 };
 // Stable local preference identity; this is not a security or file-integrity hash.
 std::uint64_t game_favorite_key(const LibraryGame& game);
@@ -46,6 +53,7 @@ struct Library {
     std::size_t route_count = 0, game_count = 0;
     Inventory inventory{};
     ScanSummary scan;
+    ArtworkSummary artwork;
 };
 // No source directory is created or changed. Caller owns this comparatively large object.
 void discover_library(const ReadOnlyFs& files, Library& result);
