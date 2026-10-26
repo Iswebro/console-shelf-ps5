@@ -7,7 +7,7 @@ Updated 26 October 2026. The [public v0.1.0-beta.1 release](https://github.com/I
 | Destination | Status | Record |
 | --- | --- | --- |
 | [RecompStore](https://recompstore.com/submit) | Submitted for developer review. The form confirmed “Thanks, it's in.” Placement is pending. | App: isShelf; developer: Iswebro; private contact: Discord `@iswebro`; title ID: `PPSA99541`; release ZIP, tagged install guide, icon, backdrop and one PS5 screenshot supplied. |
-| [ProsperoStore catalog](https://github.com/darkxex/ps5-homebrew-catalog) | [PR #777](https://github.com/darkxex/ps5-homebrew-catalog/pull/777) is open from `Iswebro:codex/list-isshelf-beta`. Catalog validation and release scanning passed; maintainer review is pending. | Adds `apps/PPSA99541.json` with the public release URL, exact SHA-256 and pinned icon. The PR explains isShelf's distinct features and credits Estante. |
+| [ProsperoStore](https://prosperostore.net/app/PPSA99541/) | [PR #777](https://github.com/darkxex/ps5-homebrew-catalog/pull/777) merged. The web listing now responds with isShelf; appearance and installation in the native PS5 store remain to be checked on console. | `apps/PPSA99541.json` contains the public release URL, exact SHA-256 and pinned icon. The PR explains isShelf's distinct features and credits Estante. |
 | [BlackBox](https://github.com/D3ATHLY/blackbox) | [Issue #59](https://github.com/D3ATHLY/blackbox/issues/59) asks whether third-party native PS5 apps are eligible and how to submit them. Its published README has no native-app intake format. This is an inquiry, not a listing. | Repository, release and title ID linked for the maintainer. |
 
 The former `blackbearreloaded/ps5-homebrew-catalog` URL resolves to `darkxex/ps5-homebrew-catalog`. One catalog PR covers ProsperoStore; no duplicate entry is needed.
@@ -35,8 +35,8 @@ The owner's console intro videos are private media. They are not in the public r
 
 ## After review
 
-1. When ProsperoStore merges PR #777, verify that `PPSA99541` appears on the [ProsperoStore site](https://prosperostore.net/) and in its native PS5 app before claiming it is live.
-2. Check [PS5 Library](https://github.com/deox1111/ps5-library#the-default-catalog), [Overdrive Homebrew](https://github.com/MyLuxy/overdrive#features) and [PS5 Scene Wire](https://github.com/SpiderNic96/ps5-scene-wire#track-another-app). They consume or refer to the ProsperoStore catalog; no separate native-app submission route was identified. If Scene Wire misses the app after the merge, propose its one-line repository entry in `api/_sources.js`.
+1. On the PS5, confirm that isShelf appears in the native ProsperoStore app and that its install or update path presents the expected `v0.1.0-beta.1` release. The [web listing](https://prosperostore.net/app/PPSA99541/) is available.
+2. Check [PS5 Library](https://github.com/deox1111/ps5-library#the-default-catalog), [Overdrive Homebrew](https://github.com/MyLuxy/overdrive#features) and [PS5 Scene Wire](https://github.com/SpiderNic96/ps5-scene-wire#track-another-app). They consume or refer to the ProsperoStore catalog; no separate native-app submission route was identified. If Scene Wire misses the app, propose its one-line repository entry in `api/_sources.js`.
 3. Wait for RecompStore's response at Discord `@iswebro` and verify the public listing before announcing placement.
 4. If BlackBox confirms that it accepts native PS5 app folders, follow its specified submission route. Do not place an app record into its game-metadata catalog without that confirmation.
 5. [PKG-Zone](https://pkg-zone.com/?console=PS5) has PS5 entries but no verified submission route for a `PPSA99541/` app-folder ZIP. [myfl.uk](https://myfl.uk/about/) is a curated resource directory, not a native installer catalog. Revisit either only if an appropriate route is published.

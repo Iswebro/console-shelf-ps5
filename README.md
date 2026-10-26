@@ -18,6 +18,8 @@ A native C++/SDL app, tested on PS5 firmware **12.20**, with a separate [browser
 
 Follow the [installation, recovery and removal guide](docs/PS5-INSTALL.md). Download [MANIFEST.json](https://github.com/Iswebro/console-shelf-ps5/releases/download/v0.1.0-beta.1/MANIFEST.json) for per-file verification and [HARDWARE-CHECKS.json](https://github.com/Iswebro/console-shelf-ps5/releases/download/v0.1.0-beta.1/HARDWARE-CHECKS.json) for tested scope. This beta is verified on **firmware 12.20** with the existing homebrew enabler, ShadowMountPlus, ELF loader and FTP service. No PC host is needed to run it. Emulators and games are supplied separately.
 
+isShelf is also [listed on ProsperoStore](https://prosperostore.net/app/PPSA99541/). See [store submission status](docs/STORE-LISTINGS.md) for the other destinations.
+
 ## New to isShelf? Start here
 
 | I want to… | Guide |
