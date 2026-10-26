@@ -8,14 +8,20 @@
 namespace shelf {
 namespace {
 using View = std::string_view;
+View part(View value, std::size_t start, std::size_t count = View::npos) {
+    // No throwing substr dependency in the console's minimal C++ runtime.
+    if (start >= value.size()) return {};
+    const auto available = value.size() - start;
+    return View(value.data() + start, count < available ? count : available);
+}
 View base(View path) {
     const auto slash = path.rfind('/');
-    return path.substr(slash == path.npos ? 0 : slash + 1);
+    return part(path, slash == path.npos ? 0 : slash + 1);
 }
 View stem(View path) {
     path = base(path);
     const auto dot = path.rfind('.');
-    return path.substr(0, dot);
+    return part(path, 0, dot);
 }
 bool serial(View value) {
     if (value.size() != 10 || value[4] != '-') return false;
@@ -64,7 +70,7 @@ void serial_index(const ReadOnlyFs& fs, Library& library, const char* path, std:
         std::size_t count = 0;
         while (count < fields.size()) {
             const auto tab = line.find('\t');
-            fields[count++] = line.substr(0, tab);
+            fields[count++] = part(line, 0, tab);
             if (tab == line.npos) break;
             line.remove_prefix(tab + 1);
         }
@@ -125,23 +131,23 @@ bool thumbnail(const ReadOnlyFs& fs, LibraryGame& game, const char* kind) {
 bool valid_artwork_source(View path) {
     if (!valid_virtual_path(path)) return false;
     const auto dot = path.rfind('.');
-    const View ext = dot == path.npos ? View{} : path.substr(dot);
+    const View ext = dot == path.npos ? View{} : part(path, dot);
     if (ext != ".png" && ext != ".PNG" && ext != ".jpg" && ext != ".JPG" && ext != ".jpeg" && ext != ".JPEG") return false;
     for (View prefix : {"/data/PSXS5/covers/", "/data/PCSX2/covers/", "/data/SwanStationPS5/covers/",
                         "/data/psswanstation/covers/", "/data/homebrew/PPSA99248/covers/",
                         "/data/homebrew/PPSA99169/thumbnails/"})
-        if (path.size() > prefix.size() && path.substr(0, prefix.size()) == prefix) return true;
+        if (path.size() > prefix.size() && part(path, 0, prefix.size()) == prefix) return true;
     constexpr View native = "/user/app/", icon = "/sce_sys/icon0.png";
-    if (path.substr(0, native.size()) == native && path.size() == native.size() + 9 + icon.size() &&
-        path.substr(path.size() - icon.size()) == icon)
+    if (part(path, 0, native.size()) == native && path.size() == native.size() + 9 + icon.size() &&
+        part(path, path.size() - icon.size()) == icon)
         return true;
     constexpr View ps3 = "/data/homebrew/PPSA99303/rpcs3/games/", ps3_icon = "/PS3_GAME/ICON0.PNG";
-    if (path.substr(0, ps3.size()) == ps3 &&
-        path.size() > ps3.size() + ps3_icon.size() && path.substr(path.size() - ps3_icon.size()) == ps3_icon) return true;
+    if (part(path, 0, ps3.size()) == ps3 &&
+        path.size() > ps3.size() + ps3_icon.size() && part(path, path.size() - ps3_icon.size()) == ps3_icon) return true;
     for (View prefix : {"/data/PSXS5/games/", "/data/PCSX2/games/", "/data/SwanStationPS5/games/",
                         "/data/homebrew/PPSA99248/games/", "/data/psswanstation/games/",
                         "/data/homebrew/PPSA99169/content/"})
-        if (path.substr(0, prefix.size()) == prefix && (stem(path) == "cover" || stem(path) == "front")) return true;
+        if (part(path, 0, prefix.size()) == prefix && (stem(path) == "cover" || stem(path) == "front")) return true;
     return false;
 }
 void discover_artwork(const ReadOnlyFs& fs, Library& library) {
@@ -177,7 +183,7 @@ void discover_artwork(const ReadOnlyFs& fs, Library& library) {
         if (!found && system == "ps1" && serial(game.title_id))
             found = named(fs, game, "/data/PSXS5/covers/3d", game.title_id) || named(fs, game, "/data/PSXS5/covers", game.title_id);
         if (!found && game.kind != MediaKind::native_title) {
-            const View folder = View(game.path).substr(0, View(game.path).rfind('/'));
+            const View folder = part(View(game.path), 0, View(game.path).rfind('/'));
             if (base(folder) != "games" && base(folder) != "psx" && base(folder) != "ps1")
                 found = named(fs, game, folder, "cover") || named(fs, game, folder, "front");
         }
