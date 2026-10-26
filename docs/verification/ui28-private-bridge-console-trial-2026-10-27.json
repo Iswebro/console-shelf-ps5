@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "dateBrisbane": "2026-10-27",
+  "checkedUTC": "2026-10-26T16:30:43.065016+00:00",
+  "status": "completed; menu control and console-rendered images verified; control stopped",
+  "contentVersion": "00.100.028",
+  "compiledSourceCommit": "704b70b474aefd684e30a9b3e31707f637fe67d2",
+  "applicationSelfSHA256": "0985ba55631023e56fb0d32f027fc11069924532d81de4586614f830e127f470",
+  "installationRecord": "ui28-private-bridge-install-2026-10-27.json",
+  "previousFailedTrialRecord": "ui27-private-bridge-admission-2026-10-27.json",
+  "ownerActivation": "Owner reported UI TEST CONTROL staying enabled after L3 + R3; initial response and rendered header confirmed active control",
+  "transport": "existing owner FTP service; fixed ui-test files in existing app data folder",
+  "evidence": {
+    "localRun": ".cache/bridge-console-trial/20261026T160647Z-4d8cae1c",
+    "localCloseout": "control-postcheck-ee6206fb/receipt.json",
+    "initialReadOnlyObservations": 1,
+    "remoteRequestsSentOnce": 18,
+    "menuActionsApplied": 17,
+    "stopRequests": 1,
+    "verifiedPNGCount": 19,
+    "contiguousSequences": [0, 18],
+    "allFramesVerifiedAgainstResponseBytesAndFNV": true,
+    "eachFrameVisuallyInspectedBeforeNextAction": true,
+    "unknownActionOutcomes": 0,
+    "automaticActionResends": 0
+  },
+  "observedActionsInOrder": [
+    "right", "left", "settings", "back", "tab", "tab", "tab", "tab",
+    "right", "right", "confirm", "down", "confirm", "down", "right", "back", "back", "stop"
+  ],
+  "observedBehaviour": [
+    "Initial home selection 3DO; right selected FinalBurn Neo and left restored 3DO",
+    "Settings opened Appearance and back returned home without changing a setting",
+    "Shelf paging advanced through pages 2 to 5 of 7; directional input selected PSP then PlayStation 1",
+    "PlayStation 1 details showed 59 discovered games and PSXS5 as preferred emulator",
+    "Show game library opened a list with thumbnails and a large Alundra selected-game cover",
+    "Down selected Alundra 2 with matching cover; right paged to game 10 of 59, Cool Boarders 3, with matching cover",
+    "Two back actions returned to the console shelf; stop removed the control header while leaving isShelf open"
+  ],
+  "representativeFrames": [
+    {
+      "sequence": 1,
+      "description": "FinalBurn Neo after right",
+      "sha256": "516ac4db42f97380bbd84af9aa5848406cc1a57c70c1c4026f9c6cf2416f16a5"
+    },
+    {
+      "sequence": 3,
+      "description": "Appearance settings open",
+      "sha256": "eb6342d0b85fa2435aa0b0a57b2ac7b6a0951b6b7674f60d3f3d456b9ab76da4"
+    },
+    {
+      "sequence": 13,
+      "description": "Alundra selected, game 1 of 59",
+      "sha256": "d90f0aac36894e72c65e4cf46babb92b7ea043394906f5beea94320cd1b1eb8d"
+    },
+    {
+      "sequence": 14,
+      "description": "Alundra 2 selected, game 2 of 59",
+      "sha256": "7d1378c2373b87db2caba597b986b2466e69ac7bbd6798ac204628904a970cf8"
+    },
+    {
+      "sequence": 15,
+      "description": "Cool Boarders 3 selected, game 10 of 59",
+      "sha256": "f662db1eb2f8ba21b73e3f899b06b7eb5b88823fbc50d4f5686b32b61cca6a7e"
+    },
+    {
+      "sequence": 18,
+      "description": "Home shelf with PlayStation 1 selected and control header removed",
+      "sha256": "e1744cc4f74be604d354575070f311d8accec3541e0cbfde63c31466d090db75"
+    }
+  ],
+  "preferencesComparedAgainstPrecontrolRawBytes": {
+    "settings.ini": {
+      "bytes": 6070,
+      "sha256": "f24fae93b9a4b9af64d44b03db2e563bd6c5110800c4f63aca48d8df152f0e3e",
+      "byteIdentical": true
+    },
+    "settings.ini.bak": {
+      "bytes": 6082,
+      "sha256": "4ec25a72c12ab4d0420068414b5181d9d38ff9151a0af04857181daca311e712",
+      "byteIdentical": true
+    }
+  },
+  "finalResponse": {
+    "sequence": 18,
+    "revision": 24,
+    "action": "stop",
+    "result": "stopped",
+    "active": false,
+    "page": 0,
+    "selectedSystem": "ps1",
+    "frameBytes": 2778017,
+    "frameFNV64": "a925f57418ff84b5"
+  },
+  "limitations": [
+    "Images are fresh frames from isShelf's PS5 renderer; physical HDMI output was not captured",
+    "Discrete action and image loop, not continuous video",
+    "No game or emulator launch requested; visible PS1 route was PSXS5 Library only",
+    "No deliberate settings change or reopen persistence trial; settingsSaved true alone does not prove a save occurred",
+    "Natural ten-minute expiry was not exercised on hardware; explicit stop was verified",
+    "This is a bounded navigation trial, not complete app acceptance or public release approval"
+  ],
+  "psnUsed": false,
+  "remoteGameOrEmulatorLaunches": 0,
+  "helperExecutedDuringTrial": false,
+  "publicReleaseChanged": false
+}

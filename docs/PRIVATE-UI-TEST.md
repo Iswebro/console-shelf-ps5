@@ -47,6 +47,9 @@ actions are `snapshot`, `up`, `down`, `left`, `right`, `confirm`, `back`, `setti
 `layout`, `favorite`, `previous-tab`, `tab` and `stop`. Direction commands move once.
 Back is a tap and cannot become a hold-to-close gesture. Settings changes save through
 isShelf's existing settings code, so testing a setting can change the owner's preferences.
+The response's `settingsSaved: true` means no save failure occurred while processing
+the request; navigation can return it without attempting a save. Compare saved files
+or test a deliberate setting change and reopen before claiming persistence.
 
 The transport uses only fixed prefixed filenames. It creates no private subdirectory
 that would prevent the FTP service from accessing the exchange under another user ID.
@@ -81,4 +84,25 @@ new local data folder. It checks navigation and new images, details/settings, pe
 stale and duplicate commands, stopping control while leaving the app open, and the
 disabled default. FTP transport tests use a local fixture. These checks establish PC
 behaviour. Console activation, FTP exchange, responsiveness and physical display
-remain unverified until tested on the PS5.
+require separate PS5 verification.
+
+## UI28 console trial, 27 October 2026
+
+The owner enabled UI28 with L3 + R3. A read-only initial observation and 18 remote
+requests produced 19 verified console-rendered PNGs. Seventeen menu actions covered
+console selection, shelf paging, opening and closing Appearance, PS1 details, the
+59-game PS1 library, game selection and library paging. Alundra, Alundra 2 and Cool
+Boarders 3 displayed their corresponding selected-game covers. Each action's frame
+was inspected before choosing the next action. The final stop request returned
+`active: false`, removed the control indicator and left isShelf open on the console
+shelf with PlayStation 1 selected. Both preference files matched the precontrol
+baseline byte for byte.
+
+This establishes the PS5 menu-action and rendered-image loop over the existing FTP
+service. It does not establish HDMI output, continuous video, emulator control,
+game launching, deliberate preference persistence or natural ten-minute expiry.
+The visible PS1 route during this trial was PSXS5, Library only. The earlier UI27
+expiry and FTP permission failures remain recorded separately.
+
+See `verification/ui28-private-bridge-console-trial-2026-10-27.json` for the bounded
+trial result and saved-image identities.
