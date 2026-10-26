@@ -30,4 +30,4 @@ The artwork reader uses only the two named game-to-serial indexes, public game m
 
 The 26 October 2026 check found 92 library entries. Eighty images came from the existing PS1, PS2, PS3 and native PS5 libraries. Ten matching N64 front covers from the [Libretro thumbnail collection](https://github.com/libretro-thumbnails/Nintendo_-_Nintendo_64) were added to the owner's private cache. The two GameShark utilities had no exact image in the checked sources and use the PS1 fallback.
 
-Native PC rendering and image/cache checks are separate from acceptance on the physical PS5. The private PS5 build is prepared for the owner's next check.
+Native PC rendering and image/cache checks are separate from acceptance on the physical PS5. The private PS5 build and 90-image cache are installed, with all changed files read back. The owner will check the physical display after work. [Verification record](verification/emulator-artwork-2026-10-26.json).
