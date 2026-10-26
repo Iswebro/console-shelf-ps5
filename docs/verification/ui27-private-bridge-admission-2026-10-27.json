@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "dateBrisbane": "2026-10-27",
+  "contentVersion": "00.100.027",
+  "status": "control trial failed before remote menu commands",
+  "installedSelfSHA256": "b3ee10c5a796c0de4c48a001c7a58b9b25f5a8ed2e3bda801377cb8a13dda24f",
+  "installRawProgramReadbacks": 242,
+  "rollbackCopiesVerified": 5,
+  "preferencesPreservedOnInstall": true,
+  "ownerEnableGestureObservedInStartupLog": true,
+  "ownerScreenshotSHA256": "38a83d33f50a610101c4bc50c21f64f9753498652cf87ab95969f3290370185e",
+  "ownerScreenshotReviewed": true,
+  "ownerScreenshotShows": "UI test control expired. Click L3 + R3 to enable again.",
+  "remoteMenuCommandsSent": 0,
+  "failures": [
+    {
+      "kind": "immediate-expiry",
+      "cause": "loop timestamp sampled before local activation was subtracted unsigned from newer start timestamp, appearing to exceed ten minutes"
+    },
+    {
+      "kind": "ftp-access-denied",
+      "observedError": "550 Permission denied",
+      "cause": "new ui-test directory mode0700 owner1 blocks existing FTP service; existing owned data root mode0777"
+    }
+  ],
+  "successorFixes": [
+    "fresh post-input control clock and bounded wrap-safe elapsed checks",
+    "fixed prefixed files directly in existing data root; no permission change or new directory"
+  ],
+  "physicalControlAcceptance": "NOT_RUN",
+  "psnUsed": false,
+  "publicReleaseChanged": false
+}

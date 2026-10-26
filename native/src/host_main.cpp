@@ -8,6 +8,10 @@
 #include "shelf/launch_client.hpp"
 #include "shelf/memory.hpp"
 #include "shelf/navigation.hpp"
+#if !defined(SHELF_PS5) || defined(SHELF_UI_TEST_BRIDGE)
+#define SHELF_HAS_UI_TEST_BRIDGE
+#include "shelf/ui_test_bridge.hpp"
+#endif
 #include <SDL.h>
 #include <algorithm>
 #include <cerrno>
@@ -328,7 +332,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-27 original game cases; dedicated PSSwanStation launch integration");
+    startup("main entered", "ui-30 original game cases; owner-enabled UI28 bridge and scan stack fix retained");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -360,6 +364,9 @@ int main(int argc, char** argv) {
     unsigned short library_port = 2121;
     bool scan_only = false;
     bool background_requested = false;
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+    bool ui_test_requested = false;
+#endif
 #ifndef SHELF_PS5
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--asset-root") == 0 && i + 1 < argc)
@@ -388,6 +395,8 @@ int main(int argc, char** argv) {
             scan_only = true;
         else if (std::strcmp(argv[i], "--background-scan") == 0)
             background_requested = true;
+        else if (std::strcmp(argv[i], "--ui-test") == 0)
+            ui_test_requested = true;
         else {
             std::fprintf(stderr, "Unknown or incomplete host option: %s\n", argv[i]);
             return 1;
@@ -398,6 +407,12 @@ int main(int argc, char** argv) {
     (void)argc;
     (void)argv;
     library_host = "127.0.0.1";
+#endif
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+    if (ui_test_requested && (script_arg || scan_only)) {
+        std::fprintf(stderr, "UI test control requires the interactive event loop.\n");
+        return 1;
+    }
 #endif
     if (library_host && library_root) {
         std::fprintf(stderr, "Choose one explicit library source.\n");
@@ -547,7 +562,11 @@ int main(int argc, char** argv) {
     char script[8192]{};
     if (script_arg)
         std::strcpy(script, script_arg);
-    else if (headless)
+    else if (headless
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+             && !ui_test_requested
+#endif
+    )
         std::strcpy(script, "shot:home.png");
     char* next = script[0] ? script : nullptr;
     bool scripting = next != nullptr;
@@ -579,6 +598,54 @@ int main(int argc, char** argv) {
     unsigned measured_frames = 0, max_render_ms = 0, max_present_ms = 0;
     unsigned script_time = 0;
     unsigned tv_redraw_at = 0;
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+    shelf::UiTestBridge ui_test;
+    shelf::UiTestRequest ui_test_request;
+    std::uint64_t ui_revision = 1;
+    unsigned ui_test_started = 0, ui_test_polled = 0, ui_test_capture_at = 0;
+    bool ui_test_pending = false, ui_test_applied = false, ui_test_saved = true;
+    bool ui_test_finish = false;
+    const char* ui_test_result = "ready";
+    SDL_JoystickID ui_test_controller = -1;
+    bool ui_test_left = false, ui_test_right = false, ui_test_chord = false;
+    auto local_ui_changed = [&]() {
+        ++ui_revision;
+        if (ui_test_pending && ui_test_request.sequence)
+            ui_test_result = "interrupted";
+    };
+    auto arm_ui_test = [&]() {
+        char session[33];
+        std::snprintf(session, sizeof(session), "%016llx%016llx",
+                      static_cast<unsigned long long>(SDL_GetPerformanceCounter()),
+                      static_cast<unsigned long long>(std::time(nullptr)));
+        if (!ui_test.start(data, session)) {
+            std::snprintf(state.notice, sizeof(state.notice), "UI test control could not open its own folder.");
+            redraw = true;
+            return;
+        }
+        ui_test_started = SDL_GetTicks();
+        ui_test_polled = ui_test_started;
+        ui_test_request = {};
+        std::strcpy(ui_test_request.name, "snapshot");
+        ui_test_pending = true;
+        ui_test_applied = false;
+        ui_test_saved = true;
+        ui_test_finish = false;
+        ui_test_result = "ready";
+        ui_test_capture_at = ui_test_started + 500;
+        ++ui_revision;
+        std::snprintf(state.notice, sizeof(state.notice), "UI test control enabled for 10 minutes. L3 + R3 disables it.");
+        startup("ISSHELF_PRIVATE_UI_TEST_BRIDGE_V1", "owner enabled; menu actions only");
+        redraw = true;
+    };
+    if (ui_test_requested)
+        arm_ui_test();
+#ifdef SHELF_UI_TEST_BRIDGE
+    std::snprintf(state.notice, sizeof(state.notice), "Private UI test build: click L3 + R3 to enable menu control.");
+    // This retained marker is independently checked before release packaging.
+    startup("ISSHELF_PRIVATE_UI_TEST_BRIDGE_V1", "disabled until owner clicks L3 + R3");
+#endif
+#endif
     while (!state.exit_requested) {
         char* token = nullptr;
         if (scripting) {
@@ -654,6 +721,9 @@ int main(int argc, char** argv) {
         if (scan.ready()) {
             scan.stop();
             accept_library(state, *library.value, ftp, false);
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+            local_ui_changed();
+#endif
             library_accepted = true;
             redraw = true;
         }
@@ -666,6 +736,37 @@ int main(int argc, char** argv) {
         }
         SDL_Event event{};
         while (SDL_PollEvent(&event)) {
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+            if (event.type == SDL_KEYDOWN || event.type == SDL_TEXTINPUT ||
+                event.type == SDL_CONTROLLERBUTTONDOWN || event.type == SDL_CONTROLLERBUTTONUP)
+                local_ui_changed();
+            if ((event.type == SDL_CONTROLLERBUTTONDOWN || event.type == SDL_CONTROLLERBUTTONUP) &&
+                (event.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSTICK ||
+                 event.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)) {
+                if (!ui_test_left && !ui_test_right)
+                    ui_test_controller = event.cbutton.which;
+                if (ui_test_controller == event.cbutton.which) {
+                    const bool down = event.type == SDL_CONTROLLERBUTTONDOWN;
+                    (event.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSTICK ? ui_test_left : ui_test_right) = down;
+                    if (ui_test_left && ui_test_right && !ui_test_chord && !state.presentation.loading &&
+                        !state.launch_busy && !close_gesture.active()) {
+                        if (ui_test.active()) {
+                            ui_test.stop();
+                            ui_test_pending = true;
+                            ui_test_result = "owner-stopped";
+                            ui_test_capture_at = SDL_GetTicks();
+                            std::snprintf(state.notice, sizeof(state.notice), "UI test control disabled.");
+                            redraw = true;
+                        } else
+                            arm_ui_test();
+                        ui_test_chord = true;
+                    }
+                    if (!ui_test_left && !ui_test_right)
+                        ui_test_chord = false;
+                }
+                continue;
+            }
+#endif
             shelf::Action action = shelf::Action::up;
             bool mapped = false;
             if (event.type == SDL_QUIT)
@@ -674,6 +775,10 @@ int main(int argc, char** argv) {
                 shelf::text_input(state, event.text.text);
                 redraw = true;
             } else if (event.type == SDL_WINDOWEVENT) {
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+                if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+                    local_ui_changed();
+#endif
                 if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
                     navigation.cancel();
                 if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
@@ -727,6 +832,13 @@ int main(int argc, char** argv) {
                         break;
                     }
             } else if (event.type == SDL_CONTROLLERDEVICEREMOVED) {
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+                if (ui_test_controller == event.cdevice.which) {
+                    ui_test_left = ui_test_right = ui_test_chord = false;
+                    ui_test_controller = -1;
+                    local_ui_changed();
+                }
+#endif
                 navigation.disconnected(event.cdevice.which);
                 close_gesture.cancel(event.cdevice.which);
                 for (auto& controller : controllers)
@@ -740,6 +852,10 @@ int main(int argc, char** argv) {
                     continue;
                 mapped = navigation.axis(event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX, event.caxis.value,
                                          event.caxis.which, SDL_GetTicks(), action);
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+                if (mapped)
+                    local_ui_changed();
+#endif
             } else if (event.type == SDL_KEYDOWN) {
                 mapped = true;
                 switch (event.key.keysym.sym) {
@@ -891,13 +1007,71 @@ int main(int argc, char** argv) {
         shelf::Action repeated{};
         if (!scripting && !state.presentation.loading && !close_gesture.closing() && navigation.tick(now, repeated)) {
             shelf::input(state, repeated);
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+            local_ui_changed();
+#endif
             redraw = true;
         }
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+        // L3 + R3 may have armed control after this loop's older `now` sample.
+        // Re-read the clock after input; the bounded helper also refuses stale
+        // samples without breaking normal unsigned clock wrap.
+        const std::uint32_t control_now = SDL_GetTicks();
+        if (ui_test.active() && shelf::ui_test_elapsed(control_now, ui_test_started, 600000)) {
+            ui_test.stop();
+            ui_test_pending = true;
+            ui_test_result = "expired";
+            ui_test_capture_at = control_now;
+            std::snprintf(state.notice, sizeof(state.notice), "UI test control expired. Click L3 + R3 to enable again.");
+            redraw = true;
+        }
+        if (ui_test.active() && !ui_test_pending && shelf::ui_test_elapsed(control_now, ui_test_polled, 250)) {
+            ui_test_polled = control_now;
+            if (ui_test.poll(ui_test_request)) {
+                ui_test_pending = true;
+                ui_test_applied = false;
+                ui_test_saved = true;
+                ui_test_finish = false;
+                ui_test_result = "ok";
+                ui_test_capture_at = control_now + 500;
+                if (ui_test_request.operation == shelf::UiTestOperation::stop) {
+                    ui_test_finish = true;
+                    ui_test_result = "stopped";
+                } else if (ui_test_request.revision != ui_revision)
+                    ui_test_result = "stale";
+                else if (state.presentation.loading || state.launch_busy || close_gesture.active() ||
+                         state.exit_requested || state.presentation.reveal < 1)
+                    ui_test_result = "busy";
+                else if (ui_test_request.operation == shelf::UiTestOperation::action) {
+                    // Trial state prevents a remote Confirm from leaving isShelf.
+                    if (!shelf::apply_ui_test_action(state, ui_test_request.action))
+                        ui_test_result = "launch-blocked";
+                    else {
+                        navigation.cancel();
+                        close_hint.dismiss();
+                        ++ui_revision;
+                        ui_test_applied = true;
+                    }
+                }
+                redraw = true;
+            }
+        }
+        if (ui_test_pending && shelf::ui_test_elapsed(control_now, ui_test_capture_at, 0))
+            redraw = true;
+        state.ui_test_active = ui_test.active() && !ui_test_finish;
+#endif
         if (state.changed) {
             if (!shelf::save_settings(settings_path, state.settings)) {
                 std::snprintf(state.notice, sizeof(state.notice),
                               "Settings could not be saved. Your previous settings are kept.");
                 result = 1;
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+                local_ui_changed();
+                if (ui_test_pending) {
+                    ui_test_saved = false;
+                    ui_test_result = "save-failed";
+                }
+#endif
             }
             state.changed = false;
         }
@@ -953,6 +1127,19 @@ int main(int argc, char** argv) {
             if (captured)
                 last_visibility_at = SDL_GetTicks();
 #endif
+#endif
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+            if (ui_test_pending && shelf::ui_test_elapsed(SDL_GetTicks(), ui_test_capture_at, 0)) {
+                const bool captured = shelf::graphics_capture(ui_test.frame_path());
+                if (ui_test_finish)
+                    ui_test.stop();
+                const bool published = ui_test.publish(ui_test_request, ui_revision, ui_test_result,
+                                                       ui_test_applied, ui_test_saved, state, captured);
+                ui_test_pending = false;
+                ui_test_applied = false;
+                if (!published)
+                    ui_test.stop();
+            }
 #endif
             if (preparing) {
                 state.presentation.preparing = false;
@@ -1031,6 +1218,12 @@ int main(int argc, char** argv) {
         if (!scripting)
             SDL_Delay(16);
     }
+#ifdef SHELF_HAS_UI_TEST_BRIDGE
+    if (ui_test.active() || ui_test_pending) {
+        ui_test.stop();
+        ui_test.publish(ui_test_request, ui_revision, "closed", ui_test_applied, ui_test_saved, state, false);
+    }
+#endif
     scan.stop();
     launcher.stop();
     for (auto* controller : controllers)

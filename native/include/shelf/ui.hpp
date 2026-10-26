@@ -47,6 +47,7 @@ struct UiState {
     bool tools = false, keyboard_for_consoles = false, changed = false, exit_requested = false;
     bool keyboard_for_tv = false;
     bool launch_connected = false, launch_requested = false, launch_busy = false;
+    bool ui_test_active = false;
     bool close_hint_requested = false;
     LaunchRequest pending_launch;
     char query[128]{}, console_query[128]{}, notice[192]{};

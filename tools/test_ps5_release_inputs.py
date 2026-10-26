@@ -5,11 +5,18 @@ import json
 import posixpath
 import re
 import unittest
-from prepare_ps5_release import (digest, packaged_icon_source, public_guides, public_install_notice, public_source_documents, verify_asset_sources,
+from prepare_ps5_release import (digest, packaged_icon_source, public_guides, public_install_notice, public_source_documents, require_public_build, verify_asset_sources,
                                  verify_console_manifest, verify_source_members)
 
 
 class ReleaseInputTests(unittest.TestCase):
+    def test_private_ui_test_build_cannot_be_released(self):
+        require_public_build({})
+        require_public_build({"uiTestBridge": False})
+        for value in (True, 1, "false", None):
+            with self.assertRaisesRegex(ValueError, "Private UI test"):
+                require_public_build({"uiTestBridge": value})
+
     def test_release_notice_updates_a_previous_release_and_preserves_instructions(self):
         old = "Native PS5 prototype v0.1.0-alpha.1, tested on firmware **12.20**. The app appears as **isShelf**."
         instructions = "\n\n## Recovery\nPreserve existing settings and saves.\n"
