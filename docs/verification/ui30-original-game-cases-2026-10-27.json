@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "dateBrisbane": "2026-10-27",
+  "status": "installed; console case appearance check pending",
+  "contentVersion": "00.100.030",
+  "compiledSourceCommit": "a67fcc8bf9128c1cc948f1183529a06c9f6e7493",
+  "compiledBranch": "codex/game-cases-ui28",
+  "caseSourceCommit": "faba2a4d636702c8a7fa51a72fa3b53bad3514b8",
+  "privateBridgeBaselineCommit": "240c463",
+  "references": [
+    {
+      "kind": "owner PS5 Create screenshot",
+      "sourceTitleId": "PPSA97510",
+      "bytes": 545293,
+      "sha256": "8c1a192904d890bd895b02ed55a6f9b92ce2378c9e200a7dc9d42c05a23e45c3",
+      "decodedWith": "Windows Imaging Component",
+      "privateMediaNotInGit": true
+    },
+    {
+      "kind": "owner PS5 Create screenshot",
+      "sourceTitleId": "PPSA99203",
+      "bytes": 517847,
+      "sha256": "02bb88495a54af9e5ca800853a7d7c056101f62916524f52c0506a63c5d018b1",
+      "decodedWith": "Windows Imaging Component",
+      "privateMediaNotInGit": true
+    }
+  ],
+  "presentation": {
+    "ps1": "Prefer existing covers/3d images and preserve their original jewel-case silhouette without applying another case",
+    "ps2": "Tall black plastic DVD case with rounded geometry, surface-normal lighting and the exact matching original spine when available",
+    "ps2BaseRGB": [
+      4,
+      5,
+      7
+    ],
+    "n64": "Wide cardboard packaging for western releases; portrait packaging for Japanese releases",
+    "otherProfiles": "NES/SNES, GB/GBC/GBA, DS/3DS, GameCube/Wii/WiiU/Switch, PSP/PS3/PS4/PS5, Sega disc/cartridge cases, PC Engine and Atari; varied packaging follows the front scan",
+    "nonCoverImages": "Native icons, screenshots and arcade posters retain their original proportions; no invented retail front art",
+    "spineFallback": "A plain spine with the game title when original spine artwork is unavailable; this does not establish an exact reproduction of every edition",
+    "largeCaseRendering": "Two-times supersampling and a two-entry render-target texture cache",
+    "fallback": "Direct geometry if the target renderer does not support render-target textures",
+    "budget": "Spines share the existing 64 MiB transfer budget and per-image bounds"
+  },
+  "checks": {
+    "nativeModelDiscoveryLaunchAndBridgeProtocol": "passed, including the retained 64 KiB worker regression",
+    "nativeHostBuild": "passed",
+    "caseRenderer": "passed: actual pixels verify deep-black PS2 plastic, distinct original spine, wide N64 box, pre-rendered PS1 proportions and square icon preservation",
+    "casePixelMeasurements": {
+      "dvd": {
+        "minx": 174,
+        "maxx": 450,
+        "miny": 17,
+        "maxy": 476,
+        "width": 277,
+        "height": 460,
+        "count": 120484
+      },
+      "spine": {
+        "minx": 157,
+        "maxx": 171,
+        "miny": 15,
+        "maxy": 477,
+        "width": 15,
+        "height": 463,
+        "count": 5105
+      },
+      "n64": {
+        "minx": 51,
+        "maxx": 579,
+        "miny": 57,
+        "maxy": 481,
+        "width": 529,
+        "height": 425,
+        "count": 207199
+      },
+      "jewel": {
+        "minx": 35,
+        "maxx": 574,
+        "miny": 0,
+        "maxy": 549,
+        "width": 540,
+        "height": 550,
+        "count": 297000
+      },
+      "icon": {
+        "minx": 30,
+        "maxx": 579,
+        "miny": 0,
+        "maxy": 549,
+        "width": 550,
+        "height": 550,
+        "count": 302500
+      }
+    },
+    "ftpIntegration": "passed: existing spine reads/cache reuse, metadata kinds, optional corrupt artwork, coalesced replies and cancellation",
+    "existingRendererSuite": "80 captures passed before the final case-material refinement; targeted case captures passed after the refinement and merge",
+    "privateClientTests": 15,
+    "privateNativeActionImageIntegration": "passed; local fixture only",
+    "publicReleaseInputTests": 15,
+    "publicPrivateBridgeGuard": "passed; this candidate is rejected by public release preparation",
+    "ps5CrossBuildAndStructure": "passed",
+    "packageIntegrity": "242 ZIP members and hashes passed",
+    "physicalCaseAppearance": "pending owner console check"
+  },
+  "applicationSelf": {
+    "path": "eboot.bin",
+    "bytes": 2846481,
+    "sha256": "c37293cc15163e8fa35ee3c5ae6e7027e03a5e48cdc8dec08cc5a573df06b577"
+  },
+  "privatePackage": {
+    "members": 242,
+    "bytes": 104412477,
+    "sha256": "b545b94949f32305bb3d83c6dd48b83d1e51b4906ea7c76762661f804446fac5"
+  },
+  "installation": {
+    "baselineContentVersion": "00.100.028",
+    "baselineSelfSHA256": "0985ba55631023e56fb0d32f027fc11069924532d81de4586614f830e127f470",
+    "sourceAndRegisteredVersions": "00.100.030",
+    "changedProgramRecords": 5,
+    "fullRawReadbacksMatched": 5,
+    "sameDirectoryRollbackCopiesVerified": 5,
+    "preferencesPreservedByteForByte": true,
+    "preferencesSHA256": "f24fae93b9a4b9af64d44b03db2e563bd6c5110800c4f63aca48d8df152f0e3e",
+    "introAndArtworkListingsUnchanged": true,
+    "privateBridgePreserved": true,
+    "privateBridgeRequiresLocalEnablement": true,
+    "privateBridgeRemoteGameLaunchStillRefused": true,
+    "embeddedHelperSHA256": "45bf41142bbb9f692840e8eea574792d39746100a9267c3b1eb52c366251a4ea",
+    "publicReleaseChanged": false,
+    "precheckObservation": "The older UI27 case install stopped before writes when the installed UI28 baseline differed; the final candidate merges that stable private bridge and preserves the current preferences",
+    "coordination": "Owner explicitly authorized messaging Improve the isShelf app; that chat confirmed a console-write/control hold and reserved UI31 for its next candidate"
+  }
+}
