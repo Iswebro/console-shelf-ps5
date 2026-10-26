@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-27",
-  "status": "installed; owner opening check pending",
+  "status": "owner confirmed stable opening and selected-game PS1 launch; artwork appearance pending visual check",
   "contentVersion": "00.100.026",
   "compiledSourceCommit": "5242a375af32169f35fda0f3aee2631b970aca21",
   "failure": {
@@ -60,9 +60,31 @@
     "ftpIntegration": "passed, including background commit using the explicit worker stack, cached/corrupt artwork, coalesced replies and cancellation",
     "ps5CrossBuildAndStructure": "passed",
     "privatePackageIntegrity": "all 242 members passed ZIP and SHA-256 verification",
-    "physicalOpening": "pending owner",
+    "physicalOpening": "passed: owner confirmed isShelf opens and stays responsive",
     "physicalArtworkDisplay": "pending owner",
-    "directSelectedPS1Game": "pending owner"
+    "directSelectedPS1Game": "passed: owner selected Castlevania: Symphony of the Night in isShelf and it played through PSSwanStation"
+  },
+  "hardwareConfirmation": {
+    "date": "2026-10-27",
+    "timezone": "Australia/Brisbane",
+    "basis": "Owner report in this chat, corroborated by a fresh read-only capture of startup and launch logs",
+    "ownerReply": "yes, opens and stays responsive, even tried to open Castlevania symphony of the night using isShelf on PS5swanstation and it worked",
+    "observedContentVersion": "00.100.026",
+    "libraryScanComplete": true,
+    "games": 92,
+    "emulatorRoutes": 56,
+    "artworkSources": 80,
+    "artworkCached": 90,
+    "artworkMissing": 2,
+    "artworkUnreadable": 0,
+    "firstFtpFailure": "none",
+    "launchRoute": "psswan",
+    "launchStatus": "foreground-observed",
+    "observedTargetTitleId": "PPSA99248",
+    "startupLogSHA256": "b231d65930a4163934910a75f68d3d050a6a236fec303cb4b8c2124efadf6033",
+    "launchStatusSHA256": "cf15a54365fc69f0211bf60aafd792ff9a83df2aa09b8c7871b2db21e12baad4",
+    "launchHelperLogSHA256": "8afae29a28903b0633dce054d8628b06c781f4ca94b90fd3880dad879aa5db8a",
+    "scope": "Startup responsiveness and one selected PS1 game on the owner's PS5; artwork appearance and other game/format combinations are not established by this report"
   },
   "applicationSelf": {
     "bytes": 2821537,
