@@ -8,7 +8,7 @@ The first collection checks focus on PS1, PS2 and Nintendo 64. PS1 prefers the e
 
 Additional case profiles cover NES, SNES, Game Boy/Color/Advance, DS/3DS, GameCube, Wii/Wii U, Switch, PSP, PS3/4/5, Mega Drive/Master System, Sega CD/Saturn/Dreamcast, PC Engine and Atari. The profile controls the case proportions, depth and material independently of the source image. Region and original scan orientation resolve common packaging differences. Computer packaging follows the scan's own proportions; arcade artwork remains a poster. A generic spine title is used when separate original spine art is unavailable, so this is not a claim that every edition's spine is an exact scanned reproduction.
 
-Case rendering adds perspective, distinct front/side/top faces, plastic highlights, contact shadows and a soft floor reflection. Large cases are drawn at twice the display resolution into a bounded two-entry texture cache for smooth edges and inexpensive subsequent frames. Actual app icons and screenshots keep their original proportions until a real retail front cover is available.
+Case rendering adds perspective, distinct front/side/top faces, contact shadows and a soft floor reflection. Plastic cases have a rounded solid shell; surface normals control the small glossy highlights while PS2's flat plastic remains deep black. This replaces the earlier flat gray rim. Large cases are drawn at twice the display resolution into a bounded two-entry texture cache for smooth edges and inexpensive subsequent frames. Actual app icons and screenshots keep their original proportions until a real retail front cover is available.
 
 ## Existing emulator artwork
 

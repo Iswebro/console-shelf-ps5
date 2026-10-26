@@ -449,6 +449,58 @@ void case_front(const CaseView& view, float left, float top, float right, float 
                 SDL_Texture* texture = nullptr, int divisions = 1) {
     case_quad(view, {{{left,top,z},{right,top,z},{right,bottom,z},{left,bottom,z}}}, tint, texture, {0,0,1,1}, divisions);
 }
+void plastic_case_shell(const CaseView& view, const CaseProfile& profile, float cw, float depth, Uint8 alpha) {
+    // A rounded solid, with lighting derived from its surface normals. The
+    // narrow curved shoulder catches light; the flat black plastic stays dark.
+    constexpr int samples = 10;
+    constexpr float radius = .007f;
+    const int count = view.scale > 150 ? samples : 4;
+    const float half[3] = {cw / 2, .5f, depth / 2};
+    const auto coordinate = [&](int axis, int index) {
+        const float edge = half[axis] - radius;
+        if (index < count/2) return -edge - radius * std::cos(index * 1.57079633f / (count/2-1));
+        return edge + radius * std::sin((index-count/2) * 1.57079633f / (count/2-1));
+    };
+    const int axes[3][3] = {{0,2,1},{1,0,2},{2,0,1}};
+    const float signs[3] = {-1,1,1};
+    for (int face = 0; face < 3; ++face) {
+        SDL_Vertex vertices[samples*samples]{};
+        int indices[(samples-1)*(samples-1)*6];
+        const int normal_axis = axes[face][0], u_axis = axes[face][1], v_axis = axes[face][2];
+        for (int row = 0; row < count; ++row) for (int column = 0; column < count; ++column) {
+            float p[3]{};
+            p[normal_axis] = half[normal_axis] * signs[face];
+            p[u_axis] = coordinate(u_axis, column); p[v_axis] = coordinate(v_axis, row);
+            float core[3], n[3];
+            for (int a = 0; a < 3; ++a) {
+                core[a] = std::max(-half[a]+radius, std::min(half[a]-radius, p[a]));
+                n[a] = p[a] - core[a];
+            }
+            const float length = std::sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2]);
+            for (int a = 0; a < 3; ++a) { n[a] /= length; p[a] = core[a] + n[a]*radius; }
+            const float nx = n[0]*std::cos(view.yaw)+n[2]*std::sin(view.yaw);
+            const float rz = -n[0]*std::sin(view.yaw)+n[2]*std::cos(view.yaw);
+            const float ny = n[1]*std::cos(view.pitch)-rz*std::sin(view.pitch);
+            const float nz = n[1]*std::sin(view.pitch)+rz*std::cos(view.pitch);
+            const float diffuse = std::max(0.f, -.345f*nx+.603f*ny+.719f*nz);
+            float specular = std::max(0.f, -.176f*nx+.307f*ny+.936f*nz);
+            for (int power = 0; power < 6; ++power) specular *= specular;
+            float strip = std::min(1.f, std::max(0.f, -.2f*nx-.1f*ny+.975f*nz));
+            for (int power = 0; power < 7; ++power) strip *= strip;
+            const float gloss = specular * 120.f + strip * 34.f + std::max(0.f, ny)*2.f;
+            const auto channel = [&](unsigned char base) { return static_cast<Uint8>(std::min(255.f, base*(.45f+.55f*diffuse)+gloss)); };
+            auto& vertex = vertices[row*count+column];
+            vertex.position = view.project({p[0],p[1],p[2]});
+            vertex.color = {channel(profile.red),channel(profile.green),channel(profile.blue),alpha};
+        }
+        int at = 0;
+        for (int row = 0; row < count-1; ++row) for (int column = 0; column < count-1; ++column) {
+            const int a = row*count+column, b = a+1, c = b+count, d = a+count;
+            for (int index : {a,b,c,a,c,d}) indices[at++] = index;
+        }
+        if (SDL_RenderGeometry(renderer,nullptr,vertices,count*count,indices,at) < 0) ++resource_errors;
+    }
+}
 void case_spine_title(const CaseView& view, const LibraryGame& game, float left, float depth, Uint8 alpha) {
     auto* f = font(20, true);
     if (!f) return;
@@ -475,7 +527,7 @@ void draw_game_case(const LibraryGame& game, Art* entry, int x, int y, int w, in
     const bool large = h > 100, cardboard = profile.material == CaseMaterial::cardboard;
     const float cw = profile.width / profile.height, depth = profile.depth / profile.height;
     const float left = -cw / 2, right = cw / 2, front = depth / 2, rear = -front;
-    CaseView view{cardboard ? .4f : .36f, .11f};
+    CaseView view{cardboard ? .4f : .52f, .11f};
     float minx = 100, maxx = -100, miny = 100, maxy = -100;
     for (float px : {left, right}) for (float py : {-.5f, .5f}) for (float pz : {rear, front}) {
         const auto p = view.project({px, py, pz});
@@ -506,28 +558,31 @@ void draw_game_case(const LibraryGame& game, Art* entry, int x, int y, int w, in
                 static_cast<Uint8>(std::min(255.f, profile.green * factor)),
                 static_cast<Uint8>(std::min(255.f, profile.blue * factor)),alpha};
     };
-    const std::array<CasePoint,4> spine{{{left,.5f,rear},{left,.5f,front},{left,-.5f,front},{left,-.5f,rear}}};
-    case_quad(view, spine, shade(.55f));
+    const bool plastic = profile.material == CaseMaterial::plastic;
+    const float shoulder = plastic ? .008f : 0;
+    if (plastic) plastic_case_shell(view, profile, cw, depth, alpha);
+    else {
+        case_quad(view, {{{left,.5f,rear},{left,.5f,front},{left,-.5f,front},{left,-.5f,rear}}}, shade(.55f));
+        case_quad(view, {{{left,.5f,rear},{right,.5f,rear},{right,.5f,front},{left,.5f,front}}}, shade(1.35f));
+        case_front(view, left, .5f, right, -.5f, front, shade(.88f));
+    }
+    const std::array<CasePoint,4> spine{{{left,.5f-shoulder,rear+shoulder},{left,.5f-shoulder,front-shoulder},
+                                       {left,-.5f+shoulder,front-shoulder},{left,-.5f+shoulder,rear+shoulder}}};
     if (game.artwork_spine_ready) {
         char spine_key[32]; spine_name(game, spine_key);
         auto* spine_art = image(spine_key);
         if (spine_art && spine_art->texture) case_quad(view, spine, {197,203,208,alpha}, spine_art->texture, {0,0,1,1}, large ? 8 : 1);
     } else if (large) case_spine_title(view, game, left-.0005f, depth, static_cast<Uint8>(190u * alpha / 255u));
-    case_quad(view, {{{left,.5f,rear},{right,.5f,rear},{right,.5f,front},{left,.5f,front}}}, shade(1.35f));
-    case_front(view, left, .5f, right, -.5f, front, shade(.88f));
-    const float rim = cardboard ? .004f : .014f;
+    const float rim = cardboard ? .004f : plastic ? .009f : .014f;
     const float aspect = static_cast<float>(entry->w) / entry->h;
     const float art_height = std::min(1 - rim*2, (cw - rim*2) / aspect), art_width = art_height * aspect;
     case_front(view, -art_width/2, art_height/2, art_width/2, -art_height/2, front+.0005f,
                {255,255,255,alpha}, entry->texture, large ? 8 : 1);
-    const Uint8 edge = static_cast<Uint8>((cardboard ? 43u : 130u) * alpha / 255u);
-    case_front(view, left+.002f, .496f, left+rim*.72f, -.496f, front+.001f, {215,226,235,edge});
-    case_front(view, left+.004f, .499f, right-.004f, .496f, front+.001f, {239,242,240,edge});
-    case_front(view, right-.004f, .496f, right-.001f, -.496f, front+.001f, {16,21,24,alpha});
-    if (large && !cardboard) {
-        case_quad(view, {{{left+rim,.49f,front+.002f},{left+cw*.22f,.49f,front+.002f},
-                          {left+cw*.52f,-.49f,front+.002f},{left+cw*.35f,-.49f,front+.002f}}},
-                  {255,255,255,static_cast<Uint8>(14u * alpha / 255u)}, nullptr, {0,0,1,1}, 1, 2);
+    if (!plastic) {
+        const Uint8 edge = static_cast<Uint8>((cardboard ? 43u : 130u) * alpha / 255u);
+        case_front(view, left+.002f, .496f, left+rim*.72f, -.496f, front+.001f, {215,226,235,edge});
+        case_front(view, left+.004f, .499f, right-.004f, .496f, front+.001f, {239,242,240,edge});
+        case_front(view, right-.004f, .496f, right-.001f, -.496f, front+.001f, {16,21,24,alpha});
     }
 }
 void game_picture(const LibraryGame& game, int x, int y, int w, int h, Uint8 alpha = 255) {

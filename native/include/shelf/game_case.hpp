@@ -17,7 +17,7 @@ inline CaseProfile game_case_profile(const LibraryGame& game, float art_aspect) 
     const bool pal = std::strstr(game.name, "Europe") || std::strstr(game.name, "Australia") ||
                      std::strncmp(game.title_id, "SLES", 4) == 0 || std::strncmp(game.title_id, "SCES", 4) == 0;
     if (id == "ps1") return {142, 125, pal ? 17.f : 10.f, CaseMaterial::jewel, 64, 69, 73};
-    if (id == "ps2") return {135, 190, 14, CaseMaterial::plastic, 25, 27, 31};
+    if (id == "ps2") return {135, 190, 14, CaseMaterial::plastic, 4, 5, 7};
     if (id == "ps3") return {135, 171, 14, CaseMaterial::plastic, 117, 123, 129};
     if (id == "ps4" || id == "ps5") return {135, 171, 14, CaseMaterial::plastic, 24, 75, 156};
     if (id == "psp") return {105, 177, 14, CaseMaterial::plastic, 151, 155, 160};

@@ -261,7 +261,7 @@ void test_library() {
     shape.system = find_system("ps2");
     std::strcpy(shape.name, "Example (Europe)");
     profile = game_case_profile(shape, .71f);
-    check(profile.width < profile.height && profile.red == 25 && profile.green == 27 && profile.blue == 31 &&
+    check(profile.width < profile.height && profile.red == 4 && profile.green == 5 && profile.blue == 7 &&
               profile.material == CaseMaterial::plastic,
           "all PS2 regions have DVD-case proportions and the owner's requested black plastic");
     for (std::size_t system = 0; system < system_count; ++system) {

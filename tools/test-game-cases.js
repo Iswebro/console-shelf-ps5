@@ -64,7 +64,7 @@ function bounds(name, predicate) {
     if(predicate(pixels[at],pixels[at+1],pixels[at+2])){minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,y);maxy=Math.max(maxy,y);count++;}
   }
   assert.ok(count>100,'the synthetic art must appear on the rendered case');
-  return {width:maxx-minx+1,height:maxy-miny+1,count};
+  return {minx,maxx,miny,maxy,width:maxx-minx+1,height:maxy-miny+1,count};
 }
 const isRed=(r,g,b)=>r>200&&g<90&&b<130;
 const isGreen=(r,g,b)=>g>150&&r<80&&b<110;
@@ -72,6 +72,13 @@ run('ps2','PlayStation 2');
 const dvd=bounds('ps2',isRed),spine=bounds('ps2',isGreen);
 assert.ok(dvd.height>dvd.width*1.3,'PS2 uses a tall DVD case');
 assert.ok(spine.height>spine.width*5,'the existing spine is a distinct narrow side face');
+const ps2Pixels=region(path.join(captures,'ps2.png'),1190,327,610,550);
+const middle=Math.floor((dvd.minx+dvd.maxx)/2);
+let paperTop=0;
+while(paperTop<550&&!isRed(...ps2Pixels.subarray((paperTop*610+middle)*4,(paperTop*610+middle)*4+3)))paperTop++;
+assert.ok(paperTop>3&&paperTop<550,'the PS2 front paper is visible below its plastic edge');
+const plastic=ps2Pixels.subarray(((paperTop-2)*610+middle)*4,((paperTop-2)*610+middle)*4+3);
+assert.ok([...plastic].every(channel=>channel<20),'rendered PS2 plastic stays deep black instead of a gray decorative frame');
 run('n64','Nintendo 64');
 const n64=bounds('n64',isRed);
 assert.ok(n64.width>n64.height*1.2,'N64 remains a wide cardboard box');
