@@ -5,11 +5,30 @@ import json
 import posixpath
 import re
 import unittest
-from prepare_ps5_release import (digest, packaged_icon_source, public_guides, public_source_documents, verify_asset_sources,
+from prepare_ps5_release import (digest, packaged_icon_source, public_guides, public_install_notice, public_source_documents, verify_asset_sources,
                                  verify_console_manifest, verify_source_members)
 
 
 class ReleaseInputTests(unittest.TestCase):
+    def test_release_notice_updates_a_previous_release_and_preserves_instructions(self):
+        old = "Native PS5 prototype v0.1.0-alpha.1, tested on firmware **12.20**. The app appears as **isShelf**."
+        instructions = "\n\n## Recovery\nPreserve existing settings and saves.\n"
+        result = public_install_notice("# Installing isShelf\n\n" + old + instructions, "v0.1.0-beta.1", "isShelf")
+        self.assertIn("Native PS5 prototype v0.1.0-beta.1, tested on firmware **12.20**.", result)
+        self.assertNotIn("v0.1.0-alpha.1", result)
+        self.assertTrue(result.endswith(instructions))
+
+    def test_release_notice_accepts_preparation_and_rejects_missing_or_ambiguous_notices(self):
+        legacy = ("Preparation guide for the first prototype. A public binary has not been published yet; see the "
+                  "[acceptance status](PROTOTYPE-PLAN.md). New builds are named **isShelf (UI test)**; "
+                  "earlier console-tested builds used **Console Shelf (UI test)**.")
+        result = public_install_notice(legacy, "v0.1.0-beta.1", "isShelf")
+        self.assertIn("The app appears as **isShelf**.", result)
+        self.assertNotIn("not been published", result)
+        for text in ("unrecognized guide", legacy + "\n" + legacy, result + "\n" + result, legacy + "\n" + result):
+            with self.assertRaisesRegex(ValueError, "notice"):
+                public_install_notice(text, "v0.2.0-beta.1", "isShelf")
+
     def test_home_icon_master_follows_source_kit_without_breaking_legacy_kits(self):
         key = "native/ps5/presentation-assets.json"
         self.assertEqual(packaged_icon_source({key: b'{}'}), "assets/shelf-icon.png")

@@ -120,6 +120,20 @@ def verify_generated_icon(app_data, kit_data):
     return directory
 
 
+def public_install_notice(guide, version, installed_name):
+    legacy = ("Preparation guide for the first prototype. A public binary has not been published yet; see the "
+              "[acceptance status](PROTOTYPE-PLAN.md). New builds are named **isShelf (UI test)**; "
+              "earlier console-tested builds used **Console Shelf (UI test)**.")
+    published = re.compile(r"^Native PS5 prototype v[0-9]+\.[0-9]+\.[0-9]+-(?:alpha|beta)\.[0-9]+, "
+                           r"tested on firmware \*\*12\.20\*\*\. The app appears as \*\*[^*\r\n]+\*\*\.$", re.M)
+    matches = list(published.finditer(guide))
+    require(guide.count(legacy) + len(matches) == 1, "Exactly one install-guide release notice is required")
+    old = legacy if legacy in guide else matches[0].group()
+    notice = ("Native PS5 prototype " + version + ", tested on firmware **12.20**. "
+              "The app appears as **" + installed_name + "**.")
+    return guide.replace(old, notice, 1)
+
+
 def public_guides(guide, room, version):
     room_url = ("https://github.com/Iswebro/console-shelf-ps5/blob/" +
                 version + "/docs/ROOM.md")
@@ -283,13 +297,8 @@ def main():
     source_info = {"file": source_zip.name, "bytes": source_zip.stat().st_size, "sha256": sha256(source_zip)}
 
     guide = (ROOT / "docs/PS5-INSTALL.md").read_text(encoding="utf-8")
-    old = ("Preparation guide for the first prototype. A public binary has not been published yet; see the "
-           "[acceptance status](PROTOTYPE-PLAN.md). New builds are named **isShelf (UI test)**; "
-           "earlier console-tested builds used **Console Shelf (UI test)**.")
-    require(old in guide, "Install-guide preparation notice was not found")
     installed_name = json.loads(app_data["sce_sys/param.json"])["localizedParameters"]["en-US"]["titleName"]
-    guide = guide.replace(old, "Native PS5 prototype " + args.version + ", tested on firmware **12.20**. "
-                          "The app appears as **" + installed_name + "**.")
+    guide = public_install_notice(guide, args.version, installed_name)
     guide = guide.replace("from this repository's release page when available", "from this release")
     guide += "\n## Verified launch routes\n\n" + "\n".join("- " + route for route in ROUTES)
     guide += ("\n\nProgram source: https://github.com/Iswebro/console-shelf-ps5/tree/" + package["sourceCommit"] +

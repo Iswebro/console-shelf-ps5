@@ -1,6 +1,6 @@
 # Installing isShelf
 
-Preparation guide for the first prototype. A public binary has not been published yet; see the [acceptance status](PROTOTYPE-PLAN.md). New builds are named **isShelf (UI test)**; earlier console-tested builds used **Console Shelf (UI test)**.
+Native PS5 prototype v0.1.0-beta.1, tested on firmware **12.20**. The app appears as **isShelf**.
 
 ## What you need
 
@@ -18,7 +18,7 @@ The tested **standard-sdk** build retains the SDK's normal helper-process capabi
 
 Keep firmware 12.20 and decline any system software update prompt.
 
-1. Download the prototype app ZIP and its checksum file from this repository's release page when available. On Windows, use `Get-FileHash -Algorithm SHA256 -LiteralPath 'C:\path\to\download.zip'` and compare the complete value with `SHA256SUMS.txt`.
+1. Download `PPSA99541.zip`, `MANIFEST.json` and `SHA256SUMS.txt` from the same [isShelf release](https://github.com/Iswebro/console-shelf-ps5/releases). Choose the version named at the top of this guide. On Windows, use `Get-FileHash -Algorithm SHA256 -LiteralPath 'C:\path\to\PPSA99541.zip'` and compare the complete value with `SHA256SUMS.txt`.
 2. Extract the ZIP on your PC. The app folder is `PPSA99541`; keep all its subfolders together. You do not need Node.js, a compiler or the PC preview to use the installed app.
 3. Close games, emulators and downloads on the PS5. Start your existing FTP service and connect using your established local FTP client.
 4. Check both `/data/homebrew/PPSA99541` and `/user/app/PPSA99541` for an existing title. This is an unofficial ID, not a globally reserved one. If it belongs to another app or you cannot identify it, stop. For an existing Shelf installation, use the upgrade steps below.
