@@ -1,6 +1,6 @@
 # Game artwork
 
-Private build `00.100.027` presents front covers in console-specific 3D cases, preserves existing rendered case artwork, and uses the same presentation in list thumbnails and the room TV's favourite-game mode. A game without an image uses its console illustration. The public `v0.1.0-beta.1` download predates this feature.
+The case renderer presents front covers in console-specific 3D cases, preserves existing rendered case artwork, and uses the same presentation in list thumbnails and the room TV's favourite-game mode. It is installed in the combined private build `00.100.030`, which also preserves the owner's UI28 testing bridge. A game without an image uses its console illustration. The public `v0.1.0-beta.1` download predates this feature.
 
 ## Console cases
 
@@ -40,4 +40,6 @@ The 26 October 2026 check found 92 library entries. Eighty images came from the 
 
 The owner's startup check of build `00.100.025` failed with `CE-108255-1`. Console diagnostics identified a stack overflow in the artwork serial-index reader. Build `00.100.026` moves that bounded buffer to the heap, gives the discovery worker an explicit 256 KiB stack, and rejects scan functions with stack frames larger than 16 KiB during PS5 compilation. A 64 KiB worker regression reproduces the old failure and passes with the fix, including maximum-size, oversized and short-read indexes.
 
-The replacement build is installed and its five changed program records were read back. Settings are unchanged byte for byte; the private intro and artwork folder listings are unchanged. On 27 October 2026, the owner confirmed that isShelf opens and stays responsive, and that selecting Castlevania: Symphony of the Night launches it successfully through PSSwanStation. Fresh console logs confirm a complete scan of 92 games, 90 cached covers, no unreadable artwork, and a foreground handoff to `PPSA99248`. Artwork appearance still awaits a visual check. [Artwork record](verification/emulator-artwork-2026-10-26.json); [startup fix and hardware record](verification/ui26-startup-stack-fix-2026-10-27.json).
+On 27 October 2026, the owner confirmed that the UI26 startup fix opens and stays responsive, and that selecting Castlevania: Symphony of the Night launches it successfully through PSSwanStation. Its console logs confirm a complete scan of 92 games, 90 cached covers, no unreadable artwork, and a foreground handoff to `PPSA99248`. The owner then requested original 3D cases rather than flat cover pictures.
+
+The combined UI30 case/UI28-bridge build is installed. All five changed program records and rollback copies passed raw readback. Current preferences remain unchanged byte for byte; the private intro and artwork folder listings are unchanged. UI30's console case appearance check is pending. [Original artwork record](verification/emulator-artwork-2026-10-26.json); [startup fix and hardware record](verification/ui26-startup-stack-fix-2026-10-27.json); [case rendering and UI30 installation](verification/ui30-original-game-cases-2026-10-27.json).
