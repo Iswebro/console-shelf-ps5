@@ -1,117 +1,42 @@
-# isShelf beta release and store listings
+# isShelf beta store submissions
 
-Submission plan updated 26 October 2026. The [v0.1.0-beta.1 beta](https://github.com/Iswebro/console-shelf-ps5/releases/tag/v0.1.0-beta.1) is published and console-accepted on firmware 12.20. All seven public downloads passed SHA-256 readback. This workflow has not submitted a store form or catalog pull request.
+Updated 26 October 2026. The [public v0.1.0-beta.1 release](https://github.com/Iswebro/console-shelf-ps5/releases/tag/v0.1.0-beta.1) is available. Its installable `PPSA99541.zip` and the other six public downloads passed SHA-256 readback. The owner accepted the release on a PS5 running firmware 12.20. Other firmware versions are not yet verified.
 
-**Verified install asset:** [PPSA99541.zip](https://github.com/Iswebro/console-shelf-ps5/releases/download/v0.1.0-beta.1/PPSA99541.zip), 104,371,163 bytes.
+## Submitted
 
-**SHA-256:** `4cca4e0c05b58b74733f8bc4392ba5b26bbd05232dde41932be11093a4ab91d6`.
-
-**Pinned tag/source:** `v0.1.0-beta.1` → `5c34e67aba3e51ca209d56215f97b586ff58c1e5`. [Publication evidence](verification/v0.1.0-beta.1-publication-2026-10-26.json).
-
-## Release decision
-
-**Recommended label: public beta**, once the final isShelf package passes the console checks below. UI-22 was accepted by the owner on firmware 12.20, including navigation, saved settings, normal restart, emulator menus and direct RetroArch launches. UI-23 changes the branding, home-screen art and icon options; its exact package still needs a console check. Describe firmware 12.20 as *tested*, not every jailbreak firmware as supported.
-
-Before publication:
-
-1. Freeze one source commit and a matching tagged version. `v0.1.0-beta.1` is a suitable first-beta tag if the build owner has not selected one; the release preparer accepts this pattern. Keep the established title ID `PPSA99541` and its user-data path.
-2. Install that exact UI-23 candidate on the PS5 and record its package manifest, successful open, home-screen icon/background, Grid/Swipe/Shelf, settings and icon choice persistence, close/reopen, a normal console restart, and the already documented menu/direct launch routes. Record any limitation that remains.
-3. Produce a store-installable ZIP whose top level is **only** `PPSA99541/`, containing `eboot.bin`, `sce_sys/` and the rest of the tested app folder. The present public release preparer also puts documentation and manifests at the ZIP root; retain those in the full download if useful, but verify the dedicated store ZIP against the same tested app bytes. Use a stable asset name such as `PPSA99541.zip`.
-4. Update the GitHub repository description and README to the accepted isShelf status, with the exact tested firmware and download/install links. The live repository description now identifies the native PS5 library and its firmware 12.20 beta target. Publish the tagged GitHub release with the app ZIP, complete source/relink archive, SHA-256 sums, release notes, and links to install, upgrade, recovery, removal, credits and known limitations. Name `PPSA99541.zip` explicitly as the installable download so catalog discovery does not confuse it with the source ZIP. The release must point to the source commit used for the executable. Read back the published assets and compare SHA-256 before listing them.
-5. Confirm the tag contains `native/ps5/param.json` with the shipped `titleId` and raised `contentVersion`. Confirm the 1024×1024 `assets/branding/isshelf-home-icon.png` is committed at that tag; the ProsperoStore record can link to it directly. Check for a title ID collision again before submission.
-6. Check links inside the store-only ZIP's `PPSA99541/START-HERE.md`. The release preparer now points its Room link at `docs/ROOM.md` under the release tag, so confirm that tagged page opens after publication. Re-read the final ZIP and its hash.
-
-`tools/prepare_store_zip.py` is ready for step 3. Run `python tools/prepare_store_zip.py <full-release.zip> <new-PPSA99541.zip>` after the full release ZIP passes its own checks. It reads the full release's `MANIFEST.json`, verifies every app member and writes only the app folder to a new archive. Compare its printed SHA-256 with a fresh file hash, then attach that same store ZIP to the tagged GitHub release. Keep the fuller preparation ZIP for audit rather than publishing two competing app downloads; publish the source kit and checksums as separately named assets. The release preparer's original `SHA256SUMS.txt` names the fuller ZIP, so make the final published checksum list from the actual published assets, including `PPSA99541.zip`. Its two focused fixture tests pass with `python tools/test_prepare_store_zip.py`.
-
-The current public repository is [Iswebro/console-shelf-ps5](https://github.com/Iswebro/console-shelf-ps5). It had no release when the initial plan was prepared; the verified first beta is now linked above. Do not fill in a version, artifact URL or SHA-256 from an unposted local file.
-
-## Listing order
-
-| Destination | Route after release | Current finding |
+| Destination | Status | Record |
 | --- | --- | --- |
-| [ProsperoStore catalog](https://github.com/darkxex/ps5-homebrew-catalog/blob/main/docs/submitting.md) | Pull request adding `apps/PPSA99541.json` from Iswebro's GitHub account. | Native PS5 apps are eligible. The release asset must be a ZIP of the app folder from a published GitHub release; prereleases are accepted. The catalog pins its SHA-256 and icon URL, then a maintainer reviews it. Category: `utilities`. Its [review policy](https://github.com/darkxex/ps5-homebrew-catalog/blob/main/docs/review-policy.md) requires a derivative to be substantially different from a listed app. Explain isShelf's own catalogue, layouts, discovery, persistence and launch-route behavior, with clear Estante credit. |
-| [RecompStore](https://recompstore.com/submit) | Submit the app through its site with repository, release file, description and pictures. | Its [Apps section](https://recompstore.com/apps) includes Estante, so the description and screenshots must make isShelf's distinct behavior clear. Its [README](https://github.com/elripalda/RecompStore/blob/main/README.md) says installs are drawn from developer GitHub releases and can use ZIP/7z. Its [title ID checker](https://recompstore.com/ids) reported `PPSA99541` absent on 26 October 2026; check again before sending. |
-| [PS5 Library](https://github.com/deox1111/ps5-library#the-default-catalog) | Check its default homebrew catalog after the ProsperoStore listing is merged. | PS5 Library reads the `homebrew.page` catalog by default. That feed currently redirects to the live `prosperostore.net` catalog, so one ProsperoStore record should reach PS5 Library. Check the actual in-app result before claiming placement. |
-| [Overdrive Homebrew](https://github.com/MyLuxy/overdrive#features) | Check its Homebrew section after the ProsperoStore merge. | Its own README says it imports native apps from `prosperostore.net` and installs from each developer's GitHub release. This is downstream of the catalog, with no separate isShelf submission route identified. |
-| [PS5 Scene Wire](https://github.com/SpiderNic96/ps5-scene-wire#track-another-app) | Check whether the release appears in its app feed after the ProsperoStore merge. If absent, propose a one-line repository entry in `api/_sources.js`. | Its source imports the `homebrew.page` catalog, which currently redirects to the live `prosperostore.net` catalog. This is a discovery index, not an installer store. |
-| [BlackBox](https://github.com/D3ATHLY/blackbox) | Ask its maintainer whether it accepts third-party native app listings. | The published README describes its catalog as game metadata and documents no app submission route. Treat as a lead until the maintainer confirms eligibility and format. |
-| [PKG-Zone](https://pkg-zone.com/?console=PS5) | Revisit if it provides a native PS5 app-folder format and submission route. | Its visible catalog includes PS5 entries, but the published installation instructions are for its HB-Store and a PS4-style setup. No verified route for an isShelf `PPSA99541/` ZIP was found. |
-| [myfl.uk directory](https://myfl.uk/about/) | Consider a project suggestion after the release if the maintainer is expanding the hand-picked resource list. | It is a small curated directory linking to source projects, not a console installer or open submission catalog. |
+| [RecompStore](https://recompstore.com/submit) | Submitted for developer review. The form confirmed “Thanks, it's in.” Placement is pending. | App: isShelf; developer: Iswebro; private contact: Discord `@iswebro`; title ID: `PPSA99541`; release ZIP, tagged install guide, icon, backdrop and one PS5 screenshot supplied. |
+| [ProsperoStore catalog](https://github.com/darkxex/ps5-homebrew-catalog) | [PR #777](https://github.com/darkxex/ps5-homebrew-catalog/pull/777) is open from `Iswebro:codex/list-isshelf-beta`. Catalog validation and release scanning passed; maintainer review is pending. | Adds `apps/PPSA99541.json` with the public release URL, exact SHA-256 and pinned icon. The PR explains isShelf's distinct features and credits Estante. |
+| [BlackBox](https://github.com/D3ATHLY/blackbox) | [Issue #59](https://github.com/D3ATHLY/blackbox/issues/59) asks whether third-party native PS5 apps are eligible and how to submit them. Its published README has no native-app intake format. This is an inquiry, not a listing. | Repository, release and title ID linked for the maintainer. |
 
-The former `blackbearreloaded/ps5-homebrew-catalog` GitHub URL resolves to `darkxex/ps5-homebrew-catalog`; submit one catalog pull request, not duplicate records under both names. Other clients that read this catalog may show the resulting listing without separate submissions.
+The former `blackbearreloaded/ps5-homebrew-catalog` URL resolves to `darkxex/ps5-homebrew-catalog`. One catalog PR covers ProsperoStore; no duplicate entry is needed.
 
-## Submission copy
+## Release facts used in the submissions
 
-**Name:** isShelf<br>
-**Author:** Iswebro<br>
-**Type:** App / Utilities<br>
-**Title ID:** `PPSA99541`<br>
-**Short description:** A native PS5 library front end with 52 system categories, saved layouts and clearly labelled emulator launch routes.<br>
-**Repository:** https://github.com/Iswebro/console-shelf-ps5<br>
-**Tested firmware:** 12.20; report other firmware only after direct testing.<br>
-**Dependencies:** Existing homebrew enabler, ShadowMountPlus, console-local ELF loader on port 9021 and `ftpsrv` on port 2121 for library discovery.<br>
-**Attribution:** Original isShelf app by Iswebro; acknowledge Estante and other upstream references in `THIRD_PARTY.md`. The listing should explain the functional differences rather than present the logo or name change as the main distinction.
-
-Draft ProsperoStore record after the release exists (replace every angle-bracket value with verified release data):
-
-```json
-{
-  "titleid": "PPSA99541",
-  "name": "isShelf",
-  "kind": "app",
-  "category": "utilities",
-  "description": "A native PS5 library front end with 52 system categories, saved layouts and clearly labelled emulator launch routes.",
-  "license": "GPL-3.0",
-  "author": "Iswebro",
-  "version": "<RELEASE_TAG>",
-  "source_repo": "https://github.com/Iswebro/console-shelf-ps5",
-  "artifact_url": "https://github.com/Iswebro/console-shelf-ps5/releases/download/<RELEASE_TAG>/PPSA99541.zip",
-  "sha256": "<VERIFIED_LOWERCASE_SHA256>",
-  "icon_url": "https://raw.githubusercontent.com/Iswebro/console-shelf-ps5/<RELEASE_TAG>/assets/branding/isshelf-home-icon.png"
-}
-```
-
-Before opening the PR, run the catalog's documented checks against the real record and verify the published icon URL. The current catalog had no `apps/PPSA99541.json` when this plan was prepared; recheck at submission time.
-
-## RecompStore form draft
-
-These are the site's actual fields, inspected on 26 October 2026. Fill in the final release fields only after the public asset has been read back. Do not send this form yet.
-
-| Form field | Prepared answer |
+| Field | Value |
 | --- | --- |
-| What is it? | **App** |
-| Name | `isShelf` |
-| Made by | `Iswebro` |
-| How can we reach you? | Discord `@iswebro` (owner-provided) |
-| GitHub repository | `https://github.com/Iswebro/console-shelf-ps5` |
-| Release file | `PPSA99541.zip`, if that exact store ZIP is published; otherwise the verified asset's real name |
-| Version | The published tag/version, after release |
+| App | isShelf by Iswebro, GPL-3.0 |
+| Type | Native PS5 library front end; app / utilities |
 | Title ID | `PPSA99541` |
-| One-line summary | `A native PS5 library front end with 52 system categories, saved layouts and clear emulator launch routes.` |
-| Description | See the ready text below; update the final-tested route list if it changes |
-| What players need | `Jailbroken PS5; ShadowMountPlus, an ELF loader and ftpsrv; installed emulators for game launches.` |
-| Credits | `Created by Iswebro. Estante by Kauan Silva Lopes informed native library discovery and the S bookshelf mark; Jewel Case by SkaRift and BlackBearReloaded's PS5 runtime contributed credited GPL components. Full credits and licenses: GitHub THIRD_PARTY.md and assets/CREDITS.md.` |
-| Web link 1 | Tagged GitHub release URL after publication |
-| Web link 2 | Tagged installation guide URL after publication |
-| Web link 3 | Leave blank unless Iswebro supplies a product/community link |
-| Anything else? | `Public beta tested on firmware 12.20. isShelf is a distinct console-first app: 52 browsable system categories, Grid/Swipe/Shelf layouts, a customizable TV room, persistent filters and emulator preferences, read-only discovery, and direct-versus-menu launch explanations. It does not bundle emulators, games, BIOS or keys.` |
-| Rights checkbox | Review the final archive, notices and artwork credits, then check when sending |
+| Version | `v0.1.0-beta.1` |
+| Install asset | [PPSA99541.zip](https://github.com/Iswebro/console-shelf-ps5/releases/download/v0.1.0-beta.1/PPSA99541.zip), 104,371,163 bytes |
+| SHA-256 | `4cca4e0c05b58b74733f8bc4392ba5b26bbd05232dde41932be11093a4ab91d6` |
+| Tagged source | `5c34e67aba3e51ca209d56215f97b586ff58c1e5` |
+| Install instructions | [Tagged installation guide](https://github.com/Iswebro/console-shelf-ps5/blob/v0.1.0-beta.1/docs/PS5-INSTALL.md) |
+| Credits | [THIRD_PARTY.md](https://github.com/Iswebro/console-shelf-ps5/blob/v0.1.0-beta.1/THIRD_PARTY.md) |
+| Publication checks | [Verification record](verification/v0.1.0-beta.1-publication-2026-10-26.json) |
 
-Ready description:
+The catalog record passed `python -m catalog check` with 143 valid records and no errors or warnings. `python -m catalog verify PPSA99541` matched the published asset to its SHA-256 and found content version `00.100.023`. The pinned 1024×1024 PNG icon URL was downloaded and matched the tagged local image.
 
-> isShelf by Iswebro is a native, controller-first PS5 library front end. Browse 52 console and computer system categories in Grid, Swipe or a customizable Shelf room. It discovers existing libraries and installed emulators without moving games. Layout, favorites, visibility and preferred emulator choices persist. Before launch, the app explains whether a selection starts a game directly, opens an emulator's own library, or is unavailable. This is an organizer and launcher, not an emulator; it includes no games, ROMs, BIOS or keys. The first beta is tested on firmware 12.20. Other firmware and emulator combinations remain unconfirmed unless the tagged release notes say otherwise. Installation, dependencies, checked routes and recovery steps are in the linked GitHub release.
+Submission summary: “A native PS5 library front end with 52 system categories, saved layouts and clearly labelled emulator launch routes.” isShelf organizes and discovers an existing library and installed emulators. It does not bundle games, ROMs, BIOS, keys or emulators. The listing credits Estante, Jewel Case and other referenced projects, and explains isShelf's own Grid, Swipe and Shelf room layouts, personal TV, saved filters and preferences, and direct-play versus emulator-menu guidance.
 
-Optional picture preparation from the current tree:
+The owner's console intro videos are private media. They are not in the public release or any store submission.
 
-- **Icon:** `assets/branding/isshelf-home-icon.png` (1024×1024 PNG, about 126 KB). RecompStore requests a square image at least 512×512.
-- **Backdrop:** `assets/backgrounds/shelf-ps5-home-v2.png` (3840×2160 PNG, about 3.9 MB). The form recommends 16:9 at 3840×2160.
-- **Transparent title logo:** optional. The existing transparent S mark is `assets/branding/shelf-gaming-mark.png`; it does not spell the app name, so use a final isShelf wordmark if the art handoff supplies one, or leave the logo field blank.
-- **Screenshots:** up to four from the final PS5 build. Capture Grid, Swipe, Shelf room and a console library/launch panel or Settings after the UI-23 test. Do not present PC mockups as console captures.
+## After review
 
-The form accepts PNG, JPEG or WebP pictures up to 8 MB each. The icon and backdrop above fit those stated size limits, but confirm the final files again at submission. RecompStore's contact field is shown only to its developer according to the form.
-
-## Other submission follow-through
-
-- **PS5 Library, Overdrive Homebrew and PS5 Scene Wire:** After the ProsperoStore PR merges, inspect their app listings for `isShelf`. If Scene Wire misses it, prepare a one-line `Iswebro/console-shelf-ps5` entry for its [`api/_sources.js`](https://github.com/SpiderNic96/ps5-scene-wire/blob/main/api/_sources.js) and open a PR with the released app link.
-- **BlackBox:** Its [README](https://github.com/D3ATHLY/blackbox) gives no third-party native-app intake. After the release, ask via its issue/contact channel: `Iswebro has released isShelf, a GPL-3.0 native PS5 library front end (PPSA99541). Does BlackBox accept listings for third-party homebrew app-folder ZIPs from developer GitHub releases? If so, what metadata, format and review route should we use?` Do not claim a BlackBox listing before a maintainer provides a route.
-- **PKG-Zone and myfl.uk:** Recheck their current formats and intake route after launch. Their pages are directory leads, with no confirmed native app-folder submission path today.
+1. When ProsperoStore merges PR #777, verify that `PPSA99541` appears on the [ProsperoStore site](https://prosperostore.net/) and in its native PS5 app before claiming it is live.
+2. Check [PS5 Library](https://github.com/deox1111/ps5-library#the-default-catalog), [Overdrive Homebrew](https://github.com/MyLuxy/overdrive#features) and [PS5 Scene Wire](https://github.com/SpiderNic96/ps5-scene-wire#track-another-app). They consume or refer to the ProsperoStore catalog; no separate native-app submission route was identified. If Scene Wire misses the app after the merge, propose its one-line repository entry in `api/_sources.js`.
+3. Wait for RecompStore's response at Discord `@iswebro` and verify the public listing before announcing placement.
+4. If BlackBox confirms that it accepts native PS5 app folders, follow its specified submission route. Do not place an app record into its game-metadata catalog without that confirmation.
+5. [PKG-Zone](https://pkg-zone.com/?console=PS5) has PS5 entries but no verified submission route for a `PPSA99541/` app-folder ZIP. [myfl.uk](https://myfl.uk/about/) is a curated resource directory, not a native installer catalog. Revisit either only if an appropriate route is published.
