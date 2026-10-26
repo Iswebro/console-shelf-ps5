@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "dateBrisbane": "2026-10-27",
-  "status": "installed; console case appearance check pending",
+  "status": "installed; N64 and PS1 verified in PS5-rendered images; PS2 console image pending the manual-stop bridge update",
   "contentVersion": "00.100.030",
   "compiledSourceCommit": "a67fcc8bf9128c1cc948f1183529a06c9f6e7493",
   "compiledBranch": "codex/game-cases-ui28",
@@ -100,7 +100,9 @@
     "publicPrivateBridgeGuard": "passed; this candidate is rejected by public release preparation",
     "ps5CrossBuildAndStructure": "passed",
     "packageIntegrity": "242 ZIP members and hashes passed",
-    "physicalCaseAppearance": "pending owner console check"
+    "physicalCaseAppearance": "pending owner console check",
+    "consoleRenderedN64AndPS1": "passed: Banjo-Kazooie, Banjo-Tooie and Alundra images visually inspected from the PS5 renderer",
+    "consoleRenderedPS2": "pending: UI30 session expired before PS2 navigation"
   },
   "applicationSelf": {
     "path": "eboot.bin",
@@ -129,5 +131,219 @@
     "publicReleaseChanged": false,
     "precheckObservation": "The older UI27 case install stopped before writes when the installed UI28 baseline differed; the final candidate merges that stable private bridge and preserves the current preferences",
     "coordination": "Owner explicitly authorized messaging Improve the isShelf app; that chat confirmed a console-write/control hold and reserved UI31 for its next candidate"
+  },
+  "consoleTrial": {
+    "session": "00065ec2584516b3000000006adf9941",
+    "successfulRequests": 16,
+    "framesVisuallyInspected": 16,
+    "actions": [
+      {
+        "sequence": 1,
+        "action": "snapshot",
+        "result": "ok",
+        "applied": false,
+        "system": "threedo",
+        "page": 0,
+        "gameFocus": 0,
+        "frameBytes": 2675934,
+        "frameSHA256": "56c60b545cccbbf25d2ece036df91f4b5974241fc2b3dd3df71645ff1944d3db"
+      },
+      {
+        "sequence": 2,
+        "action": "tab",
+        "result": "ok",
+        "applied": true,
+        "system": "wonderswan",
+        "page": 0,
+        "gameFocus": 0,
+        "frameBytes": 2827555,
+        "frameSHA256": "1144dad94a1d90ea9e97c4f25a07b773b1ed1559c743daa78839fd35321eb42d"
+      },
+      {
+        "sequence": 3,
+        "action": "tab",
+        "result": "ok",
+        "applied": true,
+        "system": "supergrafx",
+        "page": 0,
+        "gameFocus": 0,
+        "frameBytes": 2879754,
+        "frameSHA256": "ee0a62667ef7edfda76879307e364a3938051557bfb030f4ca2d2b859acc14db"
+      },
+      {
+        "sequence": 4,
+        "action": "tab",
+        "result": "ok",
+        "applied": true,
+        "system": "n64",
+        "page": 0,
+        "gameFocus": 0,
+        "frameBytes": 2763229,
+        "frameSHA256": "3c62b1b8b65c9dd1fbabe9b8ec96ac41ca7f2b709b0c32560a960c64ad4fba9c"
+      },
+      {
+        "sequence": 5,
+        "action": "confirm",
+        "result": "ok",
+        "applied": true,
+        "system": "n64",
+        "page": 1,
+        "gameFocus": 0,
+        "frameBytes": 2969831,
+        "frameSHA256": "881f67af43925ffb12afc201f89f89045aa47cc788dc5fbce4597aaece2548a8"
+      },
+      {
+        "sequence": 6,
+        "action": "right",
+        "result": "ok",
+        "applied": true,
+        "system": "n64",
+        "page": 1,
+        "gameFocus": 0,
+        "frameBytes": 2969529,
+        "frameSHA256": "a13a408f874c5a7de364ae3ae6dacf8ea1e2d42fbb8cc6a4cd9236ed6389ceee"
+      },
+      {
+        "sequence": 7,
+        "action": "confirm",
+        "result": "ok",
+        "applied": true,
+        "system": "n64",
+        "page": 2,
+        "gameFocus": 0,
+        "frameBytes": 2273672,
+        "frameSHA256": "fd74505eedbe9be9b782d69d1d662bca539aac4ab3d894f5919df7e90c2b5d8d"
+      },
+      {
+        "sequence": 8,
+        "action": "down",
+        "result": "ok",
+        "applied": true,
+        "system": "n64",
+        "page": 2,
+        "gameFocus": 1,
+        "frameBytes": 2483818,
+        "frameSHA256": "c79cd7c3b1b135f446cc5c71a7b040375b452ab5055465d19ab01eceaa5ad71c"
+      },
+      {
+        "sequence": 9,
+        "action": "back",
+        "result": "ok",
+        "applied": true,
+        "system": "n64",
+        "page": 1,
+        "gameFocus": 1,
+        "frameBytes": 2969529,
+        "frameSHA256": "a13a408f874c5a7de364ae3ae6dacf8ea1e2d42fbb8cc6a4cd9236ed6389ceee"
+      },
+      {
+        "sequence": 10,
+        "action": "back",
+        "result": "ok",
+        "applied": true,
+        "system": "n64",
+        "page": 0,
+        "gameFocus": 1,
+        "frameBytes": 2853527,
+        "frameSHA256": "77af7c38edfbfe8b6e3d591cb1505ea2c2716199ecaf27774d2674dbb61a7070"
+      },
+      {
+        "sequence": 11,
+        "action": "tab",
+        "result": "ok",
+        "applied": true,
+        "system": "wiiu",
+        "page": 0,
+        "gameFocus": 1,
+        "frameBytes": 2782284,
+        "frameSHA256": "e3a3bc20fdbff022348af2131cbbceeb4eb84a7ec201341ae9b7b61137d8ef7a"
+      },
+      {
+        "sequence": 12,
+        "action": "right",
+        "result": "ok",
+        "applied": true,
+        "system": "psp",
+        "page": 0,
+        "gameFocus": 1,
+        "frameBytes": 2785027,
+        "frameSHA256": "efd24f5a3165ade2e17eb17ed30f7592cea9936465f5f75ec4e30ff03c2b1136"
+      },
+      {
+        "sequence": 13,
+        "action": "right",
+        "result": "ok",
+        "applied": true,
+        "system": "ps1",
+        "page": 0,
+        "gameFocus": 1,
+        "frameBytes": 2783768,
+        "frameSHA256": "76867c04dba09e8ee47fcf7e1f718bec1dfad1a8d00d369aae1c10bf5e797969"
+      },
+      {
+        "sequence": 14,
+        "action": "confirm",
+        "result": "ok",
+        "applied": true,
+        "system": "ps1",
+        "page": 1,
+        "gameFocus": 1,
+        "frameBytes": 2877821,
+        "frameSHA256": "153f812d702647c29b8f12d177d0f853df814da926119baf78303c3899445113"
+      },
+      {
+        "sequence": 15,
+        "action": "right",
+        "result": "ok",
+        "applied": true,
+        "system": "ps1",
+        "page": 1,
+        "gameFocus": 1,
+        "frameBytes": 2878180,
+        "frameSHA256": "dd52cee26b49825a40c94bf0a51c5a9eedbac118ab9e41e81972b79f555adbf2"
+      },
+      {
+        "sequence": 16,
+        "action": "confirm",
+        "result": "ok",
+        "applied": true,
+        "system": "ps1",
+        "page": 2,
+        "gameFocus": 0,
+        "frameBytes": 2380588,
+        "frameSHA256": "062bd761f2a585533f0ea3cfccf5481c8efedb9c108136a5b6f59556900d87b7"
+      }
+    ],
+    "finalResponse": {
+      "protocol": 1,
+      "active": false,
+      "session": "00065ec2584516b3000000006adf9941",
+      "nextSequence": 17,
+      "sequence": 16,
+      "revision": 22,
+      "action": "confirm",
+      "result": "expired",
+      "actionApplied": false,
+      "settingsSaved": true,
+      "frameAvailable": true,
+      "frameBytes": 2280832,
+      "frameFNV64": "b435c38972f93c68",
+      "page": 2,
+      "selectedSystem": "ps1",
+      "focus": 34,
+      "gameFocus": 0,
+      "tab": 0
+    },
+    "preferencesPreservedByteForByte": true,
+    "liveCacheCounts": {
+      "games": 92,
+      "ready": 90,
+      "caseRenders": 51,
+      "originalSpines": 9
+    },
+    "consoleStartupLogSHA256": "e7f77fad22ed3cdc4229d7ed803fbbeef883282386aa07deae469f721fc02f3c",
+    "physicalHDMIAppearance": "not established by renderer PNGs",
+    "userRequestedNextChange": "Keep owner-enabled control active until L3+R3, Stop or app closure; no automatic ten-minute expiry",
+    "controlHandoff": "Improve the isShelf app owns the next console install/control session; manual-stop behavior requested by the owner"
   }
 }
