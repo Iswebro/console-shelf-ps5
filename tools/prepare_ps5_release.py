@@ -19,6 +19,11 @@ ROUTES = ("PSXS5: emulator shelf", "PS5SX2: emulator shelf", "PS5SX3: emulator s
           "RetroArch: selected Nintendo 64 game")
 
 
+def require_public_build(build):
+    require(build.get("uiTestBridge", False) is False,
+            "Private UI test control builds cannot become public release inputs")
+
+
 def cache_path(relative):
     normalized = str(relative).replace("\\", "/")
     member_path(normalized)
@@ -191,6 +196,7 @@ def main():
     kit = json.loads((CACHE / "source-kits/latest.json").read_text(encoding="utf-8"))
     require(package["sourceCommit"] == kit["sourceCommit"], "App and complete source kit have different revisions")
     build = verify_recorded_hashes(CACHE / "build")
+    require_public_build(build)
     require(build["self"]["sha256"] == kit["applicationSelf"]["sha256"], "Source kit refers to a different executable")
     if not args.verify_inputs_only:
         require(accepted.get("selfSHA256") == build["self"]["sha256"], "Hardware checks refer to a different executable")

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "dateBrisbane": "2026-10-27",
+  "status": "prepared-private-console-trial-not-run",
+  "sourceBase": "c67a0f58dd8863fb449f6fbdbfe1600756a5d54f",
+  "branch": "codex/isshelf-ui-test-bridge",
+  "uiTestBridge": true,
+  "applicationSelf": {
+    "bytes": 2830625,
+    "sha256": "144d480cd915cf628f19ba27495e17f632942dd5b9626265edea5df546a42983"
+  },
+  "applicationElf": {
+    "bytes": 2958604,
+    "sha256": "0611fbbb61f708da52998d83be0e3b1b078e1fee17578c9d3e86548b0b452dab"
+  },
+  "checks": {
+    "nativeModelProtocolAndLaunchSuppression": "passed",
+    "pcClientTests": 14,
+    "publicReleaseInputTests": 15,
+    "nativeRendererCaptures": 80,
+    "compiledEventLoopActionImageIntegration": "passed",
+    "duplicateAndStaleCommands": "rejected",
+    "defaultHostBridgeFiles": "absent",
+    "ps5CrossBuildAndStructuralVerification": "passed"
+  },
+  "scope": {
+    "control": "isShelf menu actions only",
+    "snapshots": "app renderer, after frame submission",
+    "activation": "local L3 + R3 on same controller",
+    "expirySeconds": 600,
+    "remoteLaunches": "blocked",
+    "psnSignIn": "not used",
+    "newConsoleNetworkListener": false
+  },
+  "ps5ConsoleContacted": false,
+  "consoleInstall": "not performed",
+  "physicalGesture": "not tested",
+  "consoleFtpActionImageLoop": "not tested",
+  "physicalHdmiDisplay": "not tested",
+  "emulatorControl": "not provided",
+  "launchHelperRuntime": "standard-sdk",
+  "launchHelperPermissionChanges": true
+}

@@ -21,7 +21,7 @@ def cached_run(args, inputs, output, env):
     stamp.write_text(json.dumps({"key": key, "sha256": sha256(output)}, indent=2) + "\n")
 
 
-def build(standard_runtime=False):
+def build(standard_runtime=False, ui_test_bridge=False):
     identity = source_fingerprint()
     video_sources = ROOT / "native/third_party/pl_mpeg"
     for entry in json.loads((video_sources / "SOURCE.json").read_text())["files"]:
@@ -89,8 +89,12 @@ def build(standard_runtime=False):
               "-DSHELF_PS5", "-DGS_NATIVE", "-DNDEBUG", "-D_REENTRANT", "-D_THREAD_SAFE",
               "-I", ROOT / "native/include", "-I", ROOT / "native/ps5", "-I", ROOT / "native/third_party", "-I", output,
               "-I", ports / "include/SDL2", "-I", ports / "include"]
+    if ui_test_bridge:
+        common.append("-DSHELF_UI_TEST_BRIDGE")
     sources = [ROOT / "native/src" / (name + ".cpp") for name in ("model", "settings", "ui", "graphics", "codecs", "movie", "library", "artwork_sources", "artwork", "filesystem", "metadata", "ftp", "launch_client", "host_main")]
     sources += [ROOT / "native/src/json.c"]
+    if ui_test_bridge:
+        sources.append(ROOT / "native/src/ui_test_bridge.cpp")
     sources += [ROOT / "native/ps5/platform" / name for name in ("alloc.c", "vout.c", "shims.c", "lifecycle.c")]
     sources += [runtime / "app_crt.cpp", runtime / "app_cpp_runtime.cpp"]
     objects = []
@@ -118,6 +122,7 @@ def build(standard_runtime=False):
     run([tool, "self", "--sign", "--in", elf, "--out", signed, "--magic", "0x1D3D154F"], env=env)
     run([tool, "self", "--inspect", "--file", signed], env=env)
     report = verify(elf, signed)
+    require(report["uiTestBridge"] == ui_test_bridge, "Private UI test build marker differs from requested options")
     require(elf.read_bytes().count(payload) == 1, "The verified helper is not embedded exactly once")
     report["embeddedLaunchHelper"] = {**helper_record["elf"], "offset": elf.read_bytes().index(payload),
                                      "runtimeMode": helper_record["runtimeMode"],
@@ -133,4 +138,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--standard-helper-runtime", action="store_true",
                         help="Stage a build with the SDK's permission-changing startup; does not deploy or run it")
-    build(parser.parse_args().standard_helper_runtime)
+    parser.add_argument("--ui-test-bridge", action="store_true",
+                        help="Private only: compile owner-enabled menu control and frame snapshots; blocks public release")
+    options = parser.parse_args()
+    build(options.standard_helper_runtime, options.ui_test_bridge)

@@ -12,6 +12,8 @@ const settings = path.join(root, 'native/src/settings.cpp');
 const settingsTests = path.join(root, 'native/tests/settings_tests.cpp');
 const ui = path.join(root, 'native/src/ui.cpp');
 const uiTests = path.join(root, 'native/tests/ui_tests.cpp');
+const uiBridge = path.join(root, 'native/src/ui_test_bridge.cpp');
+const uiBridgeTests = path.join(root, 'native/tests/ui_test_bridge_tests.cpp');
 const navigationTests = path.join(root, 'native/tests/navigation_tests.cpp');
 const launchTests = path.join(root, 'native/tests/launch_tests.cpp');
 const includes = path.join(root, 'native/include');
@@ -33,9 +35,9 @@ if (process.platform === 'win32') {
     if (/["%\r\n]/.test(value)) throw new Error('Unsupported character in compiler input path.');
     return `"${value}"`;
   };
-  const command = `call ${quoted(developerCommand)} -no_logo -arch=x64 -host_arch=x64 >nul && cl.exe /nologo /std:c++17 /EHsc /utf-8 /D_CRT_SECURE_NO_WARNINGS /W4 /WX /I${quoted(includes)} /I${quoted(path.join(root,'native/third_party'))} ${[source,settings,ui,tests,settingsTests,uiTests,navigationTests,launchTests,...librarySources,libraryTests].map(quoted).join(' ')} /Fe:model-tests.exe`;
+  const command = `call ${quoted(developerCommand)} -no_logo -arch=x64 -host_arch=x64 >nul && cl.exe /nologo /std:c++17 /EHsc /utf-8 /D_CRT_SECURE_NO_WARNINGS /W4 /WX /I${quoted(includes)} /I${quoted(path.join(root,'native/third_party'))} ${[source,settings,ui,uiBridge,tests,settingsTests,uiTests,uiBridgeTests,navigationTests,launchTests,...librarySources,libraryTests].map(quoted).join(' ')} /Fe:model-tests.exe`;
   run(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', `"${command}"`], { windowsVerbatimArguments: true });
 } else {
-  run('c++', ['-std=c++17', '-Wall', '-Wextra', '-Werror', '-I', includes, '-I',path.join(root,'native/third_party'),source, settings, ui, tests, settingsTests, uiTests,navigationTests,launchTests,...librarySources,libraryTests,'-o', output]);
+  run('c++', ['-std=c++17', '-Wall', '-Wextra', '-Werror', '-I', includes, '-I',path.join(root,'native/third_party'),source, settings, ui, uiBridge, tests, settingsTests, uiTests,uiBridgeTests,navigationTests,launchTests,...librarySources,libraryTests,'-o', output]);
 }
 run(output, []);

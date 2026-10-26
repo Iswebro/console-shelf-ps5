@@ -39,6 +39,8 @@ def verify_recorded_hashes(folder):
         expected = recorded[key]
         require(file.stat().st_size == expected["bytes"] and sha256(file) == expected["sha256"],
                 f"{filename} changed after its build/container validation; rebuild first")
+    bridge = b"ISSHELF_PRIVATE_UI_TEST_BRIDGE_V1" in (folder / "eboot.elf").read_bytes()
+    require(bridge == bool(recorded.get("uiTestBridge", False)), "Private UI test marker differs from build record")
     if "embeddedLaunchHelper" in recorded:
         helper = recorded["embeddedLaunchHelper"]
         raw = (folder / "eboot.elf").read_bytes()
@@ -133,6 +135,7 @@ def verify(elf_path, self_path):
     require(signed[:4] == bytes.fromhex("4f153d1d"), "Expected the native plaintext homebrew FSELF format")
     require(b"\x7fELF\x02\x01\x01\x09\x02" in signed[:4096], "SELF lacks its native ELF header")
     return {"structuralCheck": "passed", "hardwareTest": "not run", "firmware12_20": "unverified",
+            "uiTestBridge": b"ISSHELF_PRIVATE_UI_TEST_BRIDGE_V1" in raw,
             "elf": {"bytes": len(raw), "sha256": sha256(elf_path), "programHeaders": phcount,
                     "loadSegments": len(loads), "neededModules": needed,
                     "requiredShellImport": required_imports[0], "requiredVisibilityImport": required_imports[1]},

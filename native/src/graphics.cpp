@@ -1246,11 +1246,15 @@ void graphics_render(const UiState& state, unsigned time_ms, bool animate) {
         if (room_visible) room_tv(state);
         picture(icon_files[static_cast<std::size_t>(state.settings.preferences.icon)], 80, 30, 50, 50);
         text("isShelf", 147, 36, 29, white, true);
+        if (state.ui_test_active)
+            text("UI TEST CONTROL / L3 + R3 TO STOP", 1260, 42, 18, purple, true);
+        else {
 #ifdef SHELF_PS5
-        text("PS5 / DEVELOPMENT BUILD", 1388, 42, 18, muted, true);
+            text("PS5 / DEVELOPMENT BUILD", 1388, 42, 18, muted, true);
 #else
-        text("NATIVE DEVELOPMENT BUILD / PC", 1388, 42, 18, muted, true);
+            text("NATIVE DEVELOPMENT BUILD / PC", 1388, 42, 18, muted, true);
 #endif
+        }
         settings_button(state.tools && state.tool == 2);
         line(80, 99, room_visible ? 1100 : 1840, 99, {43, 48, 69, 255});
         if (state.page == Page::home)

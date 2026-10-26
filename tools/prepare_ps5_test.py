@@ -18,6 +18,10 @@ from verify_ps5_presentation import verify as verify_presentation
 def main():
     build = CACHE / "build"
     verified = verify_recorded_hashes(build)
+    bridge_notice = ("Private menu control is compiled in. Click L3 + R3 together after discovery to enable it for ten minutes. "
+                     "The header shows control status; click L3 + R3 again to disable. Remote actions cannot launch apps. "
+                     "See docs/PRIVATE-UI-TEST.md in the matching source. This executable cannot be publicly released."
+                     if verified.get("uiTestBridge") else "Remote menu test control is not compiled into this build.")
     launcher = verified.get("embeddedLaunchHelper", {})
     permission_notice = ("Standard SDK helper runtime: changes process capabilities and syscall bounds in memory. "
                          "Owner approval is required before using this private candidate."
@@ -125,6 +129,7 @@ Source: https://github.com/Iswebro/console-shelf-ps5/tree/{commit}
 Unofficial test identity: PPSA99541. This build is not hardware-validated or a public release.
 
 This private test displays Shelf's UI/settings and real library lists, and enables launch tests.
+{bridge_notice}
 The bundled original helper is embedded in eboot.bin and sent only to the console's existing
 loopback ELF loader when you select a launch action. It waits for Shelf's explicit commitment
 and cooperative closure; it never kills another app or writes emulator settings.
@@ -186,7 +191,7 @@ be assembled before any public binary release. This local package is for the own
     files = [{"path": p.relative_to(app).as_posix(), "bytes": p.stat().st_size, "sha256": sha256(p)}
              for p in sorted(app.rglob("*")) if p.is_file()]
     manifest = {"schema": 1, "purpose": "private native launch test; not a public release", "titleId": "PPSA99541", "sourceCommit": commit,
-                "hardwareTest": "not run", "launcherRuntime": launcher,
+                "hardwareTest": "not run", "launcherRuntime": launcher, "uiTestBridge": verified.get("uiTestBridge", False),
                 "sourceFingerprintSHA256": hashlib.sha256((build / "build-source.json").read_bytes()).hexdigest(), "files": files}
     (destination / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     archive = destination / "Console-Shelf-UI-test.zip"
@@ -200,7 +205,8 @@ be assembled before any public binary release. This local package is for the own
             require(len(raw) == item["bytes"] and hashlib.sha256(raw).hexdigest() == item["sha256"], "ZIP member changed")
     receipt = {"directory": str(destination.relative_to(ROOT)), "archiveBytes": archive.stat().st_size, "archiveSHA256": sha256(archive),
                "files": len(files), "appBytes": sum(item["bytes"] for item in files), "titleId": "PPSA99541", "sourceCommit": commit,
-               "consoleInstall": "not performed", "publicRelease": "not published", "launcherRuntime": launcher}
+               "consoleInstall": "not performed", "publicRelease": "not published", "launcherRuntime": launcher,
+               "uiTestBridge": verified.get("uiTestBridge", False)}
     (CACHE / "test-packages/latest.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps(receipt, indent=2))
 
