@@ -110,8 +110,8 @@ void test_launch() {
     using namespace shelf;
     auto r = request();
     auto library = std::make_unique<Library>();
-    const auto n64 = find_system("n64"), ps2 = find_system("ps2"), ps5 = find_system("ps5");
-    library->route_count = 3;
+    const auto n64 = find_system("n64"), ps2 = find_system("ps2"), ps5 = find_system("ps5"), ps1 = find_system("ps1");
+    library->route_count = 4;
     auto& ra = library->routes[0];
     ra.system = n64;
     std::strcpy(ra.id, "retroarch:mupen64plus_next");
@@ -128,7 +128,15 @@ void test_launch() {
     std::strcpy(ps2route.id, "PPSA99203");
     std::strcpy(ps2route.title_id, "PPSA99203");
     std::strcpy(ps2route.folder, "/data/homebrew/PPSA99203");
-    library->game_count = 3;
+    auto& psswan = library->routes[3];
+    psswan.system = ps1;
+    std::strcpy(psswan.id, "PPSA99248");
+    std::strcpy(psswan.title_id, "PPSA99248");
+    std::strcpy(psswan.folder, "/data/homebrew/PPSA99248");
+    library->game_count = 4;
+    library->games[3].system = ps1;
+    library->games[3].kind = MediaKind::cue;
+    std::strcpy(library->games[3].path, "/data/PSXS5/games/Own game/Own game.cue");
     library->games[0].system = n64;
     std::strcpy(library->games[0].path, "/data/homebrew/PPSA99169/content/n64/Own game.z64");
     library->games[1].system = ps2;
@@ -151,6 +159,10 @@ void test_launch() {
           "a direct RetroArch route has a different pre-launch action");
     check(plan_game(*library, 1, {}, planned) == LaunchPlan::menu && std::strcmp(planned.title, "PPSA99203") == 0,
           "a PS2 game honestly opens the emulator's own shelf");
+    check(plan_game(*library, 3, "PPSA99248", planned) == LaunchPlan::direct_game &&
+              planned.mode == LaunchMode::psswan_game && !planned.core[0] &&
+              std::strcmp(planned.rom, "ftp://127.0.0.1:2121/data/PSXS5/games/Own game/Own game.cue") == 0,
+          "PSSwanStation gets the exact selected PS1 game through the existing console-local FTP server");
     check(plan_game(*library, 2, {}, planned) == LaunchPlan::native_game && !planned.rom[0],
           "registered native games use a title launch instead of a ROM argument");
     std::strcpy(library->games[2].title_id, shelf_title_id);
@@ -241,6 +253,24 @@ void test_launch() {
     std::strcpy(r.rom, "/data/PSXS5/games/Own game.cue");
     std::strcpy(r.core, "../other");
     check(!launch_request_valid(r, 1000), "a core ID cannot select an arbitrary file");
+    r = request();
+    r.mode = LaunchMode::psswan_game;
+    std::strcpy(r.title, "PPSA99248");
+    std::strcpy(r.rom, "ftp://127.0.0.1:2121/data/PSXS5/games/Own game.cue");
+    check(launch_request_valid(r, 1000) && encode_launch_request(r, 1000, message, sizeof(message)) &&
+              parse_launch_request(message, 1000, parsed) && parsed.mode == LaunchMode::psswan_game,
+          "a PSSwanStation direct-game request survives the protocol roundtrip");
+    const auto psswan_argv = launch_arguments(r);
+    check(std::strcmp(psswan_argv[0], "--rom") == 0 && psswan_argv[1] == r.rom &&
+              std::strcmp(psswan_argv[2], "--exit-after-game") == 0 && !psswan_argv[3],
+          "PSSwanStation receives its own documented arguments without a RetroArch core argument");
+    for (const char* path : {"ftp://192.168.1.2:2121/data/PSXS5/games/Own game.cue",
+                             "ftp://127.0.0.1:21/data/PSXS5/games/Own game.cue",
+                             "ftp://127.0.0.1:2121/data/PSXS5/games/../settings.cfg",
+                             "ftp://127.0.0.1:2121/data/PCSX2/games/Own game.iso"}) {
+        std::strcpy(r.rom, path);
+        check(!launch_request_valid(r, 1000), "PSSwanStation cannot use another server, port, traversal or PS2 library");
+    }
     r = request();
     std::memset(r.title, 'A', sizeof(r.title));
     check(!launch_request_valid(r, 1000), "nonterminated fields are bounded before string operations");

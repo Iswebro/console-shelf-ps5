@@ -177,6 +177,17 @@ void test_library() {
     check(preferred && std::strcmp(preferred->id, "retroarch:ps5sx2") == 0, "explicit core preference wins");
     for (std::size_t i = 0; i < result->route_count; ++i)
         check(result->routes[i].capability == LaunchCapability::unavailable, "discovery is not launch validation");
+    Tree psswan;
+    psswan.app("PPSA99248");
+    psswan.file("/data/homebrew/PPSA99248/games/Own game.chd", "MComprHD", 123456);
+    psswan.file("/data/psswanstation/games/Outside game.chd", "MComprHD", 123456);
+    auto psswan_library = std::make_unique<Library>();
+    discover_library(psswan.fs(), *psswan_library);
+    const auto* psswan_route = preferred_route(*psswan_library, find_system("ps1"), "PPSA99248");
+    check(psswan_route && std::strcmp(psswan_route->name, "PSSwanStation") == 0 &&
+              psswan_library->route_count == 1 && psswan_library->game_count == 2 &&
+              psswan_library->inventory[find_system("ps1")].game_count == 2,
+          "PSSwanStation is a PS1 emulator, with app-local and external games, not a native game tile");
     UiState state;
     state.library = result.get();
     state.inventory = result->inventory;

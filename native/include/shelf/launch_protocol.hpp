@@ -12,7 +12,7 @@
 namespace shelf {
 inline constexpr char shelf_title_id[] = "PPSA99541";
 inline constexpr std::size_t launch_message_capacity = 2048;
-enum class LaunchMode { emulator_menu, retroarch_game, native_title };
+enum class LaunchMode { emulator_menu, retroarch_game, native_title, psswan_game };
 struct LaunchRequest {
     char id[33]{}, title[10]{}, rom[768]{}, core[64]{};
     std::uint64_t issued = 0;
@@ -28,7 +28,7 @@ inline bool launch_title_valid(std::string_view title) {
 }
 inline bool launch_menu_known(std::string_view title) {
     for (auto known : {"PPSA99169", "PPSA99203", "PPSA97510", "PPSA99303", "PPSA99008", "PPSA99764", "PPSA99360",
-                       "PPSA99064", "PPSA99247", "PPSA98510"})
+                       "PPSA99064", "PPSA99247", "PPSA98510", "PPSA99248"})
         if (title == known)
             return true;
     return false;
@@ -39,7 +39,8 @@ template <std::size_t N> inline bool launch_bounded(const char (&text)[N]) {
 inline bool launch_media_path(std::string_view path) {
     bool permitted = false;
     for (std::string_view root : {"/data/homebrew/PPSA99169/content/", "/data/homebrew/PPSA99169/roms/",
-                                  "/data/PSXS5/games/", "/data/SwanStationPS5/games/", "/data/PCSX2/games/"})
+                                  "/data/PSXS5/games/", "/data/SwanStationPS5/games/", "/data/PCSX2/games/",
+                                  "/data/homebrew/PPSA99248/games/", "/data/psswanstation/games/"})
         if (path.size() > root.size() && path.substr(0, root.size()) == root)
             permitted = true;
     if (!permitted || path.back() == '/' || path.find('\\') != path.npos)
@@ -57,6 +58,21 @@ inline bool launch_media_path(std::string_view path) {
     }
     return true;
 }
+inline constexpr std::string_view psswan_ftp_origin = "ftp://127.0.0.1:2121";
+inline bool launch_ps1_path(std::string_view path) {
+    if (!launch_media_path(path))
+        return false;
+    for (std::string_view root : {"/data/PSXS5/games/", "/data/SwanStationPS5/games/",
+                                  "/data/homebrew/PPSA99248/games/", "/data/psswanstation/games/",
+                                  "/data/homebrew/PPSA99169/content/psx/"})
+        if (path.size() > root.size() && path.substr(0, root.size()) == root)
+            return true;
+    return false;
+}
+inline bool launch_psswan_path(std::string_view path) {
+    return path.substr(0, psswan_ftp_origin.size()) == psswan_ftp_origin &&
+           launch_ps1_path(path.substr(psswan_ftp_origin.size()));
+}
 inline bool launch_request_valid(const LaunchRequest& r, std::uint64_t now) {
     if (!launch_bounded(r.id) || !launch_bounded(r.title) || !launch_bounded(r.rom) || !launch_bounded(r.core) ||
         std::strlen(r.id) != 32 || !launch_title_valid(r.title) || !r.issued || !now)
@@ -70,6 +86,8 @@ inline bool launch_request_valid(const LaunchRequest& r, std::uint64_t now) {
         return launch_menu_known(r.title) && !r.rom[0] && !r.core[0];
     if (r.mode == LaunchMode::native_title)
         return !r.rom[0] && !r.core[0];
+    if (r.mode == LaunchMode::psswan_game)
+        return std::strcmp(r.title, "PPSA99248") == 0 && !r.core[0] && launch_psswan_path(r.rom);
     if (r.mode != LaunchMode::retroarch_game || std::strcmp(r.title, "PPSA99169") != 0 || !r.core[0] ||
         !launch_media_path(r.rom))
         return false;
@@ -83,6 +101,8 @@ inline const char* launch_mode_name(LaunchMode mode) {
         return "menu";
     if (mode == LaunchMode::retroarch_game)
         return "retroarch";
+    if (mode == LaunchMode::psswan_game)
+        return "psswan";
     return mode == LaunchMode::native_title ? "native" : "invalid";
 }
 inline bool encode_launch_request(const LaunchRequest& request, std::uint64_t now, char* output, std::size_t capacity) {
@@ -134,6 +154,8 @@ inline bool parse_launch_request(std::string_view message, std::uint64_t now, La
         candidate.mode = LaunchMode::retroarch_game;
     else if (std::strcmp(mode, "native") == 0)
         candidate.mode = LaunchMode::native_title;
+    else if (std::strcmp(mode, "psswan") == 0)
+        candidate.mode = LaunchMode::psswan_game;
     else
         return false;
     if (!launch_request_valid(candidate, now))
@@ -146,6 +168,10 @@ inline bool parse_launch_request(std::string_view message, std::uint64_t now, La
 inline std::array<const char*, 6> launch_arguments(const LaunchRequest& request) {
     if (request.mode == LaunchMode::retroarch_game)
         return {"--rom", request.rom, "--core", request.core, "--exit-after-game", nullptr};
+    // PSSwanStation build 25's documented forwarder contract. Its own read-only
+    // FTP source reaches the same console-local games without moving them.
+    if (request.mode == LaunchMode::psswan_game)
+        return {"--rom", request.rom, "--exit-after-game", nullptr, nullptr, nullptr};
     return {};
 }
 enum class LaunchStage {
