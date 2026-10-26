@@ -11,6 +11,12 @@
 #include <memory>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
 namespace {
 void check(bool ok, const char* message) {
     if (!ok) {
@@ -96,6 +102,38 @@ struct Tree {
             }};
     }
 };
+struct SmallStackScan {
+    shelf::ReadOnlyFs files;
+    shelf::Library* library;
+};
+#ifdef _WIN32
+DWORD WINAPI scan_small_stack(void* raw) {
+#else
+void* scan_small_stack(void* raw) {
+#endif
+    auto& scan = *static_cast<SmallStackScan*>(raw);
+    shelf::discover_library(scan.files, *scan.library);
+    return 0;
+}
+void discover_small_stack(shelf::ReadOnlyFs files, shelf::Library& library) {
+    SmallStackScan scan{files, &library};
+    constexpr std::size_t stack_bytes = 64 * 1024;
+#ifdef _WIN32
+    HANDLE worker = CreateThread(nullptr, stack_bytes, scan_small_stack, &scan,
+                                 STACK_SIZE_PARAM_IS_A_RESERVATION, nullptr);
+    check(worker != nullptr, "create a worker with a 64 KiB stack reservation");
+    check(WaitForSingleObject(worker, INFINITE) == WAIT_OBJECT_0, "join small-stack discovery worker");
+    CloseHandle(worker);
+#else
+    pthread_attr_t attributes;
+    check(pthread_attr_init(&attributes) == 0, "initialize small-stack worker attributes");
+    check(pthread_attr_setstacksize(&attributes, stack_bytes) == 0, "limit discovery worker to 64 KiB");
+    pthread_t worker;
+    check(pthread_create(&worker, &attributes, scan_small_stack, &scan) == 0, "create small-stack discovery worker");
+    pthread_attr_destroy(&attributes);
+    check(pthread_join(worker, nullptr) == 0, "join small-stack discovery worker");
+#endif
+}
 } // namespace
 void test_library() {
     using namespace shelf;
@@ -209,6 +247,20 @@ void test_library() {
     for (std::size_t i = 0; i < cover_library->game_count; ++i)
         if (cover_library->games[i].system == find_system("ps1"))
             check(std::strstr(cover_library->games[i].artwork, "/boxart/"), "flat front artwork takes priority over a 3D case");
+    const std::string index_row = "Exact\tSLES-12345\t1\t/data/PSXS5/games/Exact/Exact.cue\tExact\n";
+    covers.file("/data/PSXS5/library.txt", index_row + "#" + std::string(65535 - index_row.size() - 1, ' '));
+    discover_small_stack(covers.fs(), *cover_library);
+    check(cover_library->scan.complete && cover_library->artwork.found == 2,
+          "a maximum-size serial index fits a 64 KiB discovery worker without hiding games or covers");
+    covers.file("/data/PSXS5/library.txt", index_row, 65536);
+    discover_small_stack(covers.fs(), *cover_library);
+    check(cover_library->game_count == 2 && cover_library->artwork.found == 1,
+          "an oversized optional serial index is skipped while discovery still completes");
+    covers.file("/data/PSXS5/library.txt", index_row, 65535);
+    discover_small_stack(covers.fs(), *cover_library);
+    check(cover_library->scan.complete && cover_library->artwork.found == 1,
+          "a short optional index read releases its buffer and leaves the game library usable");
+    covers.file("/data/PSXS5/library.txt", index_row);
     covers.file("/data/PCSX2/chd-serials.txt", "/data/PCSX2/games/PS2.iso\t1\t1\tSLUS-12345\n");
     discover_library(covers.fs(), *cover_library);
     check(cover_library->artwork.found == 1, "a stale PS2 serial row with the wrong game size cannot assign art");

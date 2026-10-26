@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "shelf/artwork.hpp"
+#include "shelf/memory.hpp"
 #include <array>
 #include <cstdio>
 #include <cstring>
@@ -55,10 +56,15 @@ bool named(const ReadOnlyFs& fs, LibraryGame& game, View directory, View name) {
 void serial_index(const ReadOnlyFs& fs, Library& library, const char* path, std::size_t system, bool ps2) {
     FileStat info;
     if (fs.stat(fs.context, path, info) != FsStatus::ok || info.directory || !info.size || info.size >= 65536) return;
-    char text[65536];
+    // The console's default worker stack cannot hold a complete serial index.
+    // Match the other metadata readers: allocate only after validating its bound.
+    auto* text = static_cast<char*>(allocate(static_cast<std::size_t>(info.size)));
+    if (!text) return;
     std::size_t used = 0;
-    if (fs.read(fs.context, path, 0, text, static_cast<std::size_t>(info.size), used) != FsStatus::ok || used != info.size)
+    if (fs.read(fs.context, path, 0, text, static_cast<std::size_t>(info.size), used) != FsStatus::ok || used != info.size) {
+        release(text);
         return;
+    }
     for (std::size_t start = 0; start < used;) {
         std::size_t end = start;
         while (end < used && text[end] != '\n') ++end;
@@ -94,6 +100,7 @@ void serial_index(const ReadOnlyFs& fs, Library& library, const char* path, std:
             else if (id != game.title_id) std::strcpy(game.title_id, "ambiguous");
         }
     }
+    release(text);
 }
 const char* database(View id) {
     struct Mapping { const char* id; const char* name; };

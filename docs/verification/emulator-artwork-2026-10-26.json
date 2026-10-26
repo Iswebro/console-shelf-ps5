@@ -1,6 +1,7 @@
 {
   "schema": 1,
-  "status": "installed; physical artwork and direct PS1 handoff pending owner after-work check",
+  "status": "superseded: owner reported CE-108255-1 at startup; build 00.100.026 addresses the diagnosed worker stack overflow",
+  "followUpRecord": "ui26-startup-stack-fix-2026-10-27.json",
   "contentVersion": "00.100.025",
   "compiledSourceCommit": "ea0159a9898332f6a124978c0cfc6a889decfe94",
   "applicationSelf": {
@@ -57,7 +58,7 @@
     "psswanLibraryPopulated": true,
     "oneGamePlayedInPSSwan": true,
     "isShelfVisibleInOverdrive": true,
-    "directPS1SelectionFromIsShelf": "pending after work",
+    "directPS1SelectionFromIsShelf": "owner confirmed Castlevania: Symphony of the Night launched and played in PSSwanStation on build 00.100.026; see followUpRecord",
     "physicalArtworkDisplay": "pending after work"
   }
 }

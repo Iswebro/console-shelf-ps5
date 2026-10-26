@@ -1,6 +1,6 @@
 # Game artwork
 
-Private build `00.100.025` adds game cover thumbnails, a large selected-game image, and cover art in the room TV's favourite-game mode. Portrait, square and landscape images keep their original proportions. A game without an image uses its console illustration. The public `v0.1.0-beta.1` download predates this feature.
+Private build `00.100.026` includes game cover thumbnails, a large selected-game image, and cover art in the room TV's favourite-game mode. Portrait, square and landscape images keep their original proportions. A game without an image uses its console illustration. The public `v0.1.0-beta.1` download predates this feature.
 
 ## Existing emulator artwork
 
@@ -30,4 +30,6 @@ The artwork reader uses only the two named game-to-serial indexes, public game m
 
 The 26 October 2026 check found 92 library entries. Eighty images came from the existing PS1, PS2, PS3 and native PS5 libraries. Ten matching N64 front covers from the [Libretro thumbnail collection](https://github.com/libretro-thumbnails/Nintendo_-_Nintendo_64) were added to the owner's private cache. The two GameShark utilities had no exact image in the checked sources and use the PS1 fallback.
 
-Native PC rendering and image/cache checks are separate from acceptance on the physical PS5. The private PS5 build and 90-image cache are installed, with all changed files read back. The owner will check the physical display after work. [Verification record](verification/emulator-artwork-2026-10-26.json).
+The owner's startup check of build `00.100.025` failed with `CE-108255-1`. Console diagnostics identified a stack overflow in the artwork serial-index reader. Build `00.100.026` moves that bounded buffer to the heap, gives the discovery worker an explicit 256 KiB stack, and rejects scan functions with stack frames larger than 16 KiB during PS5 compilation. A 64 KiB worker regression reproduces the old failure and passes with the fix, including maximum-size, oversized and short-read indexes.
+
+The replacement build is installed and its five changed program records were read back. Settings are unchanged byte for byte; the private intro and artwork folder listings are unchanged. On 27 October 2026, the owner confirmed that isShelf opens and stays responsive, and that selecting Castlevania: Symphony of the Night launches it successfully through PSSwanStation. Fresh console logs confirm a complete scan of 92 games, 90 cached covers, no unreadable artwork, and a foreground handoff to `PPSA99248`. Artwork appearance still awaits a visual check. [Artwork record](verification/emulator-artwork-2026-10-26.json); [startup fix and hardware record](verification/ui26-startup-stack-fix-2026-10-27.json).

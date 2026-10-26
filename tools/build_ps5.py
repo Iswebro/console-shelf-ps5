@@ -102,10 +102,14 @@ def build(standard_runtime=False, ui_test_bridge=False):
         obj = output / (source.stem + ".o")
         language = ["-std=c++17", "-fno-exceptions", "-fno-rtti"] if source.suffix == ".cpp" else ["-std=c11"]
         warnings = ["-Wall", "-Wextra", "-Werror", "-Wno-unused-function"]
+        if source.stem in {"library", "artwork_sources", "artwork", "filesystem", "metadata", "ftp"}:
+            # These units run on the bounded library worker stack. Reject a single
+            # oversized frame before a desktop's larger default stack hides it.
+            warnings.append("-Wframe-larger-than=16384")
         if source.stem == "codecs":
             warnings = ["-w"]  # Unmodified third-party implementations; owned units remain strict.
         print("Compile PS5:", source.name, flush=True)
-        run([compiler, *common, *language, *warnings, "-c", source, "-o", obj], env=env)
+        run([compiler, *common, *language, *warnings, "-fstack-usage", "-c", source, "-o", obj], env=env)
         objects.append(obj)
     # Equivalent to SDK v0.42's prospero-lld wrapper, using the pinned linker
     # directly so no global llvm-config symlink or installation is needed.
