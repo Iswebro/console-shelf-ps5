@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "dateBrisbane": "2026-10-27",
+  "status": "installed; waiting for owner to open isShelf and enable control",
+  "contentVersion": "00.100.028",
+  "compiledSourceCommit": "704b70b474aefd684e30a9b3e31707f637fe67d2",
+  "applicationSelf": {
+    "bytes": 2830609,
+    "sha256": "0985ba55631023e56fb0d32f027fc11069924532d81de4586614f830e127f470"
+  },
+  "packageArchiveSHA256": "2c1f65914cb9d9c8939b42bba47ffc8902123b9b03fdf085a8346dec2482aa4f",
+  "packageManifestSHA256": "9ff7345f5255b498edb321dcb6e858d05669e1a53637e74007a1c639465f7557",
+  "installation": {
+    "updatedRecords": 5,
+    "fullProgramRawReadbacks": 242,
+    "rollbackCopiesVerified": 5,
+    "preferencesPreservedByteForByte": true,
+    "artworkAndIntroListingsPreserved": true
+  },
+  "checks": {
+    "nativeModelAndTimerRegression": "passed",
+    "pcClientTests": 15,
+    "nativeActionImageIntegration": "passed",
+    "ps5CrossBuildAndStructure": "passed"
+  },
+  "previousTrial": "UI27 immediate expiry and FTP permission denial preserved in ui27-private-bridge-admission-2026-10-27.json",
+  "remoteMenuCommandsSent": 0,
+  "currentConsoleControlTrial": "NOT_RUN; UI28 has not yet been opened and enabled",
+  "psnUsed": false,
+  "helperExecutedDuringInstall": false,
+  "publicReleaseChanged": false
+}
