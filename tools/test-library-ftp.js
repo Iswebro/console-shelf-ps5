@@ -28,6 +28,7 @@ file('/data/psswanstation/games/Own PS1 game.chd', 'MComprHD');
 file('/data/psswanstation/data/frontend.cfg', 'PRIVATE - must never be read');
 const coverFixture = fs.readFileSync(path.join(root,'assets/branding/isshelf-home-icon.png'));
 file('/data/psswanstation/covers/Own PS1 game.png', coverFixture);
+file('/data/psswanstation/covers/Own PS1 game_spine.png', coverFixture);
 file('/user/app/PPSA12345/sce_sys/icon0.png', coverFixture);
 file('/data/homebrew/PPSA99169/thumbnails/Nintendo - Nintendo 64/Named_Boxarts/Example game.png', 'CORRUPT OPTIONAL ART');
 function list(folder) {
@@ -98,6 +99,8 @@ async function scenario(pasv, malformed = false, background = false, coalesced =
     assert.match(result.stdout, /Library artwork: 3 sources; 2 cached; 0 missing; 1 unreadable/,
       'valid artwork is resized and cached; corrupt optional artwork never hides a game or fails discovery');
     const artIndex=JSON.parse(fs.readFileSync(path.join(owned,'covers/index.json')));
+    assert.equal(artIndex.games.find(game=>game.system==='ps1').spineReady,true,'a separate existing spine is cached without treating it as front artwork');
+    assert.equal(artIndex.games.find(game=>game.system==='ps5').kind,2,'a native app icon remains identified as an icon');
     assert.equal(artIndex.games.filter(game=>game.ready).length,2);
     for(const game of artIndex.games.filter(game=>game.ready)){
       const bytes=fs.readFileSync(path.join(owned,'covers',game.key+'.png'));

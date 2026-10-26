@@ -13,6 +13,7 @@
     "test:room": "node tools/test-room.js",
     "test:movie": "node tools/test-movie.js",
     "test:library-ftp": "node tools/test-library-ftp.js",
+    "test:game-cases": "node tools/test-game-cases.js",
     "test:launch-client": "node tools/test-launch-client.js",
     "prepare:ps5-ui-test": "node tools/build-package-art.js && node tools/build-ps5.js prepare_ps5_test.py",
     "prepare:ps5-sources": "node tools/build-ps5.js prepare_corresponding_source.py",

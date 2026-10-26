@@ -11,4 +11,7 @@ void cache_artwork(const ReadOnlyFs& files, Library& library, const char* data_r
 inline void artwork_name(const LibraryGame& game, char (&out)[32]) {
     std::snprintf(out, sizeof(out), "@cover/%016llx", static_cast<unsigned long long>(game_favorite_key(game)));
 }
+inline void spine_name(const LibraryGame& game, char (&out)[32]) {
+    std::snprintf(out, sizeof(out), "@spine/%016llx", static_cast<unsigned long long>(game_favorite_key(game)));
+}
 } // namespace shelf

@@ -1,6 +1,14 @@
 # Game artwork
 
-Private build `00.100.026` includes game cover thumbnails, a large selected-game image, and cover art in the room TV's favourite-game mode. Portrait, square and landscape images keep their original proportions. A game without an image uses its console illustration. The public `v0.1.0-beta.1` download predates this feature.
+Private build `00.100.027` presents front covers in console-specific 3D cases, preserves existing rendered case artwork, and uses the same presentation in list thumbnails and the room TV's favourite-game mode. A game without an image uses its console illustration. The public `v0.1.0-beta.1` download predates this feature.
+
+## Console cases
+
+The first collection checks focus on PS1, PS2 and Nintendo 64. PS1 prefers the existing `covers/3d` images, including their original transparent jewel-case edges, labels and special editions. Those complete images are displayed directly rather than placed inside a second case. PS2 front covers sit inside tall plastic DVD cases; matching `_spine` images from the emulator's cover folder supply the visible side. N64 uses a wide cardboard box for western releases and portrait packaging for Japanese releases.
+
+Additional case profiles cover NES, SNES, Game Boy/Color/Advance, DS/3DS, GameCube, Wii/Wii U, Switch, PSP, PS3/4/5, Mega Drive/Master System, Sega CD/Saturn/Dreamcast, PC Engine and Atari. The profile controls the case proportions, depth and material independently of the source image. Region and original scan orientation resolve common packaging differences. Computer packaging follows the scan's own proportions; arcade artwork remains a poster. A generic spine title is used when separate original spine art is unavailable, so this is not a claim that every edition's spine is an exact scanned reproduction.
+
+Case rendering adds perspective, distinct front/side/top faces, plastic highlights, contact shadows and a soft floor reflection. Large cases are drawn at twice the display resolution into a bounded two-entry texture cache for smooth edges and inexpensive subsequent frames. Actual app icons and screenshots keep their original proportions until a real retail front cover is available.
 
 ## Existing emulator artwork
 
@@ -8,8 +16,8 @@ isShelf finds images when it scans the library. Games, emulator folders and save
 
 | Source | Matching rule |
 | --- | --- |
-| PSXS5 | The exact game path in `library.txt` supplies its serial. Front images in `covers/default` or `covers/boxart` take priority; `covers/3d` is a fallback. Filename-matched covers work too. Conflicting serial rows are ignored. |
-| PS5SX2 | An exact game path and matching file size in `chd-serials.txt` supply the serial used in `/data/PCSX2/covers`. Back and spine images are not substituted for the front. |
+| PSXS5 | The exact game path in `library.txt` supplies its serial. Complete case images in `covers/3d` take priority, followed by front images in `covers/default` or `covers/boxart`. Filename-matched covers work too. Conflicting serial rows are ignored. |
+| PS5SX2 | An exact game path and matching file size in `chd-serials.txt` supply the serial used in `/data/PCSX2/covers`. A complete case in `covers/3d` takes priority if available. Otherwise, the front and optional `_spine` images become distinct case faces; back/spine images are never substituted for the front. |
 | PSSwanStation / SwanStationPS5 | Existing `covers` folders, matched by game filename or a known serial. |
 | RetroArch | The system's `thumbnails` database folder, using `Named_Boxarts`, then `Named_Titles` or `Named_Snaps`. Matching uses the game filename or displayed name. |
 | PS3 | The discovered game's `PS3_GAME/ICON0.PNG`. |
@@ -20,7 +28,7 @@ PNG and JPEG sources are supported. These images help identify games; they do no
 
 ## Cache and privacy
 
-The app reads artwork through the console's existing ftpsrv and keeps resized PNG copies inside `/data/console-shelf/covers`. The cache uses a stable key derived from each game's system and path. Its private `index.json` records the artwork source and whether it is ready. Artwork is read in the background discovery worker, and unchanged cache entries are reused on the next opening.
+The app reads artwork through the console's existing ftpsrv and keeps resized PNG copies inside `/data/console-shelf/covers`. The cache uses a stable key derived from each game's system and path, with separate `.spine.png` and `.spine.tag` entries for original spine artwork. Its private `index.json` records the artwork source, presentation kind, cover readiness and spine readiness. Artwork is read in the background discovery worker, and unchanged cache entries are reused on the next opening. Spine transfers share the same per-opening budget as covers.
 
 Transfers are limited to known artwork locations, 8 MiB per source image and 64 MiB per opening. Decoding is bounded to 16 million pixels, and cached images have a maximum side of 960 pixels. Very large collections can fill the cache over several openings. Damaged or oversized art leaves the game available with its console illustration. Cancellation still interrupts the FTP waits.
 

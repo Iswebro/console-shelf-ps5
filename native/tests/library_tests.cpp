@@ -2,6 +2,7 @@
 #include "shelf/json.hpp"
 #include "shelf/library.hpp"
 #include "shelf/artwork.hpp"
+#include "shelf/game_case.hpp"
 #include "shelf/ui.hpp"
 #include <algorithm>
 #include <cstdio>
@@ -246,7 +247,28 @@ void test_library() {
               "only the exact game's artwork is selected; discovery does not claim decoded artwork");
     for (std::size_t i = 0; i < cover_library->game_count; ++i)
         if (cover_library->games[i].system == find_system("ps1"))
-            check(std::strstr(cover_library->games[i].artwork, "/boxart/"), "flat front artwork takes priority over a 3D case");
+            check(std::strstr(cover_library->games[i].artwork, "/3d/") &&
+                      cover_library->games[i].artwork_kind == ArtworkKind::case_render,
+                  "an existing 3D PS1 case is preferred and is identified so the renderer never wraps it twice");
+    LibraryGame shape;
+    shape.system = find_system("n64");
+    auto profile = game_case_profile(shape, 1.43f);
+    check(profile.width > profile.height && profile.material == CaseMaterial::cardboard,
+          "western N64 games use a wide cardboard box, not a DVD case");
+    std::strcpy(shape.name, "Example (Japan)");
+    profile = game_case_profile(shape, .7f);
+    check(profile.width < profile.height, "Japanese N64 artwork uses the portrait packaging");
+    shape.system = find_system("ps2");
+    std::strcpy(shape.name, "Example (Europe)");
+    profile = game_case_profile(shape, .71f);
+    check(profile.width < profile.height && profile.blue > profile.red && profile.material == CaseMaterial::plastic,
+          "PAL PS2 games have DVD-case proportions and blue plastic");
+    for (std::size_t system = 0; system < system_count; ++system) {
+        shape.system = system;
+        const auto p = game_case_profile(shape, 1);
+        check(p.width > 0 && p.height > 0 && p.depth > 0 && p.depth < p.height,
+              "every catalog system has finite, positive case proportions or an explicit non-case presentation");
+    }
     const std::string index_row = "Exact\tSLES-12345\t1\t/data/PSXS5/games/Exact/Exact.cue\tExact\n";
     covers.file("/data/PSXS5/library.txt", index_row + "#" + std::string(65535 - index_row.size() - 1, ' '));
     discover_small_stack(covers.fs(), *cover_library);

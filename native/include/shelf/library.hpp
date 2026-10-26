@@ -21,6 +21,7 @@ struct ReadOnlyFs {
     bool cached = false;
 };
 enum class MediaKind { cartridge, disc_image, cue, playlist, ps3_folder, native_title };
+enum class ArtworkKind { front, case_render, icon, screenshot };
 struct EmulatorRoute {
     std::size_t system = 0;
     char id[48]{}, name[96]{}, title_id[16]{}, folder[path_capacity]{}, core[path_capacity]{};
@@ -36,6 +37,8 @@ struct LibraryGame {
     std::uint64_t artwork_bytes = 0;
     std::int64_t artwork_modified = 0;
     bool artwork_ready = false;
+    ArtworkKind artwork_kind = ArtworkKind::front;
+    bool artwork_spine_ready = false;
 };
 struct ArtworkSummary {
     std::size_t found = 0, cached = 0, missing = 0, failed = 0;

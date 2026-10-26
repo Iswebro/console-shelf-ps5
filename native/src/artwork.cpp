@@ -26,12 +26,12 @@ bool cached_image(const char* path) {
     int w = 0, h = 0, channels = 0;
     return stbi_info(path, &w, &h, &channels) && w > 0 && h > 0 && w <= 960 && h <= 960;
 }
-std::uint64_t identity(const LibraryGame& game) {
+std::uint64_t identity(const char* path, std::uint64_t bytes, std::int64_t modified) {
     std::uint64_t value = 14695981039346656037ull;
-    for (const char* c = game.artwork; *c; ++c) value = (value ^ static_cast<unsigned char>(*c)) * 1099511628211ull;
-    value ^= game.artwork_bytes;
+    for (const char* c = path; *c; ++c) value = (value ^ static_cast<unsigned char>(*c)) * 1099511628211ull;
+    value ^= bytes;
     value *= 1099511628211ull;
-    return value ^ static_cast<std::uint64_t>(game.artwork_modified);
+    return value ^ static_cast<std::uint64_t>(modified);
 }
 bool same_tag(const char* path, const char* wanted) {
     FILE* file = std::fopen(path, "rb");
@@ -83,6 +83,48 @@ bool thumbnail(const unsigned char* encoded, std::size_t bytes, const char* path
     stbi_image_free(input);
     return ok;
 }
+bool cache_spine(const ReadOnlyFs& fs, const LibraryGame& game, const char* folder, std::size_t& transferred,
+                 bool (*cancelled)(void*), void* context) {
+    if (game.artwork_kind != ArtworkKind::front || !game.artwork[0] || !fs.stat) return false;
+    const char* dot = std::strrchr(game.artwork, '.');
+    if (!dot) return false;
+    char source[path_capacity];
+    FileStat info;
+    bool found = false;
+    for (const char* ext : {".jpg", ".png", ".jpeg", ".JPG", ".PNG", ".JPEG"}) {
+        const int used = std::snprintf(source, sizeof(source), "%.*s_spine%s", static_cast<int>(dot - game.artwork), game.artwork, ext);
+        if (used < 1 || static_cast<std::size_t>(used) >= sizeof(source) || !valid_artwork_source(source)) continue;
+        if (cancelled && cancelled(context)) return false;
+        if (fs.stat(fs.context, source, info) == FsStatus::ok && !info.directory && info.size && info.size <= 8 * 1024 * 1024) {
+            found = true; break;
+        }
+    }
+    if (!found) return false;
+    char path[2120], tag_path[2120], temporary[2120], tag[32];
+    const auto key = static_cast<unsigned long long>(game_favorite_key(game));
+    std::snprintf(path, sizeof(path), "%s/%016llx.spine.png", folder, key);
+    std::snprintf(tag_path, sizeof(tag_path), "%s/%016llx.spine.tag", folder, key);
+    std::snprintf(temporary, sizeof(temporary), "%s/%016llx.spine.tmp", folder, key);
+    std::snprintf(tag, sizeof(tag), "%016llx\n", static_cast<unsigned long long>(identity(source, info.size, info.modified)));
+    if (cached_image(path) && same_tag(tag_path, tag)) return true;
+    if (transferred + info.size > 64 * 1024 * 1024) return false;
+    auto* encoded = static_cast<unsigned char*>(allocate(static_cast<std::size_t>(info.size)));
+    if (!encoded) return false;
+    std::size_t used = 0;
+    bool ok = fs.read(fs.context, source, 0, encoded, static_cast<std::size_t>(info.size), used) == FsStatus::ok && used == info.size;
+    transferred += used;
+    ok = ok && !(cancelled && cancelled(context)) && thumbnail(encoded, used, temporary);
+    release(encoded);
+    if (ok) {
+        std::remove(path);
+        ok = std::rename(temporary, path) == 0;
+        if (ok) if (FILE* file = std::fopen(tag_path, "wb")) {
+            std::fwrite(tag, 1, std::strlen(tag), file); std::fclose(file);
+        }
+    }
+    if (!ok) std::remove(temporary);
+    return ok;
+}
 } // namespace
 void cache_artwork(const ReadOnlyFs& fs, Library& library, const char* data_root,
                    bool (*cancelled)(void*), void* context) {
@@ -99,7 +141,7 @@ void cache_artwork(const ReadOnlyFs& fs, Library& library, const char* data_root
         std::snprintf(path, sizeof(path), "%s/%016llx.png", folder, static_cast<unsigned long long>(key));
         std::snprintf(tag_path, sizeof(tag_path), "%s/%016llx.tag", folder, static_cast<unsigned long long>(key));
         std::snprintf(temporary, sizeof(temporary), "%s/%016llx.tmp", folder, static_cast<unsigned long long>(key));
-        std::snprintf(tag, sizeof(tag), "%016llx\n", static_cast<unsigned long long>(identity(game)));
+        std::snprintf(tag, sizeof(tag), "%016llx\n", static_cast<unsigned long long>(identity(game.artwork, game.artwork_bytes, game.artwork_modified)));
         if (cached_image(path) && (!game.artwork[0] || same_tag(tag_path, tag))) {
             game.artwork_ready = true;
             ++library.artwork.cached;
@@ -132,6 +174,11 @@ void cache_artwork(const ReadOnlyFs& fs, Library& library, const char* data_root
         } else ok = false;
         if (!ok) { ++library.artwork.failed; std::remove(temporary); }
     }
+    for (std::size_t i = 0; i < library.game_count; ++i) {
+        if (cancelled && cancelled(context)) return;
+        auto& game = library.games[i];
+        game.artwork_spine_ready = game.artwork_ready && cache_spine(fs, game, folder, transferred, cancelled, context);
+    }
     char index[2120];
     std::snprintf(index, sizeof(index), "%s/index.json", folder);
     if (FILE* file = std::fopen(index, "wb")) {
@@ -145,7 +192,8 @@ void cache_artwork(const ReadOnlyFs& fs, Library& library, const char* data_root
             std::fputs(",\"name\":", file); quoted(file, game.name);
             std::fputs(",\"path\":", file); quoted(file, game.path);
             std::fputs(",\"source\":", file); quoted(file, game.artwork);
-            std::fprintf(file, ",\"ready\":%s}", game.artwork_ready ? "true" : "false");
+            std::fprintf(file, ",\"ready\":%s,\"kind\":%u,\"spineReady\":%s}", game.artwork_ready ? "true" : "false",
+                         static_cast<unsigned>(game.artwork_kind), game.artwork_spine_ready ? "true" : "false");
         }
         std::fputs("]}\n", file);
         std::fclose(file);

@@ -328,7 +328,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-26 artwork scan stack fix; dedicated PSSwanStation launch integration");
+    startup("main entered", "ui-27 original game cases; dedicated PSSwanStation launch integration");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);

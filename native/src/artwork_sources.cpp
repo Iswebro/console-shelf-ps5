@@ -41,6 +41,11 @@ bool image(const ReadOnlyFs& fs, LibraryGame& game, View path) {
     std::memcpy(game.artwork, name, path.size() + 1);
     game.artwork_bytes = info.size;
     game.artwork_modified = info.modified;
+    game.artwork_kind = path.find("/covers/3d/") != path.npos ? ArtworkKind::case_render
+        : path.find("/sce_sys/icon0.png") != path.npos || path.find("/PS3_GAME/ICON0.PNG") != path.npos
+            ? ArtworkKind::icon
+        : path.find("/Named_Titles/") != path.npos || path.find("/Named_Snaps/") != path.npos
+            ? ArtworkKind::screenshot : ArtworkKind::front;
     return true;
 }
 bool named(const ReadOnlyFs& fs, LibraryGame& game, View directory, View name) {
@@ -165,6 +170,7 @@ void discover_artwork(const ReadOnlyFs& fs, Library& library) {
     for (std::size_t i = 0; i < library.game_count; ++i) {
         auto& game = library.games[i];
         game.artwork[0] = 0; game.artwork_ready = false;
+        game.artwork_kind = ArtworkKind::front; game.artwork_spine_ready = false;
         game.artwork_bytes = 0; game.artwork_modified = 0;
         const auto system = catalog[game.system].id;
         char path[path_capacity];
@@ -173,11 +179,13 @@ void discover_artwork(const ReadOnlyFs& fs, Library& library) {
             found = join_media_path(game.path, "sce_sys/icon0.png", path, sizeof(path)) && image(fs, game, path);
         else if (game.kind == MediaKind::ps3_folder)
             found = join_media_path(game.path, "PS3_GAME/ICON0.PNG", path, sizeof(path)) && image(fs, game, path);
-        if (!found && system == "ps2" && serial(game.title_id)) found = named(fs, game, "/data/PCSX2/covers", game.title_id);
+        if (!found && system == "ps2" && serial(game.title_id))
+            found = named(fs, game, "/data/PCSX2/covers/3d", game.title_id) || named(fs, game, "/data/PCSX2/covers", game.title_id);
         if (!found && system == "ps1" && serial(game.title_id))
-            found = named(fs, game, "/data/PSXS5/covers/default", game.title_id) || named(fs, game, "/data/PSXS5/covers/boxart", game.title_id);
+            found = named(fs, game, "/data/PSXS5/covers/3d", game.title_id) ||
+                    named(fs, game, "/data/PSXS5/covers/default", game.title_id) || named(fs, game, "/data/PSXS5/covers/boxart", game.title_id);
         if (!found && system == "ps1")
-            for (const char* directory : {"/data/PSXS5/covers/boxart", "/data/PSXS5/covers/default", "/data/PSXS5/covers/3d"}) {
+            for (const char* directory : {"/data/PSXS5/covers/3d", "/data/PSXS5/covers/boxart", "/data/PSXS5/covers/default"}) {
                 found = named(fs, game, directory, stem(game.path));
                 if (found) break;
             }
