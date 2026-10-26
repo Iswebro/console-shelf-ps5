@@ -18,6 +18,7 @@ Omit `--scan-only` to browse the resulting inventory in the native PC UI. `--lib
 
 | Source | Discovery rule |
 | --- | --- |
+| Game artwork | Exact serial/filename matches from existing cover folders, RetroArch thumbnails, and registered game icons. Images are cached separately in Shelf's own data folder; optional artwork failures do not hide games. See [game artwork](GAME-ART.md). |
 | Registered emulator apps | Known title identity, public `sce_sys/param.json` and a present program. A source folder alone is insufficient. |
 | RetroArch | Existing `*_libretro.so` files provide core evidence. Per-system folders under the app's `content/` are scanned using explicit folder aliases and format lists. An `.info` file or suggested core name does not count as an installed core. |
 | PSXS5 / SwanStationPS5 / PSSwanStation | Existing `/data/PSXS5/games`, `/data/SwanStationPS5/games`, `/data/homebrew/PPSA99248/games` and `/data/psswanstation/games`. PSSwanStation is detected as title `PPSA99248`; SwanStationPS5 remains a separate choice. CUE track references and M3U disc references must resolve within the existing tree. Valid multi-disc manifests suppress their individual discs; BIN tracks are not separate PS1 games. |

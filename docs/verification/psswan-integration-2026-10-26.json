@@ -1,6 +1,16 @@
 {
   "schema": 1,
-  "status": "installed; physical playback pending owner confirmation",
+  "status": "PSSwanStation library accepted; owner also confirmed direct isShelf handoff on the combined 00.100.026 build",
+  "directLaunchFollowUp": {
+    "date": "2026-10-27",
+    "contentVersion": "00.100.026",
+    "game": "Castlevania: Symphony of the Night",
+    "ownerConfirmedPlayed": true,
+    "targetTitleId": "PPSA99248",
+    "loggedStatus": "foreground-observed",
+    "record": "ui26-startup-stack-fix-2026-10-27.json",
+    "scope": "One selected-game launch from isShelf into PSSwanStation; not a claim about every game or format"
+  },
   "contentVersion": "00.100.024",
   "compiledSourceCommit": "0229478d6ddfbf73848290f6ab871ce8f31fe81e",
   "applicationSelf": {
@@ -54,7 +64,8 @@
     "sourceAndRegisteredTitleVersionsMatch": true,
     "interruption": "FTP returned 550 Cross-device link at registered title metadata after four program files passed readback; completion verified those four files, then used same-folder staging for metadata and settings.",
     "publicBetaAssetReplaced": false,
-    "physicalConsoleAcceptance": "pending"
+    "physicalConsoleAcceptance": "owner confirmed library populated and one game plays; direct isShelf handoff subsequently passed on combined build 00.100.026",
+    "supersededByPrivateBuild": "00.100.026, carrying the same PS1 launch route plus artwork and the scan stack fix"
   },
   "launchContract": "https://github.com/Press5elect/PSSwanStation/blob/3e258156af8b0e351d365f68cb0e41d2c1bb988d/ps5/MANUAL.md#L363"
 }

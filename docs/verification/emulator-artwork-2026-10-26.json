@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "status": "superseded: owner reported CE-108255-1 at startup; build 00.100.026 addresses the diagnosed worker stack overflow",
+  "followUpRecord": "ui26-startup-stack-fix-2026-10-27.json",
+  "contentVersion": "00.100.025",
+  "compiledSourceCommit": "ea0159a9898332f6a124978c0cfc6a889decfe94",
+  "applicationSelf": {
+    "bytes": 2821521,
+    "sha256": "4acda5a4e94611103882329389c859c8b8db5a7c4e566996c8a63d77c1b769fe"
+  },
+  "privatePackage": {
+    "members": 242,
+    "bytes": 104394820,
+    "sha256": "74639bb21d8f12514f03991e50d2d223f5c3649599fd68eb04824a5e0cd7a4f9"
+  },
+  "checks": {
+    "nativeModelDiscoveryAndLaunch": "passed, including exact serial matching, PS2 file-size validation, front-cover priority, ambiguous metadata and disallowed artwork paths",
+    "ftpIntegration": "passed, including EPSV/PASV pinning, coalesced 150/226 replies, corrupt optional artwork, resized PNG cache, background commit and responsive cancellation",
+    "nativeRenderer": "80 captures passed; final PS1, PS2 and N64 cover previews visually inspected on PC",
+    "ps5CrossBuildAndStructure": "passed",
+    "packageIntegrity": "passed"
+  },
+  "liveReadOnlyScan": {
+    "complete": true,
+    "games": 92,
+    "emulatorRoutes": 56,
+    "ps1Games": 59,
+    "artworkSources": 80,
+    "unreadableArtwork": 0,
+    "firstFtpFailure": "none"
+  },
+  "ownerArtworkCache": {
+    "libraryEntries": 92,
+    "images": 90,
+    "existingEmulatorImages": 80,
+    "additionalN64FrontCovers": 10,
+    "additionalSource": "https://github.com/libretro-thumbnails/Nintendo_-_Nintendo_64",
+    "fallbackEntries": ["GameShark CDX", "GameShark Lite"],
+    "filesIncludingTagsAndPrivateManifest": 171,
+    "bytes": 53082678,
+    "destination": "/data/console-shelf/covers",
+    "publicReleaseAssets": false
+  },
+  "installation": {
+    "programRecordsChanged": 5,
+    "programFullRawReadbacksMatched": 5,
+    "rollbackCopiesVerified": 5,
+    "artworkFullFinalReadbacksMatched": 171,
+    "sourceAndRegisteredVersionsMatch": true,
+    "settingsPreservedByteForByte": true,
+    "publicBetaAssetReplaced": false
+  },
+  "resolvedObservations": [
+    "Initial scans returned 90, 91 and 73 games with partial status. The directory parser could discard a fast transfer-complete control reply while switching to the data connection. It now preserves that reply; the regression fixture and complete 92-game live scan pass.",
+    "The first PS5 artwork link required libc++'s unavailable verbose-abort path through string_view::substr. Bounded non-throwing views removed that dependency; the subsequent cross-build and structural validation pass."
+  ],
+  "ownerConfirmed": {
+    "psswanLibraryPopulated": true,
+    "oneGamePlayedInPSSwan": true,
+    "isShelfVisibleInOverdrive": true,
+    "directPS1SelectionFromIsShelf": "owner confirmed Castlevania: Symphony of the Night launched and played in PSSwanStation on build 00.100.026; see followUpRecord",
+    "physicalArtworkDisplay": "pending after work"
+  }
+}
