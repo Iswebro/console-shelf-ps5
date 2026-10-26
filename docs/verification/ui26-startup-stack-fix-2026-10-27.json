@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "date": "2026-10-27",
+  "status": "installed; owner opening check pending",
+  "contentVersion": "00.100.026",
+  "compiledSourceCommit": "5242a375af32169f35fda0f3aee2631b970aca21",
+  "failure": {
+    "previousContentVersion": "00.100.025",
+    "ownerError": "CE-108255-1 before the visible loading picture",
+    "thread": "Shelf library",
+    "signal": "SIGSEGV",
+    "reason": "page fault writing an unmapped stack page at the first indirect call after allocating a large frame",
+    "repeatedConsoleFaults": 2,
+    "instructionPointer": "0x44c664",
+    "programLoadBase": "0x400000",
+    "relativeInstructionPointer": "0x4c664",
+    "symbol": "shelf::(anonymous namespace)::serial_index",
+    "callerRelativeInstructionPointer": "0x4b8fa",
+    "callerSymbol": "shelf::discover_artwork",
+    "oldLocalBufferBytes": 65536,
+    "oldFrameBytesFromDisassembly": 65800,
+    "runtimeReproduction": "Windows 64 KiB worker test exited with 3221225725 (0xC00000FD, stack overflow) before the fix",
+    "capturedStartupLogSHA256": "8df6b7e16e39528561f20b5076ed72f9eca140e9c61d3c9f31956899ebd2e481",
+    "capturedConsoleDebugLogSHA256": "889ba909b978ecfac187e3400217f79db2e41c2c20075d94b31b1cc84ad147c3"
+  },
+  "fix": {
+    "metadataBuffer": "allocate only the validated index size on the heap, with a null guard and release after success or failed/short reads",
+    "maximumAcceptedIndexBytes": 65535,
+    "serialIndexFrameBytes": 264,
+    "workerStackBytes": 262144,
+    "compileGuard": "-Wframe-larger-than=16384 under -Werror for the six library scan units",
+    "stackUsageRecords": "PS5 compilation emits .su records for every compiled unit",
+    "guardedFunctionCount": 75,
+    "largestGuardedFrameBytes": 12408,
+    "largestGuardedFrameSymbol": "get_directory",
+    "guardLimitation": "A per-function frame limit is not a proof of the maximum nested call-chain usage. The worker has explicit additional headroom."
+  },
+  "variantReview": {
+    "scope": "owned C/C++ source across the repository, followed by the library worker call path",
+    "rootCause": "A bounded optional metadata file was buffered in an automatic array larger than the worker's stack budget.",
+    "methodology": [
+      {"pattern": "char text[65536]", "matches": 1, "confirmed": 1},
+      {"pattern": "any char/byte array of 65536 elements", "matches": 1, "confirmed": 1},
+      {"pattern": "any char/byte array of at least five decimal digits", "matches": 2, "confirmed": 1, "excluded": 1}
+    ],
+    "originalIssue": {"severity": "high availability impact", "confidence": "high", "location": "native/src/artwork_sources.cpp:serial_index"},
+    "additionalConfirmedWorkerVariants": 0,
+    "excludedCandidate": {
+      "location": "native/src/settings.cpp:read_file",
+      "localBufferBytes": 32769,
+      "severity": "informational",
+      "reason": "Settings load/save executes on the main event thread, not the library worker. The worker invokes only discovery and artwork caching."
+    },
+    "otherMetadataReaders": "SFO, CUE/M3U, JSON and scanner candidate buffers already use bounded heap allocations. Network and artwork-cache frame sizes passed the target compile guard."
+  },
+  "checks": {
+    "nativeModelDiscoveryAndLaunch": "passed",
+    "smallStackRegression": "passed with 65535-byte index, refused 65536-byte index and short read; games remain available",
+    "nativeHostBuild": "passed",
+    "ftpIntegration": "passed, including background commit using the explicit worker stack, cached/corrupt artwork, coalesced replies and cancellation",
+    "ps5CrossBuildAndStructure": "passed",
+    "privatePackageIntegrity": "all 242 members passed ZIP and SHA-256 verification",
+    "physicalOpening": "pending owner",
+    "physicalArtworkDisplay": "pending owner",
+    "directSelectedPS1Game": "pending owner"
+  },
+  "applicationSelf": {
+    "bytes": 2821537,
+    "sha256": "17c67f251d4beda70c75afafa43b756c529779f9cdd05eb4b735f90b5c9e43c3"
+  },
+  "privatePackage": {
+    "members": 242,
+    "bytes": 104394823,
+    "sha256": "762350d31e05cc7e8ccd8cceb32e72765f0a8fbb901bc52a63119ed9ec20e7ff"
+  },
+  "installation": {
+    "sourceAndRegisteredVersions": "00.100.026",
+    "programRecordsChanged": 5,
+    "fullRawReadbacksMatched": 5,
+    "sameDirectoryRollbackCopiesVerified": 5,
+    "unchangedRuntimeSHA256": "e6ff45d16adf687855cc3b33b0c8a4132b6504360b221e0a34c7e99fb3ba0036",
+    "unchangedEmbeddedHelperSHA256": "45bf41142bbb9f692840e8eea574792d39746100a9267c3b1eb52c366251a4ea",
+    "settingsPreservedByteForByte": true,
+    "introAndArtworkListingsUnchanged": true,
+    "personalMediaIncludedInGit": false,
+    "publicBetaAssetReplaced": false
+  }
+}
