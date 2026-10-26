@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "version": "v0.1.0-beta.1",
+  "dateBrisbane": "2026-10-26",
+  "compiledSourceCommit": "5c34e67aba3e51ca209d56215f97b586ff58c1e5",
+  "applicationSelf": {
+    "bytes": 2773777,
+    "sha256": "9834451dc2ca0f59f6fe487900ebe3ab55f08b23f53fb9aabf16faaac2eda88e"
+  },
+  "installableAsset": "PPSA99541.zip",
+  "publishedCandidateAssets": [
+    {
+      "file": "HARDWARE-CHECKS.json",
+      "bytes": 1052,
+      "sha256": "bfbffb4dd4c8482c34562954db21765f05640fc136eeca0abbbd5715c470f1ed"
+    },
+    {
+      "file": "INSTALL.md",
+      "bytes": 7517,
+      "sha256": "f902c8b9472aaa4fb54b485c438318315c4fc7f21e534bbaff35cdf8044e8a66"
+    },
+    {
+      "file": "isShelf-v0.1.0-beta.1-Source-and-Relink.zip",
+      "bytes": 166267448,
+      "sha256": "3b4ff8771ee0854e9d9d8012f58772eb5a84186e19b4869cc60b7ed84b08f6ae"
+    },
+    {
+      "file": "MANIFEST.json",
+      "bytes": 42017,
+      "sha256": "fdbc214a7c6e49fab180e18f1393afdc5668ce633110f98b97a376a1cdfc8bd0"
+    },
+    {
+      "file": "PPSA99541.zip",
+      "bytes": 104371163,
+      "sha256": "4cca4e0c05b58b74733f8bc4392ba5b26bbd05232dde41932be11093a4ab91d6"
+    },
+    {
+      "file": "ROOM.md",
+      "bytes": 7897,
+      "sha256": "def48e7e0cc757f67e307ba35816042469b28e3a188ffadd93442d2eaa7f3d6d"
+    },
+    {
+      "file": "SHA256SUMS.txt",
+      "bytes": 508,
+      "sha256": "46d3f990e63aa9db4e2a34ae2c139689e1fe25e2ce85df5e49b5bd809ea73a44"
+    }
+  ],
+  "publicSourceColdRelink": {
+    "status": "passed",
+    "members": 507,
+    "freshCompilerPrefix": true,
+    "converterRebuilt": true,
+    "applicationRecompiled": false,
+    "consoleContacted": false,
+    "publicationOnlyChanges": [
+      "README.md",
+      "SOURCE-KIT.txt",
+      "SOURCE-KIT-MANIFEST.json"
+    ],
+    "exactInstalledSelfMatch": true
+  },
+  "finalConsoleReadback": {
+    "files": 242,
+    "preferencesUnchanged": true,
+    "programOrHelperChanged": false,
+    "changedFiles": [
+      "START-HERE.md"
+    ],
+    "publicManifestSHA256": "fdbc214a7c6e49fab180e18f1393afdc5668ce633110f98b97a376a1cdfc8bd0"
+  },
+  "hardwareAcceptance": "All nine final checks accepted; logo switching additionally confirmed in the console recording",
+  "artifactPrivacyCheck": "No console LAN addresses, private captures, games, BIOS or disc key files in the upload set",
+  "publicationAtThisRecord": "Prepared and verified; browser attachment step pending"
+}
