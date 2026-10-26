@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "status": "installed; physical playback pending owner confirmation",
+  "contentVersion": "00.100.024",
+  "compiledSourceCommit": "0229478d6ddfbf73848290f6ab871ce8f31fe81e",
+  "applicationSelf": {
+    "bytes": 2775601,
+    "sha256": "030b58e3dc8469afbd84c61165f46332aa612bf41c7ab8bbe65e5ca0b8275ae4"
+  },
+  "embeddedHelper": {
+    "bytes": 109008,
+    "sha256": "45bf41142bbb9f692840e8eea574792d39746100a9267c3b1eb52c366251a4ea",
+    "runtimeMode": "standard-sdk, as used by the accepted public beta"
+  },
+  "privatePackage": {
+    "members": 242,
+    "bytes": 104372101,
+    "sha256": "6209804fa6b9e7a63de2b55abed9a95f24a17bd2e5f48898830214a637e003c7"
+  },
+  "hostChecks": {
+    "nativeModelAndLaunchTests": "passed",
+    "readOnlyFtpFixtures": "passed, including PSSwanStation external games and refusal to read private config",
+    "launchClientFixtures": "passed",
+    "nativeHostBuild": "passed",
+    "ps5CrossBuildAndStructuralVerification": "passed",
+    "packageIntegrityAndMemberHashes": "passed"
+  },
+  "liveReadOnlyScan": {
+    "complete": true,
+    "games": 92,
+    "emulatorRoutes": 56,
+    "ps1Games": 59,
+    "ps1Routes": 3,
+    "routes": ["PSXS5", "RetroArch / swanstation", "PSSwanStation"]
+  },
+  "ownerLibrarySetup": {
+    "psswanBuild": 25,
+    "titleId": "PPSA99248",
+    "existingPs1Root": "/data/PSXS5/games",
+    "cueEntries": 62,
+    "binFiles": 189,
+    "m3uFiles": 3,
+    "sbiFiles": 6,
+    "missingCueReferences": 0,
+    "config": "PSSwanStation network.cfg adds the existing game root through ftpsrv at 127.0.0.1:2121",
+    "configReadbackMatched": true,
+    "preferredPs1Route": "PPSA99248",
+    "gamesMoved": 0
+  },
+  "installation": {
+    "changedFiles": 6,
+    "fullRawReadbackMatched": 6,
+    "rollbackCopiesVerified": 6,
+    "sourceAndRegisteredTitleVersionsMatch": true,
+    "interruption": "FTP returned 550 Cross-device link at registered title metadata after four program files passed readback; completion verified those four files, then used same-folder staging for metadata and settings.",
+    "publicBetaAssetReplaced": false,
+    "physicalConsoleAcceptance": "pending"
+  },
+  "launchContract": "https://github.com/Press5elect/PSSwanStation/blob/3e258156af8b0e351d365f68cb0e41d2c1bb988d/ps5/MANUAL.md#L363"
+}
