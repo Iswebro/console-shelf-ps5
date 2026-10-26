@@ -332,7 +332,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-27 private UI test bridge; artwork scan stack fix retained");
+    startup("main entered", "ui-28 private UI test timer and FTP access fix; artwork scan stack fix retained");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
@@ -754,7 +754,7 @@ int main(int argc, char** argv) {
                             ui_test.stop();
                             ui_test_pending = true;
                             ui_test_result = "owner-stopped";
-                            ui_test_capture_at = now;
+                            ui_test_capture_at = SDL_GetTicks();
                             std::snprintf(state.notice, sizeof(state.notice), "UI test control disabled.");
                             redraw = true;
                         } else
@@ -1013,23 +1013,27 @@ int main(int argc, char** argv) {
             redraw = true;
         }
 #ifdef SHELF_HAS_UI_TEST_BRIDGE
-        if (ui_test.active() && static_cast<unsigned>(now - ui_test_started) >= 600000) {
+        // L3 + R3 may have armed control after this loop's older `now` sample.
+        // Re-read the clock after input; the bounded helper also refuses stale
+        // samples without breaking normal unsigned clock wrap.
+        const std::uint32_t control_now = SDL_GetTicks();
+        if (ui_test.active() && shelf::ui_test_elapsed(control_now, ui_test_started, 600000)) {
             ui_test.stop();
             ui_test_pending = true;
             ui_test_result = "expired";
-            ui_test_capture_at = now;
+            ui_test_capture_at = control_now;
             std::snprintf(state.notice, sizeof(state.notice), "UI test control expired. Click L3 + R3 to enable again.");
             redraw = true;
         }
-        if (ui_test.active() && !ui_test_pending && static_cast<unsigned>(now - ui_test_polled) >= 250) {
-            ui_test_polled = now;
+        if (ui_test.active() && !ui_test_pending && shelf::ui_test_elapsed(control_now, ui_test_polled, 250)) {
+            ui_test_polled = control_now;
             if (ui_test.poll(ui_test_request)) {
                 ui_test_pending = true;
                 ui_test_applied = false;
                 ui_test_saved = true;
                 ui_test_finish = false;
                 ui_test_result = "ok";
-                ui_test_capture_at = now + 500;
+                ui_test_capture_at = control_now + 500;
                 if (ui_test_request.operation == shelf::UiTestOperation::stop) {
                     ui_test_finish = true;
                     ui_test_result = "stopped";
@@ -1052,7 +1056,7 @@ int main(int argc, char** argv) {
                 redraw = true;
             }
         }
-        if (ui_test_pending && SDL_TICKS_PASSED(now, ui_test_capture_at))
+        if (ui_test_pending && shelf::ui_test_elapsed(control_now, ui_test_capture_at, 0))
             redraw = true;
         state.ui_test_active = ui_test.active() && !ui_test_finish;
 #endif
@@ -1125,7 +1129,7 @@ int main(int argc, char** argv) {
 #endif
 #endif
 #ifdef SHELF_HAS_UI_TEST_BRIDGE
-            if (ui_test_pending && SDL_TICKS_PASSED(SDL_GetTicks(), ui_test_capture_at)) {
+            if (ui_test_pending && shelf::ui_test_elapsed(SDL_GetTicks(), ui_test_capture_at, 0)) {
                 const bool captured = shelf::graphics_capture(ui_test.frame_path());
                 if (ui_test_finish)
                     ui_test.stop();

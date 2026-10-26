@@ -2,7 +2,8 @@
 
 This development mode lets a PC send one menu action to isShelf and retrieve a fresh
 1920 x 1080 PNG from the console's renderer. It uses the owner's existing `ftpsrv`
-and isShelf's own `/data/console-shelf/ui-test` folder. It requires no PSN sign-in.
+and fixed `ui-test-*` files directly in isShelf's existing `/data/console-shelf`
+folder. It requires no PSN sign-in.
 
 It is an action, image, inspection loop rather than continuous video. The PNG shows
 the frame isShelf rendered. HDMI capture is needed to check what the display path
@@ -47,7 +48,9 @@ actions are `snapshot`, `up`, `down`, `left`, `right`, `confirm`, `back`, `setti
 Back is a tap and cannot become a hold-to-close gesture. Settings changes save through
 isShelf's existing settings code, so testing a setting can change the owner's preferences.
 
-The control directory contains only fixed protocol filenames. The app accepts a
+The transport uses only fixed prefixed filenames. It creates no private subdirectory
+that would prevent the FTP service from accessing the exchange under another user ID.
+The app accepts a
 bounded request for the current session, exact next sequence and observed UI revision.
 Physical controller input invalidates old observations. The app refuses actions during
 loading, closure or a launch handoff. Images are captured on request after rendering
@@ -55,7 +58,7 @@ and frame submission, with a short delay for menu motion to settle.
 
 The session identifier prevents old requests from replaying after restart; it is not
 authentication. Anyone who already has write access through the owner's FTP service
-can write to this directory while control is enabled. Local enablement, a visible
+can write the control files while control is enabled. Local enablement, a visible
 indicator, the time limit and the command allowlist define this private mode's scope.
 
 After a timeout or lost connection, the action outcome may be unknown. **Do not resend

@@ -5,11 +5,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <sys/stat.h>
 #include <vector>
 #ifdef _WIN32
 #include <direct.h>
-#else
-#include <sys/stat.h>
 #endif
 namespace {
 void check(bool value, const char* message) {
@@ -49,6 +48,10 @@ bool exists(const std::string& path) {
         return false;
     std::fclose(file);
     return true;
+}
+bool directory_exists(const std::string& path) {
+    struct stat info{};
+    return stat(path.c_str(), &info) == 0 && (info.st_mode & S_IFMT) == S_IFDIR;
 }
 std::string command(const char* session, std::uint64_t sequence, std::uint64_t revision, const char* action) {
     char text[180];
@@ -103,23 +106,46 @@ void contains(const std::string& json, const char* text, const char* message) {
 } // namespace
 void test_ui_test_bridge() {
     using namespace shelf;
+    check(!ui_test_elapsed(100, 101, 600000) && !ui_test_elapsed(100, 101, 250),
+          "arming after a loop timestamp cannot immediately expire or poll");
+    check(!ui_test_elapsed(600100, 101, 600000) && ui_test_elapsed(600101, 101, 600000),
+          "session expiry respects the exact ten-minute boundary");
+    check(!ui_test_elapsed(350, 101, 250) && ui_test_elapsed(351, 101, 250),
+          "request polling respects its exact quarter-second boundary");
+    constexpr std::uint32_t wrap_start = 0xfffffff0u;
+    constexpr auto expiry_after_wrap = static_cast<std::uint32_t>(wrap_start + 600000u);
+    check(!ui_test_elapsed(expiry_after_wrap - 1, wrap_start, 600000) &&
+              ui_test_elapsed(expiry_after_wrap, wrap_start, 600000),
+          "ten-minute expiry remains exact across 32-bit clock wrap");
+    check(!ui_test_elapsed(0xe9u, wrap_start, 250) && ui_test_elapsed(0xeau, wrap_start, 250),
+          "poll interval remains exact across 32-bit clock wrap");
+    check(!ui_test_elapsed(100, 101, 0) && ui_test_elapsed(101, 101, 0) &&
+              ui_test_elapsed(0x10u, wrap_start, 0),
+          "capture deadlines wait for future starts and survive clock wrap");
+    check(!ui_test_elapsed(0, 0, 0x80000000u), "ambiguous half-cycle timer intervals are refused");
     constexpr const char* session = "0123456789abcdef0123456789abcdef";
     constexpr const char* other = "1123456789abcdef0123456789abcdef";
     const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
     char root[128];
     std::snprintf(root, sizeof(root), "ui-test-bridge-%lld", static_cast<long long>(stamp));
     make_directory(root);
-    const std::string directory = std::string(root) + "/ui-test/";
-    const auto request_file = directory + "request.txt", response = directory + "response.json";
-    const auto published_frame = directory + "frame.png";
+    const std::string directory = std::string(root) + "/";
+    const auto request_file = directory + "ui-test-request.txt", response = directory + "ui-test-response.json";
+    const auto published_frame = directory + "ui-test-frame.png";
+    const auto legacy_directory = directory + "ui-test";
     UiTestBridge bridge;
     UiTestRequest request;
     check(!bridge.active() && !bridge.poll(request), "bridge starts disabled");
     check(!bridge.start(root, "short") && !bridge.start(root, "0123456789ABCDEF0123456789abcdef"),
           "invalid sessions cannot activate transport");
-    check(bridge.start(root, session) && bridge.active(), "start creates owned transport directory");
+    check(!bridge.start((directory + "missing-root").c_str(), session) &&
+              !directory_exists(directory + "missing-root"), "transport never creates a missing data root");
+    check(bridge.start(root, session) && bridge.active(), "start uses existing owned data root");
+    check(!directory_exists(legacy_directory), "transport never creates a nested ui-test directory");
+    make_directory(legacy_directory.c_str());
+    write(legacy_directory + "/response.json", "preserved-failed-trial-evidence");
     check(!exists(response) && !bridge.poll(request), "start has no stale response or command");
-    check(std::string(bridge.frame_path()) == directory + "frame.new.png", "capture path is fixed and owned");
+    check(std::string(bridge.frame_path()) == directory + "ui-test-frame.new.png", "capture path uses fixed flat prefix");
     UiState state;
     state.selected_system = find_system("ps2");
     state.focus = 7;
@@ -137,7 +163,7 @@ void test_ui_test_bridge() {
     contains(json, "\"selectedSystem\":\"ps2\"", "response uses stable console ID");
     contains(json, "\"frameAvailable\":false", "no capture never claims an image");
     check(json.find("private") == std::string::npos, "responses omit queries, messages, game paths and notices");
-    check(!exists(directory + "response.new.json") && json.back() == '\n', "response publishes complete then renames");
+    check(!exists(directory + "ui-test-response.new.json") && json.back() == '\n', "response publishes complete then renames");
 
     const auto valid = command(session, 1, 4, "snapshot");
     std::vector<std::string> invalid{
@@ -163,10 +189,10 @@ void test_ui_test_bridge() {
         write(request_file, text);
         check(!bridge.poll(request), "malformed, stale, replayable or unsupported commands never dispatch");
     }
-    write(directory + "request.new.txt", valid);
+    write(directory + "ui-test-request.new.txt", valid);
     check(!bridge.poll(request), "incomplete upload path is never read");
     check(std::remove(request_file.c_str()) == 0 &&
-              std::rename((directory + "request.new.txt").c_str(), request_file.c_str()) == 0,
+              std::rename((directory + "ui-test-request.new.txt").c_str(), request_file.c_str()) == 0,
           "fixture atomically publishes request");
     check(bridge.poll(request) && request.sequence == 1 && request.revision == 4 &&
               request.operation == UiTestOperation::snapshot, "exact next snapshot is accepted");
@@ -255,6 +281,8 @@ void test_ui_test_bridge() {
     write(request_file, command(session, 1, 0, "snapshot"));
     check(bridge.poll(request), "malformed old file cannot consume the fresh session sequence");
     bridge.stop();
+    check(read(legacy_directory + "/response.json") == "preserved-failed-trial-evidence",
+          "existing nested failed-trial evidence stays untouched through start, publish and stop");
 
     UiState home;
     check(apply_ui_test_action(home, Action::right) && home.focus == 1, "remote direction applies one menu step");

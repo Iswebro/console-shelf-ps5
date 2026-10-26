@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import socket
 import socketserver
 import tempfile
@@ -64,7 +65,8 @@ class FtpFixture:
     """Small FTP server; permits only the bridge's fixed files and operations."""
 
     def __init__(self, acknowledge=True):
-        self.files = {"response.json": encoded(response()), "frame.png": PNG}
+        self.files = {client.BRIDGE_FILES["response.json"]: encoded(response()),
+                      client.BRIDGE_FILES["frame.png"]: PNG}
         self.commands = []
         self.errors = []
         self.acknowledge = acknowledge
@@ -109,9 +111,9 @@ class FtpFixture:
                             if not arg.startswith(prefix):
                                 raise AssertionError("Request left the owned bridge directory")
                             name = arg[len(prefix):]
-                            if verb == "RETR" and name not in ("response.json", "request.txt", "frame.png"):
+                            if verb == "RETR" and name not in client.BRIDGE_FILES.values():
                                 raise AssertionError("Unexpected remote read")
-                            if verb == "STOR" and name != "request.tmp":
+                            if verb == "STOR" and name != client.REQUEST_TEMP:
                                 raise AssertionError("Unexpected remote write")
                             if verb == "RETR" and name not in fixture.files:
                                 self.reply("550 File unavailable")
@@ -133,19 +135,19 @@ class FtpFixture:
                             self.passive = None
                             self.reply("226 Complete")
                         elif verb == "RNFR":
-                            if arg != client.REMOTE_ROOT + "/request.tmp":
+                            if arg != client.REMOTE_ROOT + "/" + client.REQUEST_TEMP:
                                 raise AssertionError("Unexpected rename source")
-                            self.rename_from = "request.tmp"
+                            self.rename_from = client.REQUEST_TEMP
                             self.reply("350 Ready for destination")
                         elif verb == "RNTO":
-                            if self.rename_from != "request.tmp" or arg != client.REMOTE_ROOT + "/request.txt":
+                            if self.rename_from != client.REQUEST_TEMP or arg != client.REMOTE_ROOT + "/" + client.BRIDGE_FILES["request.txt"]:
                                 raise AssertionError("Unexpected rename destination")
-                            fixture.files["request.txt"] = fixture.files.pop("request.tmp")
+                            fixture.files[client.BRIDGE_FILES["request.txt"]] = fixture.files.pop(client.REQUEST_TEMP)
                             if fixture.acknowledge:
-                                match = client.REQUEST_RE.fullmatch(fixture.files["request.txt"])
+                                match = client.REQUEST_RE.fullmatch(fixture.files[client.BRIDGE_FILES["request.txt"]])
                                 if not match:
                                     raise AssertionError("Client published malformed protocol")
-                                fixture.files["response.json"] = encoded(response(int(match[2]), match[4].decode("ascii")))
+                                fixture.files[client.BRIDGE_FILES["response.json"]] = encoded(response(int(match[2]), match[4].decode("ascii")))
                             self.reply("250 Renamed")
                         else:
                             raise AssertionError("Unexpected FTP command: " + verb)
@@ -315,22 +317,24 @@ class ClientTests(unittest.TestCase):
         self.assertEqual(result["frame"].read_bytes(), PNG)
 
     def test_local_filesystem_exchange(self):
-        bridge = self.root / "bridge"
+        bridge = self.root / "data"
         bridge.mkdir()
-        (bridge / "response.json").write_bytes(encoded(response()))
-        (bridge / "frame.png").write_bytes(PNG)
+        (bridge / client.BRIDGE_FILES["response.json"]).write_bytes(encoded(response()))
+        (bridge / client.BRIDGE_FILES["frame.png"]).write_bytes(PNG)
+        (bridge / "settings.ini").write_bytes(b"OWNER PREFERENCES")
+        (bridge / "response.json").write_bytes(b"UNRELATED FILE")
         errors = []
         def serve():
             try:
                 deadline = time.monotonic() + 2
-                request = bridge / "request.txt"
+                request = bridge / client.BRIDGE_FILES["request.txt"]
                 while not request.exists() and time.monotonic() < deadline:
                     time.sleep(0.005)
                 match = client.REQUEST_RE.fullmatch(request.read_bytes())
                 self.assertIsNotNone(match)
                 raw = encoded(response(int(match[2]), match[4].decode("ascii")))
-                (bridge / "response.tmp").write_bytes(raw)
-                (bridge / "response.tmp").replace(bridge / "response.json")
+                (bridge / "ui-test-response.tmp").write_bytes(raw)
+                (bridge / "ui-test-response.tmp").replace(bridge / client.BRIDGE_FILES["response.json"])
             except Exception as error:
                 errors.append(error)
         worker = threading.Thread(target=serve)
@@ -338,11 +342,29 @@ class ClientTests(unittest.TestCase):
         try:
             result = client.execute(client.LocalTransport(bridge), "settings", self.root / "out")
             self.assertEqual(result["response"]["sequence"], 1)
-            self.assertFalse((bridge / "request.tmp").exists())
+            self.assertFalse((bridge / client.REQUEST_TEMP).exists())
+            self.assertEqual((bridge / "settings.ini").read_bytes(), b"OWNER PREFERENCES")
+            self.assertEqual((bridge / "response.json").read_bytes(), b"UNRELATED FILE")
+            self.assertFalse((bridge / "ui-test").exists())
         finally:
             worker.join(timeout=3)
         if errors:
             raise errors[0]
+
+    @unittest.skipUnless(os.name == "nt", "Windows sharing semantics")
+    def test_local_read_handle_allows_publisher_replacement(self):
+        published = self.root / "ui-test-response.json"
+        replacement = self.root / "ui-test-response.new.json"
+        published.write_bytes(b"old complete response")
+        replacement.write_bytes(b"new complete response")
+        with client._open_shared_read(published) as reader:
+            # Match native UiTestBridge::replace: remove the old name, then
+            # rename the fully written replacement. Windows MoveFileEx used by
+            # os.replace has stricter open-target behavior on this filesystem.
+            os.remove(published)
+            os.rename(replacement, published)
+            self.assertEqual(reader.read(), b"old complete response")
+            self.assertEqual(published.read_bytes(), b"new complete response")
 
     def test_ftp_fixed_files_and_single_publish(self):
         with FtpFixture() as fixture:
@@ -356,7 +378,14 @@ class ClientTests(unittest.TestCase):
         for verb in ("STOR", "RNFR", "RNTO"):
             self.assertEqual(sum(command[0] == verb for command in fixture.commands), 1)
         self.assertEqual([arg for verb, arg in fixture.commands if verb == "STOR"],
-                         [client.REMOTE_ROOT + "/request.tmp"])
+                         [client.REMOTE_ROOT + "/ui-test-request.tmp"])
+        self.assertEqual([arg for verb, arg in fixture.commands if verb == "RNFR"],
+                         [client.REMOTE_ROOT + "/ui-test-request.tmp"])
+        self.assertEqual([arg for verb, arg in fixture.commands if verb == "RNTO"],
+                         [client.REMOTE_ROOT + "/ui-test-request.txt"])
+        self.assertTrue(all(arg in {client.REMOTE_ROOT + "/ui-test-" + suffix for suffix in
+                                   ("response.json", "request.txt", "frame.png")}
+                            for verb, arg in fixture.commands if verb == "RETR"))
         self.assertTrue(all(verb in ("USER", "PASS", "TYPE", "PASV", "RETR", "STOR", "RNFR", "RNTO")
                             for verb, _ in fixture.commands))
 

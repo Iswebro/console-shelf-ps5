@@ -2,8 +2,9 @@
 """Send one menu action to a private, owner-enabled isShelf UI test bridge.
 
 This client uses the console's existing anonymous ftpsrv, or an explicit local
-bridge folder for host testing. It reads only response.json, request.txt and
-frame.png, and publishes only request.tmp -> request.txt. It does not sign in to
+data folder for host testing. It reads only ui-test-response.json,
+ui-test-request.txt and ui-test-frame.png, and publishes only
+ui-test-request.tmp -> ui-test-request.txt. It does not sign in to
 PSN, install software, control the PS5 shell, or send arbitrary file paths.
 
 Exactly one controller client may use a bridge session. An uncertain publish or
@@ -25,7 +26,10 @@ import time
 from pathlib import Path
 
 
-REMOTE_ROOT = "/data/console-shelf/ui-test"
+REMOTE_ROOT = "/data/console-shelf"
+BRIDGE_FILES = {"response.json": "ui-test-response.json",
+                "request.txt": "ui-test-request.txt", "frame.png": "ui-test-frame.png"}
+REQUEST_TEMP = "ui-test-request.tmp"
 RESPONSE_LIMIT = 4096
 REQUEST_LIMIT = 160
 FRAME_LIMIT = 16 * 1024 * 1024
@@ -158,7 +162,7 @@ class FtpTransport:
             raise
 
     def read(self, name, limit):
-        if name not in ("response.json", "request.txt", "frame.png"):
+        if name not in BRIDGE_FILES:
             raise ClientError("Client refused an unsupported remote read.")
         chunks, used = [], 0
 
@@ -170,7 +174,7 @@ class FtpTransport:
             chunks.append(chunk)
 
         try:
-            self.ftp.retrbinary(f"RETR {REMOTE_ROOT}/{name}", receive, blocksize=65536)
+            self.ftp.retrbinary(f"RETR {REMOTE_ROOT}/{BRIDGE_FILES[name]}", receive, blocksize=65536)
         except ftplib.error_perm as error:
             if str(error).startswith("550"):
                 raise MissingBridgeFile("Bridge file is unavailable; enable the private UI test session.") from error
@@ -180,11 +184,47 @@ class FtpTransport:
     def publish(self, payload):
         if len(payload) > REQUEST_LIMIT:
             raise ClientError("Request exceeds its transfer bound.")
-        self.ftp.storbinary(f"STOR {REMOTE_ROOT}/request.tmp", io.BytesIO(payload))
-        self.ftp.rename(f"{REMOTE_ROOT}/request.tmp", f"{REMOTE_ROOT}/request.txt")
+        self.ftp.storbinary(f"STOR {REMOTE_ROOT}/{REQUEST_TEMP}", io.BytesIO(payload))
+        self.ftp.rename(f"{REMOTE_ROOT}/{REQUEST_TEMP}", f"{REMOTE_ROOT}/{BRIDGE_FILES['request.txt']}")
 
     def close(self):
         self.ftp.close()
+
+
+def _open_shared_read(path):
+    """Allow the native publisher to replace a Windows file during a read.
+
+    Python's ordinary Windows file open omits FILE_SHARE_DELETE. The bridge
+    publishes complete files by replacement, so a reader must share deletion as
+    well as reading/writing. Descriptor ownership transfers exactly once.
+    """
+    if os.name != "nt":
+        return Path(path).open("rb")
+    import ctypes
+    from ctypes import wintypes
+    import msvcrt
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    create = kernel32.CreateFileW
+    create.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                       ctypes.c_void_p, wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE)
+    create.restype = wintypes.HANDLE
+    close = kernel32.CloseHandle
+    close.argtypes = (wintypes.HANDLE,)
+    close.restype = wintypes.BOOL
+    handle = create(str(path), 0x80000000, 0x1 | 0x2 | 0x4, None, 3, 0x80, None)
+    if handle is None or handle == ctypes.c_void_p(-1).value:
+        raise ctypes.WinError(ctypes.get_last_error())
+    try:
+        descriptor = msvcrt.open_osfhandle(handle, os.O_RDONLY | os.O_BINARY)
+    except BaseException:
+        close(handle)
+        raise
+    try:
+        return os.fdopen(descriptor, "rb")
+    except BaseException:
+        os.close(descriptor)
+        raise
 
 
 class LocalTransport:
@@ -196,13 +236,13 @@ class LocalTransport:
             raise ClientError("Local bridge root is not a directory.")
 
     def read(self, name, limit):
-        if name not in ("response.json", "request.txt", "frame.png"):
+        if name not in BRIDGE_FILES:
             raise ClientError("Client refused an unsupported local read.")
-        path = self.root / name
+        path = self.root / BRIDGE_FILES[name]
         if path.is_symlink():
             raise ClientError("Bridge files must not be symbolic links.")
         try:
-            with path.open("rb") as source:
+            with _open_shared_read(path) as source:
                 data = source.read(limit + 1)
         except FileNotFoundError as error:
             raise MissingBridgeFile("Bridge file is unavailable; enable the private UI test session.") from error
@@ -213,7 +253,7 @@ class LocalTransport:
     def publish(self, payload):
         if len(payload) > REQUEST_LIMIT:
             raise ClientError("Request exceeds its transfer bound.")
-        temp, final = self.root / "request.tmp", self.root / "request.txt"
+        temp, final = self.root / REQUEST_TEMP, self.root / BRIDGE_FILES["request.txt"]
         if temp.is_symlink() or final.is_symlink():
             raise ClientError("Bridge files must not be symbolic links.")
         with temp.open("wb") as output:
@@ -371,7 +411,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     connection = parser.add_mutually_exclusive_group(required=True)
     connection.add_argument("--host", type=lan_ipv4, help="Literal private-LAN/loopback PS5 IPv4 address")
-    connection.add_argument("--local-root", type=Path, help="Host fixture's ui-test folder containing response.json")
+    connection.add_argument("--local-root", type=Path, help="Host data folder containing ui-test-response.json")
     parser.add_argument("--port", type=int, default=2121, help="Existing ftpsrv port (default: 2121)")
     operation = parser.add_mutually_exclusive_group()
     operation.add_argument("--action", choices=ACTIONS, default="snapshot", help="One discrete action (default: snapshot)")

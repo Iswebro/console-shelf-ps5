@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 import uuid
+import ui_test_client as client_api
 
 ROOT = Path(__file__).resolve().parent.parent
 folder = ROOT / ".cache/ui-test-integration" / uuid.uuid4().hex
@@ -17,11 +18,12 @@ data.mkdir(parents=True)
 executable = ROOT / ".cache/native-host" / ("shelf-host.exe" if os.name == "nt" else "shelf-host")
 client = ROOT / "tools/ui_test_client.py"
 flags = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}
-bridge = data / "ui-test"
+bridge = data
+transport = client_api.LocalTransport(bridge)
 
 
 def response():
-    return json.loads((bridge / "response.json").read_text(encoding="utf-8"))
+    return json.loads(transport.read("response.json", client_api.RESPONSE_LIMIT))
 
 
 def wait_for(predicate, seconds=20):
@@ -31,7 +33,7 @@ def wait_for(predicate, seconds=20):
             value = response()
             if predicate(value):
                 return value
-        except (OSError, ValueError):
+        except (OSError, ValueError, client_api.MissingBridgeFile):
             pass
         time.sleep(.05)
     raise AssertionError("Native bridge response did not arrive")
@@ -44,7 +46,7 @@ def command(action):
 
 
 def frame_digest():
-    return hashlib.sha256((bridge / "frame.png").read_bytes()).hexdigest()
+    return hashlib.sha256(transport.read("frame.png", client_api.FRAME_LIMIT)).hexdigest()
 
 
 with (folder / "native.log").open("wb") as log:
@@ -62,8 +64,8 @@ with (folder / "native.log").open("wb") as log:
         assert moved["revision"] > observed["revision"] and frame_digest() != first_frame
 
         # Duplicate input must not advance or repeat selection, even after more polls.
-        request = (bridge / "request.txt").read_bytes()
-        (bridge / "request.txt").write_bytes(request)
+        request = (bridge / "ui-test-request.txt").read_bytes()
+        (bridge / "ui-test-request.txt").write_bytes(request)
         time.sleep(.4)
         assert response()["sequence"] == moved["sequence"]
         assert response()["selectedSystem"] == moved["selectedSystem"]
@@ -71,8 +73,8 @@ with (folder / "native.log").open("wb") as log:
         # A command based on an earlier image is acknowledged but never applied.
         stale = (f'ISSHELF_UI_TEST_1 {moved["session"]} {moved["nextSequence"]} '
                  f'{observed["revision"]} left\n').encode("ascii")
-        (bridge / "request.tmp").write_bytes(stale)
-        (bridge / "request.tmp").replace(bridge / "request.txt")
+        (bridge / "ui-test-request.tmp").write_bytes(stale)
+        (bridge / "ui-test-request.tmp").replace(bridge / "ui-test-request.txt")
         rejected = wait_for(lambda value: value["sequence"] == moved["nextSequence"])
         assert rejected["result"] == "stale" and not rejected["actionApplied"]
         assert rejected["selectedSystem"] == moved["selectedSystem"]
@@ -95,10 +97,10 @@ with (folder / "native.log").open("wb") as log:
 disabled = folder / "disabled"
 subprocess.run([str(executable), "--asset-root", str(ROOT), "--data-dir", str(disabled), "--headless"],
                cwd=ROOT, check=True, timeout=30, stdout=subprocess.DEVNULL, **flags)
-assert not (disabled / "ui-test").exists()
+assert not list(disabled.glob("ui-test-*"))
 invalid = subprocess.run([str(executable), "--asset-root", str(ROOT), "--data-dir", str(folder / "invalid"),
                           "--ui-test", "--script", "right"], cwd=ROOT, capture_output=True, timeout=10, **flags)
-assert invalid.returncode != 0 and not (folder / "invalid/ui-test").exists()
+assert invalid.returncode != 0 and not list((folder / "invalid").glob("ui-test-*"))
 summary = {"result": "passed", "nativeEventLoop": True, "transport": "local fixture",
            "commands": ["snapshot", "right", "confirm", "settings", "confirm", "stop"],
            "duplicateRejected": True, "staleRevisionRejected": True, "disabledByDefault": True,

@@ -4,6 +4,13 @@
 #include <cstdint>
 
 namespace shelf {
+// UI test timers are always shorter than half the 32-bit clock cycle. Within
+// that bound, unsigned subtraction handles wrap, while a future start or stale
+// loop sample is rejected instead of appearing to have elapsed for 49 days.
+inline constexpr bool ui_test_elapsed(std::uint32_t now, std::uint32_t start, std::uint32_t interval) {
+    const auto elapsed = static_cast<std::uint32_t>(now - start);
+    return interval < 0x80000000u && elapsed < 0x80000000u && elapsed >= interval;
+}
 enum class UiTestOperation { snapshot, action, stop };
 struct UiTestRequest {
     std::uint64_t sequence = 0, revision = 0;

@@ -5,9 +5,6 @@
 #include <cstring>
 #include <limits>
 #include <sys/stat.h>
-#ifdef _WIN32
-#include <direct.h>
-#endif
 
 namespace shelf {
 namespace {
@@ -25,17 +22,9 @@ bool replace(const char* source, const char* target) {
     // readers may briefly see no file between removal and rename.
     return discard(target) && std::rename(source, target) == 0;
 }
-bool directory(const char* name) {
+bool existing_directory(const char* name) {
     struct stat info{};
-    if (stat(name, &info) == 0)
-        return (info.st_mode & S_IFMT) == S_IFDIR;
-    if (errno != ENOENT)
-        return false;
-#ifdef _WIN32
-    return _mkdir(name) == 0;
-#else
-    return mkdir(name, 0700) == 0;
-#endif
+    return stat(name, &info) == 0 && (info.st_mode & S_IFMT) == S_IFDIR;
 }
 bool session(const char* value) {
     if (!value || std::strlen(value) != 32)
@@ -216,10 +205,14 @@ bool UiTestBridge::start(const char* data_root, const char* session32) {
         if (*at < 32 || *at == 127)
             return false;
     char response[2304], pending[2304], frame[2304];
-    if (!path(directory_, data_root, "ui-test") || !directory(directory_) ||
-        !path(request_path_, directory_, "request.txt") || !path(frame_new_path_, directory_, "frame.new.png") ||
-        !path(response, directory_, "response.json") || !path(pending, directory_, "response.new.json") ||
-        !path(frame, directory_, "frame.png") || !discard(response) || !discard(pending) ||
+    if (!existing_directory(data_root))
+        return false;
+    std::memcpy(directory_, data_root, std::strlen(data_root) + 1);
+    if (!path(request_path_, directory_, "ui-test-request.txt") ||
+        !path(frame_new_path_, directory_, "ui-test-frame.new.png") ||
+        !path(response, directory_, "ui-test-response.json") ||
+        !path(pending, directory_, "ui-test-response.new.json") ||
+        !path(frame, directory_, "ui-test-frame.png") || !discard(response) || !discard(pending) ||
         !discard(frame) || !discard(frame_new_path_))
         return false;
     std::memcpy(session_, session32, sizeof(session_));
@@ -251,8 +244,8 @@ bool UiTestBridge::publish(const UiTestRequest& request, std::uint64_t revision,
     if (!std::memchr(request.name, 0, sizeof(request.name)) || !operation(request.name, checked))
         return false;
     char frame[2304], response[2304], pending[2304];
-    if (!path(frame, directory_, "frame.png") || !path(response, directory_, "response.json") ||
-        !path(pending, directory_, "response.new.json"))
+    if (!path(frame, directory_, "ui-test-frame.png") || !path(response, directory_, "ui-test-response.json") ||
+        !path(pending, directory_, "ui-test-response.new.json"))
         return false;
     std::size_t bytes = 0;
     std::uint64_t hash = 0;
