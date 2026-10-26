@@ -808,9 +808,7 @@ int main(int argc, char** argv) {
             if (launcher.start(request, data, shelf_launch_payload, sizeof(shelf_launch_payload))) {
                 state.launch_busy = true;
                 navigation.cancel();
-                startup("launcher request started", request.mode == shelf::LaunchMode::retroarch_game
-                                                        ? "direct RetroArch route"
-                                                        : "title menu route");
+                startup("launcher request started", shelf::launch_mode_name(request.mode));
             } else {
                 std::snprintf(state.notice, sizeof(state.notice), "%s", launcher.error());
                 startup("launcher request refused");

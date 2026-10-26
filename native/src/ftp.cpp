@@ -58,7 +58,8 @@ bool allowed_path(const char* path) {
     if (!path || !valid_virtual_path(path))
         return false;
     for (const char* root :
-         {"/data/homebrew", "/user/app", "/data/PCSX2/games", "/data/PSXS5/games", "/data/SwanStationPS5/games"})
+         {"/data/homebrew", "/user/app", "/data/PCSX2/games", "/data/PSXS5/games", "/data/SwanStationPS5/games",
+          "/data/psswanstation/games"})
         if (in_root(path, root))
             return true;
     return false;

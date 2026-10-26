@@ -41,6 +41,8 @@ Open a console to choose a preferred detected emulator or show its game library.
 
 Highlight **Preferred emulator** and use Left/Right (or Cross) to cycle the detected choices. This selection saves in Shelf. For example, PlayStation 1 can offer PSXS5's own shelf and a RetroArch/SwanStation game route when both apps are detected. Both emulators can use the existing PS1 files: PSXS5 opens its own shelf, while the RetroArch game route receives the selected file. An emulator's own playlist is separate from Shelf's discovered library; switching the preference does not move games or convert saved data.
 
+The next private build also detects the dedicated PSSwanStation app (`PPSA99248`, build 25). To show an existing PSXS5 collection in PSSwanStation's Network tab, add `path = ftp://127.0.0.1:2121/data/PSXS5/games` to that app's `network.cfg`, then reopen it or choose **Scan for games**. This reads the same files through the PS5's existing ftpsrv; the games stay in place. Choose **PSSwanStation** in isShelf's PS1 preferred-emulator control to use its selected-game launch. The public beta ZIP predates this integration.
+
 Before selecting a game, read its launch panel. **Library only / Open emulator library** means you will choose the game inside that emulator after it opens. **Direct play / Play game** opens the selected game through RetroArch. This explanation stays visible while browsing; the Cross action in the footer matches it.
 
 ## Upgrading and recovery

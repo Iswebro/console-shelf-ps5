@@ -22,6 +22,10 @@ file('/data/homebrew/PPSA99169/content/n64/Example game.z64', Buffer.from('80371
 file('/data/homebrew/PPSA99169/retroarch.cfg', 'PRIVATE - must never be read');
 file('/user/app/PPSA12345/sce_sys/param.json', JSON.stringify({ titleId: 'PPSA12345', localizedParameters: { 'en-US': { titleName: 'Registered example' } } }));
 file('/user/app/PPSA12345/mount.lnk', 'a mount marker, not a launch guarantee');
+file('/user/app/PPSA99248/eboot.bin', 'PSSwanStation - must never be downloaded');
+file('/user/app/PPSA99248/sce_sys/param.json', JSON.stringify({ titleId: 'PPSA99248', titleName: 'PSSwanStation' }));
+file('/data/psswanstation/games/Own PS1 game.chd', 'MComprHD');
+file('/data/psswanstation/data/frontend.cfg', 'PRIVATE - must never be read');
 function list(folder) {
   const rows = [];
   for (const [name, data] of files) if (path.posix.dirname(name) === folder) rows.push(`${data === null ? 'd' : '-'}rwxr-xr-x 1 root wheel ${data === null ? 0 : data.length} Oct 25 12:00 ${path.posix.basename(name)}\r\n`);
@@ -64,7 +68,7 @@ async function scenario(pasv, malformed = false, background = false) {
         } else if (verb === 'REST') { rest = Number(arg); socket.write('350 Offset accepted\r\n'); }
         else if (verb === 'LIST' || verb === 'RETR') {
           if (!files.has(arg) || (verb === 'LIST' ? files.get(arg) !== null : files.get(arg) === null)) { socket.write('550 No such file or directory\r\n'); dataConnection?.end(); continue; }
-          if (verb === 'RETR' && !arg.endsWith('/sce_sys/param.json') && !arg.endsWith('.z64')) { failure = Error('Unexpected file read: ' + arg); socket.destroy(); continue; }
+          if (verb === 'RETR' && !arg.endsWith('/sce_sys/param.json') && !arg.endsWith('.z64') && !arg.endsWith('.chd')) { failure = Error('Unexpected file read: ' + arg); socket.destroy(); continue; }
           socket.write('150 Data follows\r\n');
           const send = () => {
             const payload = verb === 'LIST' ? Buffer.from(list(arg) + (malformed && arg === '/data/PCSX2/games' ? 'truncated' : '')) : files.get(arg).subarray(rest);
@@ -82,12 +86,13 @@ async function scenario(pasv, malformed = false, background = false) {
       ...(background ? ['--background-scan', '--script', 'shot:async-loading.png,wait:1000,frame:1200,report:async-library.json'] : ['--scan-only'])]);
     if (failure) throw failure;
     assert.equal(result.code, malformed ? 2 : 0, result.stderr + result.stdout);
-    assert.match(result.stdout, /2 games, 1 emulator\/core routes/);
+    assert.match(result.stdout, /3 games, 2 emulator\/core routes/);
+    assert.match(result.stdout, /ps1: 1 games, 1 routes/);
     assert.match(result.stdout, /n64: 1 games, 1 routes/);
     assert.match(result.stdout, /ps5: 1 games, 0 routes/);
     if (!background) assert.match(result.stdout, malformed ? /first failure listing data \(226\)/ : /first failure none \(0\)/,
       'the bounded diagnostic distinguishes a malformed transfer from successful discovery');
-    if (background) assert.equal(JSON.parse(fs.readFileSync(path.join(owned,'async-library.json'))).libraryGames,2,
+    if (background) assert.equal(JSON.parse(fs.readFileSync(path.join(owned,'async-library.json'))).libraryGames,3,
       'a finished worker commits its inventory to the interface');
     assert.ok(commands.some(c => c.verb === 'RETR'));
     if (pasv) assert.ok(commands.some(c => c.verb === 'PASV'), 'PASV fallback should use original peer, not advertised external IP');

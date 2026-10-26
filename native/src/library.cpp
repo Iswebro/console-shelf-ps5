@@ -503,7 +503,8 @@ static const App apps[] = {{"PPSA99169", "RetroArch", ""},
                            {"PPSA99360", "PS5-ECAM", "wiiu|3ds|ds"},
                            {"PPSA99064", "Mupen64", "n64"},
                            {"PPSA99247", "Flycast", "dreamcast|naomi|atomiswave"},
-                           {"PPSA98510", "SwanStation", "ps1"}};
+                           {"PPSA98510", "SwanStationPS5", "ps1"},
+                           {"PPSA99248", "PSSwanStation", "ps1"}};
 bool known_utility(std::string_view title) {
     if (one_of(title, "PPSA99000|PPSA90210|PPSA77305|PPSA99995|PPSA99310|PPSA98001|PPSA75837|PPSA99841|PPSA99109|"
                       "PPSA99350|PPSA99230|PPSA99058|PPSA99541"))
@@ -698,6 +699,8 @@ void discover_library(const ReadOnlyFs& fs, Library& out) {
     scanner.scan("/data/PCSX2/games", find_system("ps2"));
     scanner.scan("/data/PSXS5/games", find_system("ps1"));
     scanner.scan("/data/SwanStationPS5/games", find_system("ps1"));
+    scanner.scan("/data/homebrew/PPSA99248/games", find_system("ps1"));
+    scanner.scan("/data/psswanstation/games", find_system("ps1"));
     ps3_folder(checked, out, "/data/homebrew/PPSA99303/rpcs3/games");
     for (std::size_t i = 0; i < out.game_count; ++i)
         ++out.inventory[out.games[i].system].game_count;

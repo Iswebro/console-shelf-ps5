@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-26T03:29:31.392Z",
+  "source": "MyLuxy/overdrive app/state/homebrew.js",
+  "sourceBlob": "eb963f90becef51ad1e235c79f3fa7f96692adea",
+  "requests": [
+    "https://prosperostore.net/api/v1/index.json",
+    "https://prosperostore.net/api/v1/apps/PPSA99541.json"
+  ],
+  "entry": {
+    "id": "hb-PPSA99541",
+    "title": "isShelf",
+    "titleId": "PPSA99541",
+    "version": "v0.1.0-beta.1",
+    "download": {
+      "id": "homebrew-v0.1.0-beta.1",
+      "provider": "GitHub",
+      "label": "",
+      "version": "v0.1.0-beta.1",
+      "url": "https://github.com/Iswebro/console-shelf-ps5/releases/download/v0.1.0-beta.1/PPSA99541.zip",
+      "format": "zip",
+      "filename": "PPSA99541-v0.1.0-beta.1.zip",
+      "sizeBytes": 104371163,
+      "sha256": "4cca4e0c05b58b74733f8bc4392ba5b26bbd05232dde41932be11093a4ab91d6",
+      "source": "homebrew"
+    }
+  },
+  "status": "PASS: live catalog accepted and pinned download enabled by the Overdrive adapter",
+  "consoleUI": "not yet owner-observed"
+}
