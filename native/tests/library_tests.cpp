@@ -269,6 +269,10 @@ void test_library() {
         check(p.width > 0 && p.height > 0 && p.depth > 0 && p.depth < p.height,
               "every catalog system has finite, positive case proportions or an explicit non-case presentation");
     }
+    shape.system = find_system("c64");
+    for (float aspect : {.01f, 100.f})
+        check(game_case_profile(shape, aspect).material == CaseMaterial::none,
+              "extreme banner or spine scans stay flat instead of crossing the case camera's near plane");
     const std::string index_row = "Exact\tSLES-12345\t1\t/data/PSXS5/games/Exact/Exact.cue\tExact\n";
     covers.file("/data/PSXS5/library.txt", index_row + "#" + std::string(65535 - index_row.size() - 1, ' '));
     discover_small_stack(covers.fs(), *cover_library);

@@ -61,6 +61,8 @@ inline CaseProfile game_case_profile(const LibraryGame& game, float art_aspect) 
         return {art_aspect, 1, .02f, CaseMaterial::none, 34, 37, 39};
     // Original packaging varied for computers and several handhelds. The actual
     // front scan supplies its proportions instead of imposing a DVD case.
+    if (art_aspect < .35f || art_aspect > 2.5f)
+        return {art_aspect, 1, .02f, CaseMaterial::none, 34, 37, 39};
     return {art_aspect, 1, .12f, CaseMaterial::cardboard, 44, 47, 49};
 }
 } // namespace shelf
