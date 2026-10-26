@@ -1,10 +1,12 @@
 # isShelf
 
-**isShelf** is the official product name, created by **Iswebro** and previously called Console Shelf. Use **isShelf by Iswebro** in project listings and credits. Iswebro's PS5 app family uses a lowercase `is` prefix followed by a capitalized product name. The vector S logo is the default, with Gaming, Classic mint and Jade selectable in Settings. Existing app IDs, data folders and saved preferences retain their stable identifiers across the display-name change.
+**Your consoles. Your games. Your play room.** isShelf by **Iswebro** brings your existing PS5 homebrew libraries together in Grid, Swipe and a customisable Shelf room.
 
-A console-first library for PS5 homebrew, with a native C++/SDL app and a [browser design preview](index.html). Browse 52 system categories using Grid, Swipe or the Shelf play room; discover existing libraries and choose an installed emulator. Hardware visibility does not imply emulator availability. The owner completed UI-24's final controls, saved settings, normal restart, three PlayStation emulator menus and direct RetroArch Nintendo 64 test on firmware **12.20**. All 242 program files passed full raw console readbacks. The owner's captures confirm the Vector home icon, Glass and Light background, and all four logo choices updating the header and TV badge. The first public beta, [v0.1.0-beta.1](https://github.com/Iswebro/console-shelf-ps5/releases/tag/v0.1.0-beta.1), is available with matching source, credits, guides and checksums. See the [final console checks](docs/verification/ui24-owner-final-checks-2026-10-26.json), [prototype plan](docs/PROTOTYPE-PLAN.md), [tested launch behavior](docs/INTEGRATION.md), [build instructions](native/README.md) and [credits](THIRD_PARTY.md).
+A native C++/SDL app, tested on PS5 firmware **12.20**, with a separate [browser design preview](index.html). Choose your preferred installed emulator, keep your games in their existing folders and make the room your own. The catalogue has 52 system categories; a console illustration does **not** mean an emulator is available for it.
 
-![Shelf's integrated gaming room, deep console counters and personal TV](previews/display-shelf-desktop.png)
+![isShelf running on PS5: PlayStation consoles arranged on deep shelves, with a personal video on the room TV](docs/images/ps5/shelf-room.webp)
+
+*Actual PS5 capture, 26 October 2026. Manufacturer startup videos visible on the TV are personal overrides, supplied separately. isShelf includes its own original intro animations.* [More PS5 screenshots and a short recording](docs/SCREENSHOTS.md).
 
 ## Download for PS5
 
@@ -16,7 +18,17 @@ A console-first library for PS5 homebrew, with a native C++/SDL app and a [brows
 
 Follow the [installation, recovery and removal guide](docs/PS5-INSTALL.md). Download [MANIFEST.json](https://github.com/Iswebro/console-shelf-ps5/releases/download/v0.1.0-beta.1/MANIFEST.json) for per-file verification and [HARDWARE-CHECKS.json](https://github.com/Iswebro/console-shelf-ps5/releases/download/v0.1.0-beta.1/HARDWARE-CHECKS.json) for tested scope. This beta is verified on **firmware 12.20** with the existing homebrew enabler, ShadowMountPlus, ELF loader and FTP service. No PC host is needed to run it. Emulators and games are supplied separately.
 
-## What works in the preview
+## New to isShelf? Start here
+
+| I want to… | Guide |
+| --- | --- |
+| Get started, learn the controls and choose an emulator | [Beginner's guide](docs/BEGINNERS.md) |
+| Put my own videos or pictures on the room TV | [Personal TV media, step by step](docs/PERSONAL-TV.md) |
+| Choose consoles, arrange a shelf, change logos or set the clock | [Room and customisation guide](docs/ROOM.md) |
+| Install, update, back up or remove isShelf | [Installation and recovery](docs/PS5-INSTALL.md) |
+| Find missing games or understand a launch message | [Troubleshooting](docs/BEGINNERS.md#troubleshooting) |
+
+## Make it yours
 
 - Browse 52 systems in Grid, a curved card-free Swipe carousel, or a lit display Shelf. Shelf places the console illustrations directly on deep walnut counters in one continuous gaming-lounge scene, with a subtle selection light. It pages through the collection instead of stretching a shelf photograph into each row. All layouts share sort, visibility and favourite choices. Grid can also use classic text cards.
 - In Shelf, **L1/R1** (or Page Up/Down) swaps eight consoles at a time while the room stays still. **Sort & filter → Shelf pages** can instead show one curated display of up to eight consoles chosen in **Consoles**. All consoles, emulator/game availability, favourites, search and sorting apply to the collection. Small preview screens fit fewer systems per page.
@@ -27,9 +39,9 @@ Follow the [installation, recovery and removal guide](docs/PS5-INSTALL.md). Down
 - Switch between **All consoles**, **Emulator or games**, and **Favourites**. Availability uses recorded emulator routes, built-in PS5/PS4 routes, or example games in the preview; the native app uses real discovery. Choices persist on the device.
 - Search, filter by brand or evidence level, sort in several ways, and save favorites.
 - Open the settings gear for Appearance, Sort & filter, Consoles and Play room. Search the console picker, toggle individual systems or whole brands, and show/hide search results in one click. These choices persist on the device.
-- Open a console detail page, choose a preferred emulator, and view example games. The emulator button is a preview action only.
+- Open a console detail page, choose a preferred detected emulator and browse its discovered games. The separate browser demo uses an example inventory and never launches PS5 software.
 - A persistent launch panel explains the action before selection: [Open emulator library](previews/launch-library-only.png) for menu-only routes, or [Play game](previews/launch-direct-play.png) for a direct RetroArch route. It follows the preferred emulator and stays on screen while browsing.
-- Choose Vector, Gaming, Classic mint or Jade for the preview header and browser tab. Vector is the default.
+- Choose Vector, Gaming, Classic mint or Jade for the app logo. Vector is the default. The selected logo also appears on the room's clock/message screen and bundled intros; personal videos keep their own contents.
 
 See the [mobile Swipe view](previews/carousel-mobile.png) and [Switch 2 icon](previews/switch2-3d-card.png). Nintendo's press photo informed the Switch 2 illustration but is **not** displayed or bundled.
 
@@ -39,13 +51,11 @@ The [demo system catalogue](docs/SYSTEMS.md) comes from a dated PS5 setup snapsh
 
 The [first native PS5 beta](https://github.com/Iswebro/console-shelf-ps5/releases/tag/v0.1.0-beta.1) is available. Its C++/SDL runtime renders the three layouts, discovers existing libraries, saves preferences and explains each launch route before selection. The owner confirmed foreground PSXS5/PS5SX2/PS5SX3 libraries and direct Nintendo 64 play through RetroArch after a normal restart. Opening can still show black before the interface, and other emulator/native-title routes remain experimental. [Publication evidence](docs/verification/v0.1.0-beta.1-publication-2026-10-26.json) records all seven public download hashes, 242 app members and 507 source-archive members. The matching source kit cold-relinks to the installed program exactly.
 
-![Console collection on lit walnut shelves](previews/display-shelf-desktop.png)
+![Nintendo systems in isShelf on a real PS5](docs/images/ps5/shelf-nintendo.webp)
 
-![Searchable console visibility settings](previews/settings-consoles.png)
+![Choose which consoles to show individually in the native PS5 app](docs/images/ps5/settings-consoles.webp)
 
-The native C++ renderer running on PC:
-
-![Native development build](previews/native-home.png)
+These are native PS5 captures. [The screenshot gallery](docs/SCREENSHOTS.md) also shows Appearance, Sort & filter and Play room settings. PC development previews remain under `previews/` and are labelled separately.
 
 ## PS5 home-screen artwork
 

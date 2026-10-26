@@ -1,0 +1,84 @@
+{
+  "dateBrisbane": "2026-10-26",
+  "firmware": "12.20",
+  "application": "isShelf v0.1.0-beta.1",
+  "processing": "JPEG XR decoded to PNG, resized from 3840x2160 to 1920x1080, encoded as WebP without capture metadata. No UI elements retouched.",
+  "personalMedia": "Manufacturer intros visible inside the room TV are personal overrides; they are not included in isShelf downloads.",
+  "files": [
+    {
+      "file": "shelf-room.webp",
+      "caption": "Shelf layout with PlayStation systems and a personal TV intro",
+      "sourceKind": "PS5 Create screenshot",
+      "sourceSHA256": "f46bf5e01ebf0f9815e073a2fb804858b70a23da3e7312bc45f9cf0e9984425c",
+      "sha256": "dcd8b45cb86a28a6163c8f3469b01267b33ddd1c0cb5d3287e0fcf79ecf7e1fb",
+      "bytes": 202038,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "file": "shelf-nintendo.webp",
+      "caption": "Shelf layout with Nintendo systems and a personal TV intro",
+      "sourceKind": "PS5 Create screenshot",
+      "sourceSHA256": "7f8efe67d67def4e4165544332b79febac105b8af49a657a14cf9b1b1e07562a",
+      "sha256": "add90d2806d5b2246abda666900dae57146ba697665ec44907ac903a970879d9",
+      "bytes": 210380,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "file": "settings-appearance.webp",
+      "caption": "Appearance: layout, logo, missing-emulator colour and motion",
+      "sourceKind": "PS5 Create screenshot",
+      "sourceSHA256": "b8327c392e449270f2258984556ad8ffdb1f61660c41d582877866d822970d1a",
+      "sha256": "175fd53e82a859d87e1f29032fecbebe9445976ce1bcd4ff883da57e6e1d0afd",
+      "bytes": 87816,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "file": "settings-sort.webp",
+      "caption": "Sort and filter: brand, availability and Shelf paging",
+      "sourceKind": "PS5 Create screenshot",
+      "sourceSHA256": "bb1b5a045b606845e2445cb5e9a92449b0b68c624a8a6715030ae29f74bc4d29",
+      "sha256": "dfe6d063037cb4e2be85408d7b5a333407d1b95a3cabd896ab24307fe2fc0fc6",
+      "bytes": 89268,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "file": "settings-consoles.webp",
+      "caption": "Consoles: show all, available or favourite systems; individual visibility",
+      "sourceKind": "PS5 Create screenshot",
+      "sourceSHA256": "d95a9c9ca375d4ce8354577dc1a57cf0d6a0dc3581908d8c2de95a89de0a91d0",
+      "sha256": "47c86590d107c3debbbc052722175b3dcc4b9b9f886d5e4c3f8a821e31638fa4",
+      "bytes": 86516,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "file": "settings-play-room.webp",
+      "caption": "Play room: TV mode, message, rotation, intro scope and static",
+      "sourceKind": "PS5 Create screenshot",
+      "sourceSHA256": "a5de4318d83b4beb21bb56e0dde967cf18f6c97051614aa8a5d55abbd180c53b",
+      "sha256": "5ed2c01fa87faacab224fc3251502b9f448727aecdbad25b87d87b919899db65",
+      "bytes": 93722,
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "file": "shelf-tour.mp4",
+      "caption": "Twenty-second PS5 room navigation excerpt with personal TV overrides",
+      "sourceKind": "PS5 Create video",
+      "sourceSHA256": "591539256d7067082b0d68067fc1e3618b18a8760a72a3158f83dbc2185647b3",
+      "sha256": "3d895db0ffcd71ab43274d61cac1a9b55f1675a5de666cd3f97030c5d937759f",
+      "bytes": 735569,
+      "width": 1280,
+      "height": 720,
+      "seconds": 20,
+      "sourceStartSeconds": 66,
+      "audio": false,
+      "processing": "Trimmed 66-86 seconds, HDR BT.2020/PQ converted to SDR BT.709 with Hable tonemapping; aspect preserved with padding; H.264 at 30 fps; capture metadata and audio removed.",
+      "fullSourceAndOutputDecode": "passed"
+    }
+  ]
+}

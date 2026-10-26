@@ -2,6 +2,8 @@
 
 Native PS5 prototype v0.1.0-beta.1, tested on firmware **12.20**. The app appears as **isShelf**.
 
+For a guided first session, see [Start using isShelf](BEGINNERS.md). To add personal intro clips after installation, use the [step-by-step TV tutorial](PERSONAL-TV.md).
+
 ## What you need
 
 - An existing working PS5 homebrew setup. The current hardware target is firmware **12.20**.

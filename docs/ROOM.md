@@ -1,5 +1,11 @@
 # Your Shelf play room
 
+New to the app? Start with the [beginner's guide](BEGINNERS.md). For personal videos, follow [Personal TV media, step by step](PERSONAL-TV.md); it covers conversion, FTP, filenames and troubleshooting.
+
+![The Shelf room running on PS5, with a personal TV intro](images/ps5/shelf-room.webp)
+
+*Actual PS5 capture. The manufacturer's intro on this TV is a personal override, not part of the isShelf download.*
+
 Shelf is a fixed-camera room with layered console artwork. It is not a navigable 3D room. The room and its deep wood counters stay still when pages change; only the hardware illustrations slide, while their name labels fade in place. The atmosphere takes inspiration from the virtual room in [d3t's SEGA Mega Drive Classics Hub](https://d3tltd.com/our-work/sega-mega-drive-classics-hub/). Shelf's room artwork and application code are documented in the project's own credits.
 
 ## Arrange the consoles
@@ -63,6 +69,6 @@ The tool creates a new directory under `.cache/room-intros` with a validated `ps
 
 In the **browser preview**, Play room has PNG and MP4 file pickers for individual console intros. Media stays in that browser's IndexedDB storage; text and choices stay in local storage. This does not transfer it to the console. The TV display is hidden on narrow phone previews where the TV is outside the cropped room; the console library remains usable.
 
-## Prototype status
+## Tested beta scope
 
-Browser and native host checks cover bounded selection, old-settings compatibility, personal-image fallback, text safety, favourite-game rotation and page transitions. Native frame checks compare the unchanged wood and floor pixels during motion. These are PC checks; this UI revision still needs physical PS5 acceptance before a verified prototype release.
+The [first beta](https://github.com/Iswebro/console-shelf-ps5/releases/tag/v0.1.0-beta.1) is published. On firmware 12.20, the owner confirmed room paging, settings, clock persistence, per-console animations, all three layouts and the final normal-restart checks. The newer [PS5 gallery](SCREENSHOTS.md) also shows personal TV overrides and the four settings pages. Host checks separately cover personal-media fallback, text safety and unchanged room pixels during page motion. A catalogue entry or intro does not establish emulator compatibility. [Final hardware acceptance](verification/ui24-owner-final-checks-2026-10-26.json).

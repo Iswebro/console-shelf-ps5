@@ -1,6 +1,6 @@
 # Read-only library discovery
 
-The native development app can now inspect an existing PS5 library and display real game lists. The implementation is original Shelf code. The Windows client has been checked against a live console with its owner-started ftpsrv service; **the same scanner has not yet been tested inside the PS5 app sandbox**. This is discovery evidence, not game-launch or compatibility validation.
+The native PS5 beta inspects existing libraries and displays real game lists. The implementation is original isShelf code. Discovery has been tested inside the PS5 app on firmware 12.20, with the owner's existing `ftpsrv`; the [final hardware checks](verification/ui24-owner-final-checks-2026-10-26.json) include actual library/launch acceptance. Discovery alone does not establish that every listed game is compatible. For everyday use, see [adding games](BEGINNERS.md#5-add-more-games).
 
 ## Connection and scope
 
@@ -34,10 +34,10 @@ N64 dumps require a recognised byte-order signature. Other listed formats are di
 - Switch NSP/NSZ base/update/DLC parsing, dedicated non-RetroArch libraries, and PS4 package-only metadata need additional adapters. Their game lists are not inferred from filenames or dependency folders.
 - Native apps without accessible public metadata are omitted. Existing per-game settings and account/token files are never consulted.
 - Default emulator selection prefers a detected standalone app over a RetroArch core. The owner can cycle detected choices in console details; their choice uses a stable route ID and saves in Shelf's own settings.
-- Every launch capability remains unavailable until its actual route is console-tested. A discovered game can be browsed without claiming it can launch directly.
+- The launch panel distinguishes direct RetroArch requests from standalone emulator libraries. The owner has verified PSXS5/PS5SX2/PS5SX3 menus and selected RetroArch game routes; other routes remain experimental. Discovery alone does not prove direct launch.
 
 ## Checks
 
 `npm run test:native` exercises path/UTF-8 validation, bounded JSON parsing, duplicate-key/NUL rejection, real core evidence, disc reference deduplication, partial scans, preference selection and library navigation. `npm run test:library-ftp` uses an ephemeral loopback-only fake server: it checks permitted commands, multiline replies, EPSV/PASV peer pinning, native metadata and malformed directory refusal. It never contacts a PS5. `npm run test:native-renderer` continues to exercise the shared UI.
 
-Public source and screenshots contain no captured owner inventory, IP address, account data or game files. Local development snapshots remain under ignored `.cache/console-readonly/`.
+Public screenshots show owner-selected app views and their game/emulator counts. Raw inventory snapshots, IP addresses, account data and game files are not published. Local development snapshots remain under ignored `.cache/console-readonly/`.
