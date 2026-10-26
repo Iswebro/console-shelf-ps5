@@ -74,7 +74,8 @@ struct LibraryScan {
         return 0;
     }
     bool start() {
-        thread = SDL_CreateThread(run, "Shelf library", this);
+        // Bounded metadata/network/decoder calls must not depend on the platform default.
+        thread = SDL_CreateThreadWithStackSize(run, "Shelf library", 256 * 1024, this);
         return thread != nullptr;
     }
     bool ready() {
@@ -327,7 +328,7 @@ bool script_event(const char* token) {
 int main(int argc, char** argv) {
 #ifdef SHELF_PS5
     PlatformExit platform_exit;
-    startup("main entered", "ui-25 emulator artwork cache; dedicated PSSwanStation launch integration");
+    startup("main entered", "ui-26 artwork scan stack fix; dedicated PSSwanStation launch integration");
     char missing[1024];
     if (gs_missing_imports(missing, sizeof(missing)) != 0) {
         startup("missing imports", missing);
