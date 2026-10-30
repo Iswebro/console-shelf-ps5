@@ -6,7 +6,7 @@ const root = path.resolve(__dirname, '..');
 const build = path.join(root, '.cache/native-host');
 fs.mkdirSync(build, { recursive: true });
 function run(command,args,options={}) { const result=spawnSync(command,args,{cwd:build,stdio:'inherit',windowsHide:true,...options});if(result.error)throw result.error;if(result.status!==0)throw new Error(`Build command failed (${result.status})`); }
-const sources=['model.cpp','settings.cpp','ui.cpp','graphics.cpp','codecs.cpp','movie.cpp','library.cpp','filesystem.cpp','metadata.cpp','ftp.cpp','launch_client.cpp','json.c','host_main.cpp'].map(file=>path.join(root,'native/src',file));
+const sources=['model.cpp','localization.cpp','settings.cpp','ui.cpp','graphics.cpp','codecs.cpp','movie.cpp','library.cpp','filesystem.cpp','metadata.cpp','ftp.cpp','launch_client.cpp','json.c','host_main.cpp'].map(file=>path.join(root,'native/src',file));
 const includes=[path.join(root,'native/include'),path.join(root,'native/third_party')];
 if(process.platform==='win32'){
   run(process.execPath,[path.join(root,'tools/fetch-native-deps.js')]);
@@ -22,6 +22,9 @@ if(process.platform==='win32'){
   fs.copyFileSync(path.join(sdl,'lib/x64/SDL2.dll'),path.join(build,'SDL2.dll'));
 }else{
   const flags=spawnSync('sdl2-config',['--cflags','--libs'],{encoding:'utf8'});if(flags.status!==0)throw new Error('An existing SDL2 development installation is required.');
-  run('c++',['-std=c++17','-O2','-Wall','-Wextra','-Werror','-Wno-unused-function',...includes.flatMap(value=>['-I',value]),...sources,...flags.stdout.trim().split(/\s+/),'-o','shelf-host']);
+  // Apple clang diagnoses bundled third-party C headers more strictly than the
+  // project compiler settings on PS5/Linux. Keep our own warnings fatal.
+  const warningCompatibility=process.platform==='darwin'?['-Wno-error=deprecated','-Wno-error=missing-field-initializers']:[];
+  run('c++',['-std=c++17','-O2','-Wall','-Wextra','-Werror','-Wno-unused-function',...warningCompatibility,...includes.flatMap(value=>['-I',value]),...sources,...flags.stdout.trim().split(/\s+/),'-o','shelf-host']);
 }
 console.log('Built native host renderer in .cache/native-host.');
